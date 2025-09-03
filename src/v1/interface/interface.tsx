@@ -1,4 +1,4 @@
-import { AccountTier, AffiliationStatus, BiometricType, BlockchainNetwork, BooleanString, Coin, Fiat, PaymentRail, RequestStatus, Role, SenderStatus, Status, TeamRole, TeamStatus, TransactionStatus, TransactionType, UserType, WalletStatus, WalletType } from "@/enums/enums";
+import { AccountTier, AffiliationStatus, BiometricType, BlockchainNetwork, BooleanString, Coin, Fiat, PaymentRail, RequestStatus, Role, SenderStatus, Status, TeamRole, TeamStatus, TransactionStatus, TransactionType, UserType, WalletStatus, WalletType } from "@/v1/enums/enums";
 
 
 export interface IHandshakeClient {

@@ -1,8 +1,7 @@
-import React from "react";
 import { motion } from "framer-motion";
 import { Plus, ReceiptText } from "lucide-react";
 import { Button } from "./ui/button";
-import { useRouter, useParams } from 'next/navigation';
+import { useParams } from "wouter";
 
 interface EmptyTransactionProps {
     statusFilter: string;
@@ -10,12 +9,11 @@ interface EmptyTransactionProps {
 }
 
 export default function EmptyTransaction({ statusFilter, onClick }: EmptyTransactionProps) {
-    const router = useRouter();
-    const params = useParams() as { wallet?: string } | undefined;
+    const params = useParams();
     const wallet = (params?.wallet || 'NGN').toUpperCase();
 
     const handleCreate = () => {
-        router.push(`/dashboard/${wallet}/payment`);
+        window.location.href = `/dashboard/${wallet}/payment`;
         onClick();
     }
 

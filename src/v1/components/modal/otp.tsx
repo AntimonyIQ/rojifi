@@ -2,15 +2,13 @@
 
 import type React from "react"
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Button } from "@/v1/components/ui/button"
+import { Input } from "@/v1/components/ui/input"
 import { Lock, X, MailOpen, Clipboard } from "lucide-react"
-import { useRouter } from "next/navigation"
-import { Status } from "@/enums/enums"
-import { IResponse } from "@/interface/interface"
-import Defaults from "@/defaults/defaults"
-import { session, SessionData } from "@/session/session"
-import { toast } from "sonner"
+import { Status } from "@/v1/enums/enums"
+import { IResponse } from "@/v1/interface/interface"
+import Defaults from "@/v1/defaults/defaults"
+import { session, SessionData } from "@/v1/session/session"
 
 interface OTPVerificationFormProps {
     email: string
@@ -24,7 +22,6 @@ export function OTPVerificationModal({ email, isOpen, onClose, id, onSuccess }: 
     const [otp, setOtp] = useState("")
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
-    const router = useRouter()
     const sd: SessionData = session.getUserData();
 
     const handleSubmit = async (e: React.FormEvent) => {

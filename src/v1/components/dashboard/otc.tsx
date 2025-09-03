@@ -1,14 +1,14 @@
 "use client"
 
 import React, { useEffect } from "react"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/v1/components/ui/button"
 import { motion } from "framer-motion";
 import { ArrowUpRight, MonitorDot } from "lucide-react";
 import { toast } from "sonner";
-import { IResponse, IUser } from "@/interface/interface";
-import { session, SessionData } from "@/session/session";
-import { RequestStatus, Status } from "@/enums/enums";
-import Defaults from "@/defaults/defaults";
+import { IResponse, IUser } from "@/v1/interface/interface";
+import { session, SessionData } from "@/v1/session/session";
+import { RequestStatus, Status } from "@/v1/enums/enums";
+import Defaults from "@/v1/defaults/defaults";
 import { ILoginFormProps } from "../auth/login-form";
 
 export default function OTCView() {

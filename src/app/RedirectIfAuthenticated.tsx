@@ -1,4 +1,4 @@
-import { session, SessionData } from "@/session/session";
+import { session, SessionData } from "@/v1/session/session";
 import { Redirect, useRoute } from "wouter";
 
 export function RedirectIfAuthenticated({

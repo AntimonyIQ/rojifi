@@ -1,20 +1,20 @@
 "use client"
 
 import React, { useEffect, useState } from "react"
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/v1/components/ui/sheet"
 import { Button } from "../ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Input } from "@/v1/components/ui/input"
+import { Label } from "@/v1/components/ui/label"
 import { Country, ICountry } from "country-state-city";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
 import { Plus } from "lucide-react"
 import PaymentDetailsDrawer from "./payment-details-view"
-import { ITransaction } from "@/interface/interface"
+import { IPayment, ITransaction } from "@/v1/interface/interface"
 
 export interface PayAgainModalProps {
     open: boolean
     onClose: () => void
-    transaction?: ITransaction | null
+    transaction?: IPayment | null
     onSubmit?: (payload: any) => void
 }
 

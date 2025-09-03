@@ -2,21 +2,21 @@
 
 import { useState, useEffect } from "react"
 import * as htmlToImage from "html-to-image";
-import { Button } from "@/components/ui/button"
-import { useRouter, usePathname } from "next/navigation";
+import { Button } from "@/v1/components/ui/button"
 import { ChevronRight, CircleDot, Download, Expand, EyeOff, Plus, Repeat, Send, Wallet } from "lucide-react"
 import { Card, CardContent } from "../ui/card"
 import TransactionChart from "./transactionchart"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog"
-import Link from "next/link";
 import Loading from "../loading";
-import { session, SessionData } from "@/session/session";
+import { session, SessionData } from "@/v1/session/session";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
-import { IResponse, ITransaction, IUser, IWallet } from "@/interface/interface";
-import { Fiat, Status } from "@/enums/enums";
-import Defaults from "@/defaults/defaults";
+import { IResponse, ITransaction, IUser, IWallet } from "@/v1/interface/interface";
+import { Fiat, Status } from "@/v1/enums/enums";
+import Defaults from "@/v1/defaults/defaults";
 import { ILoginFormProps } from "../auth/login-form";
+import { useRouter } from "wouter";
+import { usePathname } from "wouter/use-browser-location";
 
 export function DashboardOverview() {
     const router = useRouter();
@@ -227,7 +227,7 @@ export function DashboardOverview() {
                                             key={tab.currency}
                                             onClick={(): void => {
                                                 setSelectedCurrency(tab.currency as Fiat);
-                                                router.push(`/dashboard/${tab.currency}`);
+                                                window.location.href = `/dashboard/${tab.currency}`;
                                             }}
                                             className={`px-3 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap flex flex-row items-center gap-1 ${selectedCurrency === tab.currency
                                                 ? "bg-white text-primary shadow-sm"
@@ -352,7 +352,7 @@ export function DashboardOverview() {
                                                         <div className="text-xs uppercase">Pending Payments</div>
                                                     </div>
                                                     <Button variant="outline">
-                                                        <Link href={`/dashboard/${selectedCurrency}/transactions`} className="text-xs uppercase">View Payments</Link>
+                                                        <a href={`/dashboard/${selectedCurrency}/transactions`} className="text-xs uppercase">View Payments</a>
                                                     </Button>
                                                 </div>
                                             }
@@ -368,7 +368,7 @@ export function DashboardOverview() {
                                                         <div className="text-xs uppercase">Total Recipient</div>
                                                     </div>
                                                     <Button variant="outline">
-                                                        <Link href={`/dashboard/${selectedCurrency}/beneficiary`} className="text-xs uppercase">View Recipient</Link>
+                                                        <a href={`/dashboard/${selectedCurrency}/beneficiary`} className="text-xs uppercase">View Recipient</a>
                                                     </Button>
                                                 </div>
                                             }
@@ -377,13 +377,15 @@ export function DashboardOverview() {
                                 )}
 
                                 <div className="flex flex-row items-center justify-start gap-2">
-                                    <Link href={`/dashboard/${selectedCurrency}/deposit`} className="flex flex-row items-center justify-center text-center py-2 gap-2 hover:bg-slate-50 capitalize border rounded-lg px-5 bg-white">
+                                    <a href={`/dashboard/${selectedCurrency}/deposit`} className="flex flex-row items-center justify-center text-center py-2 gap-2 hover:bg-slate-50 capitalize border rounded-lg px-5 bg-white">
                                         <Plus className="h-4 w-4" /> Deposit
-                                    </Link>
-                                    <Button variant="outline" onClick={(): void => router.push(`/dashboard/${selectedCurrency}/swap`)} disabled={!isLive}>
-                                        <Link href={`/dashboard/${selectedCurrency}/swap`} className="flex flex-row items-center justify-center gap-2">
+                                    </a>
+                                    <Button variant="outline" onClick={(): void => {
+                                        window.location.href = `/dashboard/${selectedCurrency}/swap`
+                                    }} disabled={!isLive}>
+                                        <a href={`/dashboard/${selectedCurrency}/swap`} className="flex flex-row items-center justify-center gap-2">
                                             <Repeat className="h-4 w-4" /> Swap
-                                        </Link>
+                                        </a>
                                     </Button>
                                     {selectedCurrency === Fiat.NGN ? (
                                         <Button
@@ -394,16 +396,16 @@ export function DashboardOverview() {
                                                 if (selectedCurrency === Fiat.NGN && withdrawEnabled === false) {
                                                     setWithdrawalActivated(true);
                                                 } else {
-                                                    router.push(`/dashboard/${selectedCurrency}/withdraw`);
+                                                    window.location.href = `/dashboard/${selectedCurrency}/withdraw`;
                                                 }
                                             }}>
                                             <Send className="h-4 w-4" /> Withdraw
                                         </Button>
                                     ) : (
                                         <Button variant="default" size="sm" className="text-white">
-                                            <Link href={`/dashboard/${selectedCurrency}/payment`} className="flex flex-row items-center justify-center gap-2">
+                                            <a href={`/dashboard/${selectedCurrency}/payment`} className="flex flex-row items-center justify-center gap-2">
                                                 <Send className="h-4 w-4" /> Transfer
-                                            </Link>
+                                            </a>
                                         </Button>
                                     )}
                                 </div>

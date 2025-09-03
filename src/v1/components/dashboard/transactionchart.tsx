@@ -1,6 +1,4 @@
-"use client";
-
-import React, { useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import * as d3 from "d3";
 
 interface ChartData {
@@ -73,7 +71,7 @@ export default function TransactionChart({ data, height = 200 }: TransactionChar
                 `;
             })
             .attr("fill", "#0C4592")
-            .on("mouseover", function (event, d) {
+            .on("mouseover", function (_event, d) {
                 d3.select(this).attr("fill", "#0C4592");
                 tooltip
                     .style("opacity", 1)

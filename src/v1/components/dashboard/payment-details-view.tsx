@@ -1,12 +1,11 @@
-"use client"
 
-import React, { useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "../ui/button"
 import { UserCircle } from "lucide-react"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/v1/components/ui/sheet"
 import FilePreviewModal from "./file-preview-modal"
-import { IPayment, IUser } from "@/interface/interface"
-import { session, SessionData } from "@/session/session"
+import { IPayment, IUser } from "@/v1/interface/interface"
+import { session, SessionData } from "@/v1/session/session"
 
 export interface TransactionFee {
     amount: string
@@ -33,22 +32,6 @@ export default function PaymentDetailsDrawer({ open, onClose, onEdit, details }:
         }
     }, [sd]);
 
-    const classcodes = "w-full flex flex-row items-center justify-between px-4 py-3 font-medium border-b";
-    const getStatusColor = (status: string) => {
-        switch (status.toLowerCase()) {
-            case "successful":
-                return "bg-green-100 text-green-800"
-            case "pending":
-                return "bg-yellow-100 text-yellow-800"
-            case "processing":
-                return "bg-blue-100 text-blue-800"
-            case "failed":
-                return "bg-red-100 text-red-800"
-            default:
-                return "bg-gray-100 text-gray-800"
-        }
-    }
-
     const formatCurrency = (amount: string | undefined) => {
         const cleanedAmount = amount?.replace(/,/g, '') ?? "0";
         const numAmount = Number.parseFloat(cleanedAmount);
@@ -56,21 +39,6 @@ export default function PaymentDetailsDrawer({ open, onClose, onEdit, details }:
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
         })}`;
-    };
-
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        return date.toString() === "Invalid Date"
-            ? "Invalid Date"
-            : date.toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit",
-                hour12: true,
-            });
     };
 
     const openPreview = (url?: string | null, name?: string | null) => {

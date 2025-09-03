@@ -1,8 +1,6 @@
-'use client';
-
-import Handshake from "@/hash/handshake";
-import JWT from "@/hash/jwt";
-import { IHandshakeClient, IPayment, ISender, ITransaction, IUser, IWallet } from "@/interface/interface";
+import Handshake from "@/v1/hash/handshake";
+import JWT from "@/v1/hash/jwt";
+import { IHandshakeClient, IPayment, ISender, ITransaction, IUser, IWallet } from "@/v1/interface/interface";
 
 export interface SessionData {
     user: IUser;
@@ -140,68 +138,4 @@ export default class Session {
 
 const secretKey: string = "a054d1f7f839eccf142fbaacedde77a415eee92298188d9734b863b58e1d8809";
 
-function createSessionInstance(): Session {
-    return new Session(secretKey);
-}
-
-// Lazy proxy: export a `session: Session` that doesn't construct the real
-// Session until the first property is accessed. This avoids touching
-// `localStorage` during server-side imports (Next.js SSR).
-const lazySession = (() => {
-    let instance: Session | null = null;
-
-    const ensureInstance = () => {
-        if (!instance) {
-            // If we're on the server, return a lightweight stub that
-            // implements the same public methods but avoids touching
-            // browser-only APIs like localStorage. This prevents
-            // server-side rendering from throwing when code imports
-            // `session`.
-            if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
-                const stub = {
-                    // minimal session data expected by consumers
-                    checkLoggedIn: () => false,
-                    getUserData: () => ({
-                        user: {} as IUser,
-                        activeWallet: '',
-                        isLoggedIn: false,
-                        client: { publicKey: '', privateKey: '' } as any,
-                        deviceid: '',
-                    }),
-                    login: (_userData: SessionData) => { /* no-op on server */ },
-                    logout: () => { /* no-op on server */ },
-                    updateSession: (_userData: SessionData) => { /* no-op on server */ },
-                    updateSessionKey: (_key: string, _value: any) => { /* no-op on server */ },
-                } as unknown as Session;
-
-                instance = stub;
-            } else {
-                instance = createSessionInstance();
-            }
-        }
-
-        return instance as Session;
-    };
-
-    const handler: ProxyHandler<any> = {
-        get(_target, prop) {
-            const inst = ensureInstance();
-            const value = (inst as any)[prop];
-            if (typeof value === 'function') return value.bind(inst);
-            return value;
-        },
-        set(_target, prop, value) {
-            const inst = ensureInstance();
-            (inst as any)[prop] = value;
-            return true;
-        },
-        has(_target, prop) {
-            const inst = ensureInstance();
-            return prop in inst;
-        }
-    };
-
-    return new Proxy({}, handler) as Session;
-})();
-
-export const session: Session = lazySession;
+export const session: Session = new Session(secretKey);

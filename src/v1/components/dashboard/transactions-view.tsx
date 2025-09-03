@@ -2,15 +2,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/v1/components/ui/button";
+import { Card, CardContent } from "@/v1/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/v1/components/ui/select";
 import { EyeOff } from "lucide-react";
-import { TransactionDetailsDrawer, TxType } from "./transaction-details-modal";
+import { TransactionDetailsDrawer } from "./transaction-details-modal";
 import Loading from "../loading";
 import EmptyTransaction from "../emptytx";
-import { ITransaction } from "@/interface/interface";
-import { session, SessionData } from "@/session/session";
+import { ITransaction } from "@/v1/interface/interface";
+import { session, SessionData } from "@/v1/session/session";
 
 interface ICurrency {
     name: string;
@@ -253,8 +253,8 @@ export function TransactionsView() {
                                                             maximumFractionDigits: 2,
                                                         })}`}
                                                 </td>
-                                                <td className="py-4 px-6 text-sm text-gray-600 whitespace-nowrap">{transaction.beneficiary_fullname}</td>
-                                                <td className="py-4 px-6 text-sm text-gray-600 whitespace-nowrap">{transaction.completed_date}</td>
+                                                <td className="py-4 px-6 text-sm text-gray-600 whitespace-nowrap">{transaction.beneficiaryAccountName}</td>
+                                                <td className="py-4 px-6 text-sm text-gray-600 whitespace-nowrap">{transaction.createdAt.toString()}</td>
                                                 {/*
                                                 <td className="py-4 px-6">
                                                     <span

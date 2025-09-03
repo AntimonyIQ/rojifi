@@ -1,24 +1,22 @@
-"use client"
-
 export function Stats() {
     return (
         <section className="py-12 md:py-16 md:pt-0">
             <div className="container">
                 <div className="px-1 md:px-[80px] py-2 md:py-1 border-spacing-6">
                     <div className="overflow-hidden rounded-tr-xl md:rounded-tr-3xl rounded-tl-xl md:rounded-tl-3xl border-[2px] md:h-auto">
-                        
+
                         {/* Desktop Image */}
-                        <img 
-                            src="/dashboard.png" 
-                            alt="Dashboard" 
-                            className="hidden md:block relative -top-[2px] left-[2px]" 
+                        <img
+                            src="/dashboard.png"
+                            alt="Dashboard"
+                            className="hidden md:block relative -top-[2px] left-[2px]"
                         />
 
                         {/* Mobile Image */}
-                        <img 
-                            src="/dashboard.png" 
-                            alt="Dashboard Mobile" 
-                            className="block md:hidden relative -top-[2px] right-[0px] left-[2px]" 
+                        <img
+                            src="/dashboard.png"
+                            alt="Dashboard Mobile"
+                            className="block md:hidden relative -top-[2px] right-[0px] left-[2px]"
                         />
 
                     </div>

@@ -2,16 +2,15 @@
 
 import React from "react"
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
+import { Button } from "@/v1/components/ui/button"
+import { Input } from "@/v1/components/ui/input"
+import { Label } from "@/v1/components/ui/label"
+import { Checkbox } from "@/v1/components/ui/checkbox"
 import { Mail, User, Percent, IdCard, Calendar, Building, Mailbox, Map, Plus } from "lucide-react"
-import Link from "next/link"
-import { useRouter, useParams } from "next/navigation"
-import { Logo } from "@/components/logo"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Logo } from "@/v1/components/logo"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/v1/components/ui/select"
 import { Country, ICountry } from 'country-state-city'
+import { useParams } from "wouter"
 
 export function AddShareHolderForm() {
     const [dragActive, setDragActive] = useState(false)
@@ -43,7 +42,6 @@ export function AddShareHolderForm() {
         agreeToMarketing: false,
     })
 
-    const router = useRouter()
     const { id } = useParams()
     const countries: Array<ICountry> = Country.getAllCountries()
 
@@ -188,12 +186,12 @@ export function AddShareHolderForm() {
                 <div className="w-full h-full overflow-y-auto custom-scroll px-4 py-6">
                     <div className="p-4 max-w-md mx-auto">
                         <div className="flex items-center justify-between mb-8">
-                            <Link href="/" className="flex items-center space-x-2">
+                            <a href="/" className="flex items-center space-x-2">
                                 <Logo className="h-8 w-auto" />
-                            </Link>
-                            <Link href="/login" className="text-gray-400 hover:text-gray-600">
+                            </a>
+                            <a href="/login" className="text-gray-400 hover:text-gray-600">
                                 Skip
-                            </Link>
+                            </a>
                         </div>
 
                         <div className="text-center mb-8">
@@ -602,13 +600,13 @@ export function AddShareHolderForm() {
                                     />
                                     <Label htmlFor="agreeToTerms" className="text-sm text-gray-600">
                                         I agree to Rojifi's{" "}
-                                        <Link href="/privacy" className="text-primary hover:text-primary/80">
+                                        <a href="/privacy" className="text-primary hover:text-primary/80">
                                             Privacy Policy
-                                        </Link>{" "}
+                                        </a>{" "}
                                         and{" "}
-                                        <Link href="#" className="text-primary hover:text-primary/80">
+                                        <a href="#" className="text-primary hover:text-primary/80">
                                             Terms and Conditions
-                                        </Link>
+                                        </a>
                                     </Label>
                                 </div>
 
@@ -632,9 +630,9 @@ export function AddShareHolderForm() {
 
                             <div className="text-center text-sm text-gray-600">
                                 Have an account?{" "}
-                                <Link href="/login" className="text-primary hover:text-primary/80 font-medium">
+                                <a href="/login" className="text-primary hover:text-primary/80 font-medium">
                                     Sign in
-                                </Link>
+                                </a>
                             </div>
                         </form>
                     </div>

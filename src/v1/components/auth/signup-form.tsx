@@ -2,23 +2,22 @@
 
 import type React from "react"
 import { useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
+import { Button } from "@/v1/components/ui/button"
+import { Input } from "@/v1/components/ui/input"
+import { Label } from "@/v1/components/ui/label"
+import { Checkbox } from "@/v1/components/ui/checkbox"
 import { Eye, EyeOff, Mail, Lock, User, X, AlertCircle, ArrowUpRight } from "lucide-react"
-import Link from "next/link"
-import { useRouter, useParams } from "next/navigation"
-import { Logo } from "@/components/logo"
+import { Logo } from "@/v1/components/logo"
 import { OTPVerificationModal } from "../modal/otp";
 import { Carousel, ICarouselData } from "../carousel"
 import GlobeWrapper from "../globe"
-import { session, SessionData } from "@/session/session"
-import Defaults from "@/defaults/defaults"
-import { IRequestAccess, IResponse } from "@/interface/interface"
-import { Status } from "@/enums/enums"
+import { session, SessionData } from "@/v1/session/session"
+import Defaults from "@/v1/defaults/defaults"
+import { IRequestAccess, IResponse } from "@/v1/interface/interface"
+import { Status } from "@/v1/enums/enums"
 import { motion, Variants } from "framer-motion";
 import { toast } from "sonner"
+import { Link, useParams } from "wouter"
 
 const logoVariants: Variants = {
     animate: {
@@ -68,7 +67,6 @@ export function SignupForm() {
         agreeToTerms: false,
         agreeToMarketing: false,
     });
-    const router = useRouter();
     const { id } = useParams();
     const sd: SessionData = session.getUserData();
 

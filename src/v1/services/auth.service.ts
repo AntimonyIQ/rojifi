@@ -1,7 +1,7 @@
 import axios from 'axios';
-import { API_BASE_URL } from '@/utils/constant';
-import { LoginPayload, LoginResponse, UpdateUserPayload } from '@/types/auth.type';
-import { IUser } from '@/interface/interface';
+import { API_BASE_URL } from '@/v1/utils/constant';
+import { LoginPayload, LoginResponse, UpdateUserPayload } from '@/v1/types/auth.type';
+import { IUser } from '@/v1/interface/interface';
 
 // Define signup payload type
 export interface SignupPayload {

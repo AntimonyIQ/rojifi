@@ -1,20 +1,18 @@
 "use client"
 
 import { useState } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/v1/components/ui/button"
 import { ChevronDown, Menu, X } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Logo } from "@/components/logo"
+import { Logo } from "@/v1/components/logo"
 import { MultiCurrencyWalletIcon, OTCDeskIcon, VirtualCardIcon } from "./product-icons"
 import { AboutUsIcon, BlogIcon, HelpIcon } from "./company-icons"
-import { setAuthToken } from "@/services/auth.service"
-import { IUser } from "@/interface/interface"
-import { session } from "@/session/session"
+import { IUser } from "@/v1/interface/interface"
+import { session } from "@/v1/session/session"
 
 interface HeaderProps {
     isLoggedIn: boolean
-    user?: IUser | null
+    user: IUser | null
 }
 
 export function Header({ isLoggedIn }: HeaderProps) {
@@ -24,9 +22,9 @@ export function Header({ isLoggedIn }: HeaderProps) {
         <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="container flex h-16 items-center justify-between">
                 <div className="flex items-center gap-6">
-                    <Link href="/" className="flex items-center space-x-2">
+                    <a href="/" className="flex items-center space-x-2">
                         <Logo className="h-10 w-auto" />
-                    </Link>
+                    </a>
                     <nav className="hidden md:flex items-center gap-6">
                         <div className="relative group">
                             <button className="flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary">
@@ -35,7 +33,7 @@ export function Header({ isLoggedIn }: HeaderProps) {
                             <div className="absolute left-0 top-full hidden w-[600px] rounded-md border bg-background p-6 shadow-lg group-hover:block">
                                 <h3 className="text-lg font-medium mb-4">Products</h3>
                                 <div className="grid grid-cols-2 gap-6">
-                                    <Link
+                                    <a
                                         href="/multicurrency"
                                         className="flex items-start gap-3 rounded-md p-3 transition-colors hover:bg-gray-50"
                                     >
@@ -44,8 +42,8 @@ export function Header({ isLoggedIn }: HeaderProps) {
                                             <h4 className="text-sm font-medium">Multi-Currency Wallet</h4>
                                             <p className="text-sm text-muted-foreground">Local and global currencies for your business</p>
                                         </div>
-                                    </Link>
-                                    <Link
+                                    </a>
+                                    <a
                                         href="/otc"
                                         className="flex items-start gap-3 rounded-md p-3 transition-colors hover:bg-gray-50"
                                     >
@@ -54,8 +52,8 @@ export function Header({ isLoggedIn }: HeaderProps) {
                                             <h4 className="text-sm font-medium">OTC Desk</h4>
                                             <p className="text-sm text-muted-foreground">High value transactions at competitive rates</p>
                                         </div>
-                                    </Link>
-                                    <Link
+                                    </a>
+                                    <a
                                         href="/cards"
                                         className="flex items-start gap-3 rounded-md p-3 transition-colors hover:bg-gray-50"
                                     >
@@ -64,7 +62,7 @@ export function Header({ isLoggedIn }: HeaderProps) {
                                             <h4 className="text-sm font-medium">Virtual USD Cards</h4>
                                             <p className="text-sm text-muted-foreground">Cards you can trust for your online payments</p>
                                         </div>
-                                    </Link>
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -75,7 +73,7 @@ export function Header({ isLoggedIn }: HeaderProps) {
                             <div className="absolute left-0 top-full hidden w-[600px] rounded-md border bg-background p-6 shadow-lg group-hover:block">
                                 <h3 className="text-lg font-medium mb-4">Company</h3>
                                 <div className="grid grid-cols-2 gap-6">
-                                    <Link
+                                    <a
                                         href="/about"
                                         className="flex items-start gap-3 rounded-md p-3 transition-colors hover:bg-gray-50"
                                     >
@@ -84,8 +82,8 @@ export function Header({ isLoggedIn }: HeaderProps) {
                                             <h4 className="text-sm font-medium">About Us</h4>
                                             <p className="text-sm text-muted-foreground">Rojifi is a B2B cross-border payment provider</p>
                                         </div>
-                                    </Link>
-                                    <Link href="#" className="flex items-start gap-3 rounded-md p-3 transition-colors hover:bg-gray-50">
+                                    </a>
+                                    <a href="#" className="flex items-start gap-3 rounded-md p-3 transition-colors hover:bg-gray-50">
                                         <BlogIcon className="h-6 w-6 flex-shrink-0" />
                                         <div>
                                             <h4 className="text-sm font-medium">Blog</h4>
@@ -93,8 +91,8 @@ export function Header({ isLoggedIn }: HeaderProps) {
                                                 Stay informed on our latest updates and blog posts
                                             </p>
                                         </div>
-                                    </Link>
-                                    <Link
+                                    </a>
+                                    <a
                                         href="/help"
                                         className="flex items-start gap-3 rounded-md p-3 transition-colors hover:bg-gray-50"
                                     >
@@ -103,20 +101,20 @@ export function Header({ isLoggedIn }: HeaderProps) {
                                             <h4 className="text-sm font-medium">Help</h4>
                                             <p className="text-sm text-muted-foreground">Get assistance and answers to your questions</p>
                                         </div>
-                                    </Link>
+                                    </a>
                                 </div>
                             </div>
                         </div>
-                        <Link href="#" className="text-sm font-medium transition-colors hover:text-primary">
+                        <a href="#" className="text-sm font-medium transition-colors hover:text-primary">
                             Rates
-                        </Link>
-                        <Link href="#" className="text-sm font-medium transition-colors hover:text-primary">
+                        </a>
+                        <a href="#" className="text-sm font-medium transition-colors hover:text-primary">
                             Blog
-                        </Link>
+                        </a>
                         {isLoggedIn && (
-                            <Link href="/dashboard/NGN" className="text-sm font-medium transition-colors hover:text-primary">
+                            <a href="/dashboard/NGN" className="text-sm font-medium transition-colors hover:text-primary">
                                 Dashboard
-                            </Link>
+                            </a>
                         )}
                     </nav>
                 </div>
@@ -124,7 +122,7 @@ export function Header({ isLoggedIn }: HeaderProps) {
                     {isLoggedIn ? (
                         <>
                             <Button asChild className="text-white">
-                                <Link href="/dashboard/NGN">Dashboard</Link>
+                                <a href="/dashboard/NGN">Dashboard</a>
                             </Button>
                             <Button
                                 variant="outline"
@@ -138,14 +136,14 @@ export function Header({ isLoggedIn }: HeaderProps) {
                         </>
                     ) : (
                         <>
-                            <Button variant="link">
-                                <Link href="/contactus">Contact Us</Link>
+                            <Button variant="ghost">
+                                <a href="/contactus">Contact Us</a>
                             </Button>
                             <Button variant="outline" asChild>
-                                <Link href="/login">Sign in</Link>
+                                <a href="/login">Sign in</a>
                             </Button>
                             <Button asChild className="text-white">
-                                <Link href="/request-access">Request Access</Link>
+                                <a href="/request-access">Request Access</a>
                             </Button>
                         </>
                     )}
@@ -168,21 +166,21 @@ export function Header({ isLoggedIn }: HeaderProps) {
                                 <nav className="grid gap-1 pl-4">
                                     <div className="flex items-center gap-2 py-1">
                                         <MultiCurrencyWalletIcon className="h-5 w-5" />
-                                        <Link href="/multicurrency" className="text-sm hover:text-primary">
+                                        <a href="/multicurrency" className="text-sm hover:text-primary">
                                             Multi-currency Wallet
-                                        </Link>
+                                        </a>
                                     </div>
                                     <div className="flex items-center gap-2 py-1">
                                         <OTCDeskIcon className="h-5 w-5" />
-                                        <Link href="/otc" className="text-sm hover:text-primary">
+                                        <a href="/otc" className="text-sm hover:text-primary">
                                             OTC Desk
-                                        </Link>
+                                        </a>
                                     </div>
                                     <div className="flex items-center gap-2 py-1">
                                         <VirtualCardIcon className="h-5 w-5" />
-                                        <Link href="/cards" className="text-sm hover:text-primary">
+                                        <a href="/cards" className="text-sm hover:text-primary">
                                             Virtual USD Cards
-                                        </Link>
+                                        </a>
                                     </div>
                                 </nav>
                             </div>
@@ -191,37 +189,37 @@ export function Header({ isLoggedIn }: HeaderProps) {
                                 <nav className="grid gap-1 pl-4">
                                     <div className="flex items-center gap-2 py-1">
                                         <AboutUsIcon className="h-5 w-5" />
-                                        <Link href="/about" className="text-sm hover:text-primary">
+                                        <a href="/about" className="text-sm hover:text-primary">
                                             About Us
-                                        </Link>
+                                        </a>
                                     </div>
                                     <div className="flex items-center gap-2 py-1">
                                         <BlogIcon className="h-5 w-5" />
-                                        <Link href="#" className="text-sm hover:text-primary">
+                                        <a href="#" className="text-sm hover:text-primary">
                                             Blog
-                                        </Link>
+                                        </a>
                                     </div>
                                     <div className="flex items-center gap-2 py-1">
                                         <HelpIcon className="h-5 w-5" />
-                                        <Link href="/help" className="text-sm hover:text-primary">
+                                        <a href="/help" className="text-sm hover:text-primary">
                                             Help
-                                        </Link>
+                                        </a>
                                     </div>
                                 </nav>
                             </div>
-                            <Link href="#" className="block text-sm font-medium hover:text-primary">
+                            <a href="#" className="block text-sm font-medium hover:text-primary">
                                 Rates
-                            </Link>
+                            </a>
                             {isLoggedIn && (
-                                <Link href="/dashboard/NGN" className="block text-sm font-medium hover:text-primary">
+                                <a href="/dashboard/NGN" className="block text-sm font-medium hover:text-primary">
                                     Dashboard
-                                </Link>
+                                </a>
                             )}
                             <div className="flex flex-col gap-2 pt-2">
                                 {isLoggedIn ? (
                                     <>
                                         <Button asChild className="w-full text-white">
-                                            <Link href="/dashboard/NGN">Dashboard</Link>
+                                            <a href="/dashboard/NGN">Dashboard</a>
                                         </Button>
                                         <Button
                                             variant="outline"
@@ -237,13 +235,13 @@ export function Header({ isLoggedIn }: HeaderProps) {
                                 ) : (
                                     <>
                                         <Button variant="outline" asChild className="w-full">
-                                            <Link href="/contactus">Contact Us</Link>
+                                            <a href="/contactus">Contact Us</a>
                                         </Button>
                                         <Button variant="outline" asChild className="w-full">
-                                            <Link href="/login">Sign in</Link>
+                                            <a href="/login">Sign in</a>
                                         </Button>
                                         <Button asChild className="w-full text-white">
-                                            <Link href="/request-access">Request Access</Link>
+                                            <a href="/request-access">Request Access</a>
                                         </Button>
                                     </>
                                 )}

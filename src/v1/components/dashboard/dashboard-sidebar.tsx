@@ -2,16 +2,14 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
-import { BarChart3, ArrowLeftRight, Settings, LogOut, X, CreditCard, Coins, Group, ReceiptText, SendIcon, Briefcase, LucideSend, Star, ChevronDown, CheckIcon } from "lucide-react"
-import { Logo } from "@/components/logo"
+import { BarChart3, ArrowLeftRight, Settings, LogOut, X, CreditCard, Coins, Group, ReceiptText, Briefcase, LucideSend, Star, ChevronDown, CheckIcon } from "lucide-react"
+import { Logo } from "@/v1/components/logo"
 import { Button } from "../ui/button"
-import { ISender, IUser } from "@/interface/interface"
-import { session, SessionData } from "@/session/session"
-import Defaults from "@/defaults/defaults"
-import { IResponse } from "@/interface/interface"
-import { cn } from "@/lib/utils"
+import { ISender, IUser } from "@/v1/interface/interface"
+import { session, SessionData } from "@/v1/session/session"
+import Defaults from "@/v1/defaults/defaults"
+import { IResponse } from "@/v1/interface/interface"
+import { cn } from "@/v1/lib/utils"
 import {
     Command,
     CommandEmpty,
@@ -19,14 +17,15 @@ import {
     CommandInput,
     CommandItem,
     CommandList,
-} from "@/components/ui/command"
+} from "@/v1/components/ui/command"
 import {
     Popover,
     PopoverContent,
     PopoverTrigger,
-} from "@/components/ui/popover"
-import { Status } from "@/enums/enums"
+} from "@/v1/components/ui/popover"
+import { Status } from "@/v1/enums/enums"
 import { Badge } from "../ui/badge"
+import { usePathname } from "wouter/use-browser-location"
 
 interface DashboardSidebarProps {
     open: boolean
@@ -48,7 +47,6 @@ const navigationBase = [
 
 export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ open, setOpen }) => {
     const pathname = usePathname()
-    const router = useRouter()
     const [senders, setSenders] = useState<Array<ISender>>([])
     const [popOpen, setPopOpen] = useState<boolean>(false)
     const [loading, setLoading] = useState<boolean>(true)
@@ -143,9 +141,9 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ open, setOpe
       `}>
                 {/* Logo Header */}
                 <div className="px-6 border-b border-gray-200 h-[73px] flex items-center justify-between">
-                    <Link href="/dashboard/NGN">
+                    <a href="/dashboard/NGN">
                         <Logo className="h-8 w-auto" />
-                    </Link>
+                    </a>
                     <button onClick={() => setOpen(false)} className="lg:hidden p-2 rounded-md hover:bg-gray-100">
                         <X className="h-5 w-5" />
                     </button>

@@ -1,6 +1,6 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/v1/components/ui/button"
 import { User, FileText } from "lucide-react"
 
 interface OnboardingWelcomeProps {

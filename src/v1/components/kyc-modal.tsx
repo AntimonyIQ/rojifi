@@ -1,11 +1,11 @@
 "use client"
 
 import React from 'react';
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/v1/components/ui/card";
 import { User, Loader2 } from "lucide-react";
 import { Inter } from "next/font/google";
 import { motion } from "framer-motion";
-import Link from 'next/link';
+import { Link } from 'wouter';
 
 const figtree = Inter({
     subsets: ["latin"],

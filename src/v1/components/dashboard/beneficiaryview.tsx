@@ -2,12 +2,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { WalletService } from "@/services/wallet.service";
+import { Button } from "@/v1/components/ui/button";
+import { Card, CardContent } from "@/v1/components/ui/card";
+import { WalletService } from "@/v1/services/wallet.service";
 import Loading from "../loading";
 import EmptyTransaction from "../emptytx";
-import { Transaction } from "@/types/wallet.type";
+import { Transaction } from "@/v1/types/wallet.type";
 import { ArrowUpRight, MoreVertical, Repeat, Search, Trash } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import {
@@ -17,7 +17,7 @@ import {
     DialogTitle,
     DialogDescription,
     DialogFooter,
-} from "@/components/ui/dialog";
+} from "@/v1/components/ui/dialog";
 import { toast } from "sonner";
 import { Input } from "../ui/input";
 import PayAgainModal from "./pay-again-modal";

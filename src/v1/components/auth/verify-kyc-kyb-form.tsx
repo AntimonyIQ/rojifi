@@ -1,19 +1,18 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
+import { Button } from "@/v1/components/ui/button"
+import { Label } from "@/v1/components/ui/label"
 import { X, Plus, Check, ExternalLink } from "lucide-react"
-import Link from "next/link"
-import { useRouter, useParams } from "next/navigation"
-import { Logo } from "@/components/logo"
+import { Logo } from "@/v1/components/logo"
 import { Carousel, ICarouselData } from "../carousel"
 import GlobeWrapper from "../globe"
-import Defaults from "@/defaults/defaults"
-import { IResponse } from "@/interface/interface"
-import { Status } from "@/enums/enums"
-import { session, SessionData } from "@/session/session"
+import Defaults from "@/v1/defaults/defaults"
+import { IResponse } from "@/v1/interface/interface"
+import { Status } from "@/v1/enums/enums"
+import { session, SessionData } from "@/v1/session/session"
 import { toast } from "sonner"
+import { Link, useParams } from "wouter"
 
 const carouselItems: ICarouselData[] = [
     {
@@ -67,7 +66,6 @@ export function KYBVerificationForm() {
     const sd: SessionData = session.getUserData();
 
     const { id } = useParams();
-    const router = useRouter();
 
     const handleDrag = (e: React.DragEvent) => {
         e.preventDefault();
@@ -232,7 +230,7 @@ export function KYBVerificationForm() {
                             />
                         </div>
 
-                        <style jsx>{`
+                        <style>{`
                             @keyframes upload-slide {
                                 0% { transform: translateX(-120%); }
                                 50% { transform: translateX(20%); }

@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { ChevronLeft, ChevronRight, Star } from "lucide-react"
-import Image from "next/image"
 
 const testimonials = [
   {
@@ -145,7 +144,7 @@ export function Testimonials() {
                   <div key={testimonial.id} className="w-full flex-shrink-0 px-4">
                     <div className="mx-auto rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
                       <div className="flex items-center gap-4 mb-4">
-                        <Image
+                        <img
                           src={testimonial.image || "/placeholder.svg?height=64&width=64&query=person"}
                           alt={testimonial.name}
                           width={64}
@@ -165,9 +164,8 @@ export function Testimonials() {
                         {Array.from({ length: 5 }).map((_, i) => (
                           <Star
                             key={i}
-                            className={`h-5 w-5 ${
-                              i < testimonial.rating ? "fill-amber-400 text-amber-400" : "fill-gray-200 text-gray-200"
-                            }`}
+                            className={`h-5 w-5 ${i < testimonial.rating ? "fill-amber-400 text-amber-400" : "fill-gray-200 text-gray-200"
+                              }`}
                           />
                         ))}
                       </div>
@@ -188,7 +186,7 @@ export function Testimonials() {
                         <div key={testimonial.id} className="flex-1">
                           <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm h-full">
                             <div className="flex items-center gap-4 mb-4">
-                              <Image
+                              <img
                                 src={testimonial.image || "/placeholder.svg?height=64&width=64&query=person"}
                                 alt={testimonial.name}
                                 width={64}
@@ -208,11 +206,10 @@ export function Testimonials() {
                               {Array.from({ length: 5 }).map((_, i) => (
                                 <Star
                                   key={i}
-                                  className={`h-5 w-5 ${
-                                    i < testimonial.rating
+                                  className={`h-5 w-5 ${i < testimonial.rating
                                       ? "fill-amber-400 text-amber-400"
                                       : "fill-gray-200 text-gray-200"
-                                  }`}
+                                    }`}
                                 />
                               ))}
                             </div>

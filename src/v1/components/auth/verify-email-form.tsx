@@ -3,15 +3,13 @@
 import type React from "react"
 
 import { useState, useRef, useEffect } from "react"
-import { Input } from "@/components/ui/input"
-import { useRouter } from "next/navigation"
+import { Input } from "@/v1/components/ui/input"
 
 export function VerifyEmailForm() {
     const [code, setCode] = useState(["", "", "", "", "", ""])
     const [isLoading, setIsLoading] = useState(false)
     const [isResending, setIsResending] = useState(false)
     const inputRefs = useRef<(HTMLInputElement | null)[]>([])
-    const router = useRouter()
 
     const handleInputChange = (index: number, value: string) => {
         if (value.length > 1) return // Only allow single digit
@@ -46,7 +44,7 @@ export function VerifyEmailForm() {
         setTimeout(() => {
             setIsLoading(false)
             // Redirect to success page
-            router.push("/verify-email/success")
+            window.location.href = "/verify-email/success"
         }, 2000);
     }
 

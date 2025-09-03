@@ -2,8 +2,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/v1/components/ui/button";
+import { Card, CardContent } from "@/v1/components/ui/card";
 import { Plus, Search, X } from "lucide-react";
 import Loading from "../loading";
 import { Input } from "../ui/input";
@@ -12,10 +12,10 @@ import { Dialog, DialogContent, DialogTitle } from "../ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Label } from "../ui/label";
 import { toast } from "sonner";
-import { IPagination, IResponse, ITeamMember, ITeams } from "@/interface/interface";
-import { Status, TeamRole, TeamStatus } from "@/enums/enums";
-import { session, SessionData } from "@/session/session";
-import Defaults from "@/defaults/defaults";
+import { IPagination, IResponse, ITeamMember, ITeams } from "@/v1/interface/interface";
+import { Status, TeamRole, TeamStatus } from "@/v1/enums/enums";
+import { session, SessionData } from "@/v1/session/session";
+import Defaults from "@/v1/defaults/defaults";
 
 
 interface IProps {
@@ -223,7 +223,7 @@ export function TeamsView() {
         }
     }
 
-    const handleAddTeam = async (teamData: { email: string; role: string }) => {
+    const handleAddTeam = async () => {
         setLoading(true);
     };
 

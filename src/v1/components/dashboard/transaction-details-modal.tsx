@@ -1,6 +1,6 @@
 "use client"
 
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/v1/components/ui/sheet"
 import { Check, AlertCircle, Download, MoreVertical, FileText, Repeat, Edit, UserCircle } from "lucide-react"
 import { Button } from "../ui/button";
 import {
@@ -9,12 +9,12 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
-import Link from "next/link";
+} from "@/v1/components/ui/dropdown-menu";
 import FilePreviewModal from "./file-preview-modal";
 import PayAgainModal from "./pay-again-modal";
 import { useState } from "react";
-import { ITransaction } from "@/interface/interface";
+import { ITransaction } from "@/v1/interface/interface";
+import { Link } from "wouter";
 
 export enum TxType {
     DEPOSIT = "deposit",

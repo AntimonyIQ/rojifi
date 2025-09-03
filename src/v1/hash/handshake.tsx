@@ -10,11 +10,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use client';
-
 import secp256k1 from 'secp256k1';
 import CryptoJS from 'crypto-js';
-import { IHandshakeClient } from '@/interface/interface';
+import { IHandshakeClient } from '@/v1/interface/interface';
 
 const bytesToHex = (bytes: Uint8Array): string => {
     return Array.from(bytes)

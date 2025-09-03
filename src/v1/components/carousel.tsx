@@ -1,5 +1,3 @@
-"use client";
-
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -50,7 +48,7 @@ export class Carousel extends React.Component<CarouselProps, CarouselState> {
     }
 
     render(): React.ReactNode {
-        const { data, interval = 5000 } = this.props;
+        const { data } = this.props;
         const { current } = this.state;
 
         return (

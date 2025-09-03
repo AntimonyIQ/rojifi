@@ -1,8 +1,5 @@
-"use client"
-
-import Link from "next/link"
-import { usePathname } from "next/navigation"
 import { BarChart3, Wallet, ArrowLeftRight, Settings } from "lucide-react"
+import { usePathname } from "wouter/use-browser-location"
 
 const navigationBase = [
     { name: "Overview", href: "", icon: BarChart3 },
@@ -24,7 +21,7 @@ export const BottomNavigation = () => {
                     const href = item.href ? `${basePath}/${item.href}` : basePath
                     const isActive = pathname === href || pathname?.startsWith(href + '/')
                     return (
-                        <Link
+                        <a
                             key={item.name}
                             href={href}
                             className={`flex-1 flex flex-col items-center justify-center py-2 px-1 text-xs font-medium transition-colors ${isActive ? "text-primary bg-blue-50" : "text-gray-500 hover:text-gray-700"
@@ -32,7 +29,7 @@ export const BottomNavigation = () => {
                         >
                             <item.icon className={`h-5 w-5 mb-1 ${isActive ? "text-primary" : "text-gray-400"}`} />
                             <span className="truncate">{item.name}</span>
-                        </Link>
+                        </a>
                     )
                 })}
             </nav>

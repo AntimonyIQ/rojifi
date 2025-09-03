@@ -24,7 +24,7 @@ import { Button } from "../ui/button";
 import { Country, ICountry } from "country-state-city";
 import PaymentDetailsDrawer from "./payment-details-view";
 import Loading from "../loading";
-import { cn } from "@/lib/utils"
+import { cn } from "@/v1/lib/utils"
 import {
     Command,
     CommandEmpty,
@@ -32,20 +32,20 @@ import {
     CommandInput,
     CommandItem,
     CommandList,
-} from "@/components/ui/command"
+} from "@/v1/components/ui/command"
 import {
     Popover,
     PopoverContent,
     PopoverTrigger,
-} from "@/components/ui/popover"
-import Link from "next/link";
+} from "@/v1/components/ui/popover"
 import { format } from "date-fns"
 import { Calendar as CalendarIcon } from "lucide-react"
-import { Calendar } from "@/components/ui/calendar"
-import Defaults from "@/defaults/defaults";
-import { IPayment, IResponse, ISender, IWallet } from "@/interface/interface";
-import { Fiat, Status, TransactionStatus } from "@/enums/enums";
-import { session, SessionData } from "@/session/session";
+import { Calendar } from "@/v1/components/ui/calendar"
+import Defaults from "@/v1/defaults/defaults";
+import { IPayment, IResponse, ISender, IWallet } from "@/v1/interface/interface";
+import { Fiat, Status, TransactionStatus } from "@/v1/enums/enums";
+import { session, SessionData } from "@/v1/session/session";
+import { Link } from "wouter";
 
 interface IIBan {
     id: string;
@@ -547,7 +547,7 @@ formdata: {
                                 />
                             </div>
 
-                            <style jsx>{`
+                            <style>{`
                             @keyframes upload-slide {
                                 0% { transform: translateX(-120%); }
                                 50% { transform: translateX(20%); }

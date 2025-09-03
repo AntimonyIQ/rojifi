@@ -2,14 +2,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Briefcase, Check, CheckCircle2, Files, MapPin, UsersIcon, } from "lucide-react";
+import { Check, CheckCircle2, Files, MapPin, UsersIcon, } from "lucide-react";
 import Loading from "../loading";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
-import Link from "next/link";
-import { ISender } from "@/interface/interface";
-import { session, SessionData } from "@/session/session";
+import { ISender } from "@/v1/interface/interface";
+import { session, SessionData } from "@/v1/session/session";
 
 enum Tabs {
     KYC = "KYC",
@@ -22,9 +21,8 @@ export function BusinessProfileView() {
     const [sender, setSender] = useState<ISender | null>(null);
     const sd: SessionData = session.getUserData();
 
-    const [currentPage, setCurrentPage] = useState(1);
+    const [_currentPage, setCurrentPage] = useState(1);
     const [statusFilter, setStatusFilter] = useState("KYC");
-    const itemsPerPage = 10;
 
     const statusTabs = Object.values(Tabs);
 
@@ -122,10 +120,10 @@ export function BusinessProfileView() {
                             <div className="w-full h-[1px] bg-slate-300"></div>
                             <div>
                                 <Button className="text-white w-full" size="lg" >
-                                    <Link href="/signup/123456/verification" className="flex flex-row gap-2 items-center justify-center">
+                                    <a href="/signup/123456/verification" className="flex flex-row gap-2 items-center justify-center">
                                         <CheckCircle2 />
                                         Submit for Approval
-                                    </Link>
+                                    </a>
                                 </Button>
                             </div>
                         </div>
@@ -148,9 +146,9 @@ export function BusinessProfileView() {
                             <div className="w-full h-[1px] bg-slate-300"></div>
                             <div>
                                 <Button className="text-white w-full" size="lg" >
-                                    <Link href="/signup/123456/verification" className="flex flex-row gap-2 items-center justify-center">
+                                    <a href="/signup/123456/verification" className="flex flex-row gap-2 items-center justify-center">
                                         Close
-                                    </Link>
+                                    </a>
                                 </Button>
                             </div>
                         </div>

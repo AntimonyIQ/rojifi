@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from "react"
 import * as htmlToImage from "html-to-image";
-import { Button } from "@/components/ui/button"
+import { Button } from "@/v1/components/ui/button"
 import { ArrowLeftRight, Expand, EyeOff, Plus, Send } from "lucide-react"
 import { Card, CardContent } from "../ui/card"
 import TransactionChart from "./transactionchart"
-import { IUser } from "@/interface/interface";
-import { session, SessionData } from "@/session/session";
+import { IUser } from "@/v1/interface/interface";
+import { session, SessionData } from "@/v1/session/session";
 
 enum Currency {
     NGN = "NGN",

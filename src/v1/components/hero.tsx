@@ -1,10 +1,9 @@
-"use client"
 
-import Link from "next/link"
 import { motion } from "framer-motion"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/v1/components/ui/button"
 import "../app/hero-image.css"
 import "../app/button-styles.css"
+import { Link } from "wouter"
 
 interface HeroProps {
     isLoggedIn: boolean

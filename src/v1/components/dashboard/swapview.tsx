@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/v1/components/ui/card";
 import { ArrowLeftRight, ArrowUpRight, CheckCircle, CircleDot, EyeOff } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/v1/components/ui/button";
+import { Input } from "@/v1/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/v1/components/ui/select";
 import Loading from "../loading";
 import { motion } from "framer-motion";
 import {
@@ -15,12 +15,12 @@ import {
     DialogTitle,
     DialogDescription,
     DialogFooter,
-} from "@/components/ui/dialog";
-import Link from "next/link";
-import { usePathname } from 'next/navigation'
-import { session, SessionData } from "@/session/session";
-import { IWallet } from "@/interface/interface";
-import { Fiat } from "@/enums/enums";
+} from "@/v1/components/ui/dialog";
+import { session, SessionData } from "@/v1/session/session";
+import { IWallet } from "@/v1/interface/interface";
+import { Fiat } from "@/v1/enums/enums";
+import { usePathname } from "wouter/use-browser-location";
+import { Link } from "wouter";
 
 
 export function SwapView() {
@@ -35,9 +35,9 @@ export function SwapView() {
     const [successfulSwap, setSuccessfulSwap] = useState<boolean>(false);
     const [currencies, setCurrencies] = useState<Array<IWallet>>([]);
 
-    const pathname = usePathname()
-    const parts = pathname ? pathname.split('/') : []
-    const wallet = (parts[2] || 'NGN').toUpperCase()
+    const pathname = usePathname();
+    const parts = pathname ? pathname.split('/') : [];
+    const wallet = (parts[2] || Fiat.NGN).toUpperCase();
 
     const [rates, setRates] = useState<Record<string, number>>({
         "USD": 1,

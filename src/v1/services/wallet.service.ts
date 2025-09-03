@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { API_BASE_URL } from '@/utils/constant';
-import { TransactionResponse, WalletResponse, SwapFeeResponse, ExchangeRateResponse, SwapResponse, WithdrawalResponse, Currency } from '@/types/wallet.type';
+import { API_BASE_URL } from '@/v1/utils/constant';
+import { TransactionResponse, WalletResponse, SwapFeeResponse, ExchangeRateResponse, SwapResponse, WithdrawalResponse, Currency } from '@/v1/types/wallet.type';
 
 export class WalletService {
     private readonly baseUrl: string;

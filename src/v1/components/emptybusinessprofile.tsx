@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { IdCard, Plus, ReceiptText } from "lucide-react";
+import { IdCard, ReceiptText } from "lucide-react";
 import { Button } from "./ui/button";
 
 interface EmptyBPProps {

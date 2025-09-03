@@ -1,8 +1,6 @@
-"use client"
-
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
+import { Button } from "@/v1/components/ui/button"
 import { motion } from "framer-motion"
+import { Link } from "wouter"
 
 interface CtaProps {
     isLoggedIn: boolean

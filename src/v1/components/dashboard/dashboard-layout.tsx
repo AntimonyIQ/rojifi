@@ -1,16 +1,13 @@
-"use client"
-
 import type React from "react"
 import { useState, useEffect } from "react"
-import { usePathname } from "next/navigation"
 import { ArrowLeftRight, Send, Plus, Menu, ArrowDownLeft, } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/v1/components/ui/button"
 import { DashboardSidebar } from "./dashboard-sidebar"
 import { BottomNavigation } from "./bottom-navigation"
-import Link from "next/link"
-import { session, SessionData } from "@/session/session"
-import { ISender, IUser, IWallet } from "@/interface/interface"
-import { Fiat } from "@/enums/enums"
+import { session, SessionData } from "@/v1/session/session"
+import { ISender, IWallet } from "@/v1/interface/interface"
+import { Fiat } from "@/v1/enums/enums"
+import { usePathname } from "wouter/use-browser-location"
 
 interface DashboardLayoutProps {
     children: React.ReactNode
@@ -21,7 +18,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
     const [wallets, setWallets] = useState<Array<IWallet>>([]);
     const [activeWallet, setActiveWallet] = useState<IWallet | undefined>(undefined);
     const [selectedCurrency, setSelectedCurrency] = useState<Fiat>(Fiat.NGN);
-    const [user, setUser] = useState<IUser | null>(null);
     const [sender, setSender] = useState<ISender | null>(null);
     const sd: SessionData = session.getUserData();
 
@@ -29,7 +25,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
 
     useEffect(() => {
         if (sd) {
-            setUser(sd.user);
             setWallets(sd.wallets);
             setSender(sd.sender);
 
@@ -91,10 +86,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                                 size="sm"
                                 id="top-button"
                                 className="bg-primary hover:bg-primary/90 text-white flex items-center gap-2">
-                                <Link href={`/dashboard/${selectedCurrency}/payment`} className="flex flex-row items-center justify-center gap-2">
+                                <a href={`/dashboard/${selectedCurrency}/payment`} className="flex flex-row items-center justify-center gap-2">
                                     <Plus className="h-4 w-4" />
                                     <span className="hidden sm:inline">Create Payment</span>
-                                </Link>
+                                </a>
                             </Button>
                         </div>
                         <div className="hidden items-center gap-2 lg:gap-3">
@@ -165,7 +160,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                     {sender?.businessVerificationCompleted === false && (
                         <div className=" absolute bg-[#ffe7c8] h-5 left-[250px] right-0 top-[70px] border-b border-yellow-700 flex flex-row items-center justify-between px-4">
                             <span className="text-xs text-gray-700">KYC Verification Failed, Click here to review.</span>
-                            <Link href={`/dashboard/${selectedCurrency}/sender`} className="text-xs font-medium text-gray-900 underline">Verify Now</Link>
+                            <a href={`/dashboard/${selectedCurrency}/sender`} className="text-xs font-medium text-gray-900 underline">Verify Now</a>
                         </div>
                     )}
                 </header>

@@ -2,16 +2,16 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react"
 import { X, ArrowLeft, Check } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
-import { useToast } from "@/components/ui/use-toast"
-import { fetchTransferBanks, initiateTransfer, verifyInternationalAccount } from "@/services/bank.service"
-import { WalletService } from "@/services/wallet.service"
-import { Bank } from "@/types/bank.type"
-import { Wallet } from "@/types/wallet.type"
+import { Button } from "@/v1/components/ui/button"
+import { Input } from "@/v1/components/ui/input"
+import { Label } from "@/v1/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/v1/components/ui/select"
+import { Textarea } from "@/v1/components/ui/textarea"
+import { useToast } from "@/v1/components/ui/use-toast"
+import { fetchTransferBanks, initiateTransfer, verifyInternationalAccount } from "@/v1/services/bank.service"
+import { WalletService } from "@/v1/services/wallet.service"
+import { Bank } from "@/v1/types/bank.type"
+import { Wallet } from "@/v1/types/wallet.type"
 
 interface TransferModalProps {
   isOpen: boolean
@@ -278,13 +278,13 @@ export function TransferModal({ isOpen, onClose }: TransferModalProps) {
         bank_code: ["USD"].includes(selectedCurrency)
           ? formData.bankCode
           : ["EUR", "GBP", "CAD"].includes(selectedCurrency)
-          ? formData.sortCode
-          : formData.bankCodeForTransfer,
+            ? formData.sortCode
+            : formData.bankCodeForTransfer,
         beneficiary_name: formData.beneficiaryName,
         bank_name: formData.selectedBank || "",
       }
 
-    if (["EUR", "GBP", "CAD"].includes(selectedCurrency)) {
+      if (["EUR", "GBP", "CAD"].includes(selectedCurrency)) {
         transferPayload.iban = formData.iban
       }
 

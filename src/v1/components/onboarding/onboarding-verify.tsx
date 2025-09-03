@@ -1,14 +1,14 @@
 "use client"
 
-import React, { useState, useEffect, useRef } from "react"
-import { Button } from "@/components/ui/button"
+import { useState, useEffect, useRef } from "react"
+import { Button } from "@/v1/components/ui/button"
 import { OnboardingProgress } from "./onboarding-progress"
 import { OnboardingSidebar } from "./onboarding-sidebar"
-import { KYCInitResponse } from "@/services/auth.service"
-import { API_BASE_URL, PARTNER_ID } from "@/utils/constant"
+import { KYCInitResponse } from "@/v1/services/auth.service"
+import { API_BASE_URL, PARTNER_ID } from "@/v1/utils/constant"
 import Script from "next/script"
-import { IUser } from "@/interface/interface"
-import { session, SessionData } from "@/session/session"
+import { IUser } from "@/v1/interface/interface"
+import { session, SessionData } from "@/v1/session/session"
 
 declare global {
     interface Window {
@@ -22,12 +22,12 @@ interface OnboardingVerifyProps {
 }
 
 export function OnboardingVerify({ onNext, onPrev }: OnboardingVerifyProps) {
-    const [loading, setLoading] = useState(true)
+    const [loading, _setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [token, setToken] = useState<string | null>(null)
     const [sdkLoaded, setSdkLoaded] = useState(false)
     const [user, setUser] = useState<IUser | null>(null)
-    const [kycData, setKycData] = useState<KYCInitResponse['data'] | null>(null)
+    const [kycData, _setKycData] = useState<KYCInitResponse['data'] | null>(null)
     const initializedRef = useRef(false)
     const sd: SessionData = session.getUserData();
 

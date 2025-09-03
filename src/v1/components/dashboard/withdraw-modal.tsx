@@ -2,16 +2,15 @@
 
 import type React from "react";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { X, Plus, ArrowLeft, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/components/ui/use-toast";
-import { WalletService } from "@/services/wallet.service";
-import { fetchBankAccounts, addBankAccount, fetchBanks, verifyBankAccount } from "@/services/bank.service";
-import type { BankAccount, Bank } from "@/types/bank.type";
+import { Button } from "@/v1/components/ui/button";
+import { Input } from "@/v1/components/ui/input";
+import { Label } from "@/v1/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/v1/components/ui/select";
+import { useToast } from "@/v1/components/ui/use-toast";
+import { WalletService } from "@/v1/services/wallet.service";
+import { fetchBankAccounts, addBankAccount, fetchBanks, verifyBankAccount } from "@/v1/services/bank.service";
+import type { BankAccount, Bank } from "@/v1/types/bank.type";
 
 interface WithdrawModalProps {
   isOpen: boolean;
@@ -29,7 +28,6 @@ const currencies = [
 ];
 
 export function WithdrawModal({ isOpen, onClose }: WithdrawModalProps) {
-  const router = useRouter();
   const { toast } = useToast();
   const walletService = new WalletService();
 

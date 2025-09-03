@@ -1,18 +1,16 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle, EyeOff } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/v1/components/ui/card";
+import { CheckCircle } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/v1/components/ui/select";
+import { Button } from "@/v1/components/ui/button";
 import { Copy } from "lucide-react";
 // import QRCode from "react-qr-code";
 import { QRCode } from 'react-qrcode-logo';
 import { toast } from "sonner";
 import Loading from "../loading";
-import { session, SessionData } from "@/session/session";
-import Link from "next/link";
-import { usePathname } from 'next/navigation';
+import { session, SessionData } from "@/v1/session/session";
 import {
     Dialog,
     DialogContent,
@@ -20,10 +18,11 @@ import {
     DialogTitle,
     DialogDescription,
     DialogFooter,
-} from "@/components/ui/dialog";
+} from "@/v1/components/ui/dialog";
 import { motion } from "framer-motion";
-import { IWallet } from "@/interface/interface";
-import { Fiat } from "@/enums/enums";
+import { IWallet } from "@/v1/interface/interface";
+import { Fiat } from "@/v1/enums/enums";
+import { usePathname } from "wouter/use-browser-location";
 
 export function DepositView() {
     const ss: SessionData = session.getUserData();
@@ -124,7 +123,6 @@ export function DepositView() {
     const depositLabel = `${shortNetworkNameMap[network] || network} Deposit Address`;
     const depositAddress = sampleAddressMap[network] || sampleAddressMap['ETH'];
 
-    const ethAddress = sampleAddressMap['ETH'];
     const accNum = "0123456789";
     const accName = "John Doe";
 
@@ -372,9 +370,9 @@ export function DepositView() {
                     </Card>
 
                     <div className="flex items-center justify-between w-full max-w-3xl mt-6">
-                        <Link href={`/dashboard/${wallet}`} className="bg-black hover:bg-slate-800 text-white capitalize px-10 py-2 rounded-lg">
+                        <a href={`/dashboard/${wallet}`} className="bg-black hover:bg-slate-800 text-white capitalize px-10 py-2 rounded-lg">
                             cancel
-                        </Link>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -414,9 +412,9 @@ export function DepositView() {
                             Close
                         </Button>
                         <Button className="text-white">
-                            <Link href={`/dashboard/${wallet}`} className="flex items-center gap-2">
+                            <a href={`/dashboard/${wallet}`} className="flex items-center gap-2">
                                 Dashboard
-                            </Link>
+                            </a>
                         </Button>
                     </DialogFooter>
                 </DialogContent>

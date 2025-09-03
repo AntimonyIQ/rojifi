@@ -1,4 +1,4 @@
-import { IUser } from "@/interface/interface";
+import { IUser } from "@/v1/interface/interface";
 
 export interface LoginPayload {
     email: string;

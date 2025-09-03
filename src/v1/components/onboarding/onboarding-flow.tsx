@@ -2,17 +2,16 @@
 
 import { useState, useEffect } from "react"
 import { X } from "lucide-react"
-import Link from "next/link"
-import { Logo } from "@/components/logo"
+import { Logo } from "@/v1/components/logo"
 import { OnboardingWelcome } from "./onboarding-welcome"
 import { OnboardingPersonalInfo } from "./onboarding-personal-info"
 import { OnboardingAddress } from "./onboarding-address"
 import { OnboardingVerify } from "./onboarding-verify"
 import { OnboardingSuccess } from "./onboarding-success"
 import { motion } from "framer-motion"
-import { IUser } from "@/interface/interface"
-import { session, SessionData } from "@/session/session";
-
+import { IUser } from "@/v1/interface/interface"
+import { session, SessionData } from "@/v1/session/session";
+import { Link } from "wouter"
 
 const logoVariants: any = {
     animate: {

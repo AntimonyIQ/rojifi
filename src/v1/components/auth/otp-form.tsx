@@ -2,12 +2,11 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Button } from "@/v1/components/ui/button"
+import { Input } from "@/v1/components/ui/input"
 import { Lock, ArrowLeft } from "lucide-react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { verifyOTP } from "@/services/auth.service"
+import { verifyOTP } from "@/v1/services/auth.service"
+import { Link } from "wouter"
 
 export function OTPVerificationForm() {
     const [otp, setOtp] = useState("")
@@ -15,7 +14,6 @@ export function OTPVerificationForm() {
     const [isLoading, setIsLoading] = useState(false)
     const [isVerified, setIsVerified] = useState(false)
     const [error, setError] = useState<string | null>(null)
-    const router = useRouter()
 
     // Retrieve email from localStorage on component mount
     useEffect(() => {
@@ -49,7 +47,7 @@ export function OTPVerificationForm() {
             localStorage.removeItem('signupEmail')
             localStorage.removeItem('loginEmail')
             // Redirect to login page
-            setTimeout(() => router.push("/login"), 2000)
+            setTimeout(() => window.location.href = "/login", 2000)
         } catch (err: any) {
             setIsLoading(false)
             setError(err.message || "Invalid OTP. Please try again.")

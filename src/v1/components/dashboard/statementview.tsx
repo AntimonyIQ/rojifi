@@ -1,16 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { EyeOff, FileDown, Plus } from "lucide-react";
-import Link from "next/link";
+import { Button } from "@/v1/components/ui/button";
+import { Card, CardContent } from "@/v1/components/ui/card";
+import { FileDown, Plus } from "lucide-react";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
-import { usePathname } from 'next/navigation'
+import { usePathname } from "wouter/use-browser-location";
+import { Link } from "wouter";
 
 export function BankStatementView() {
-    const [hideBalances, setHideBalances] = useState(false);
     const [totalTransactions, setTotalTransactions] = useState<number>(1);
     const [email, setEmail] = useState<string>("antimonyiq@gmail.com");
     const [months, setMonths] = useState<number>(3); // default: 3 months
@@ -22,9 +21,9 @@ export function BankStatementView() {
     const pastDate = new Date();
     pastDate.setMonth(today.getMonth() - months);
 
-    const pathname = usePathname()
-    const parts = pathname ? pathname.split('/') : []
-    const wallet = (parts[2] || 'NGN').toUpperCase()
+    const pathname = usePathname();
+    const parts = pathname ? pathname.split('/') : [];
+    const wallet = (parts[2] || 'NGN').toUpperCase();
 
     return (
         <div className="space-y-6">

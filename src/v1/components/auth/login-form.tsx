@@ -1,19 +1,14 @@
-// app/components/LoginForm.tsx
-'use client';
-
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Button } from '@/v1/components/ui/button';
+import { Input } from '@/v1/components/ui/input';
+import { Label } from '@/v1/components/ui/label';
 import { Eye, EyeOff, Mail, Lock, X } from 'lucide-react';
-import Link from 'next/link';
 import { toast } from 'sonner';
-import { Logo } from '@/components/logo';
-import { session, SessionData } from '@/session/session';
-import Defaults from '@/defaults/defaults';
-import { IResponse, ISender, ITransaction, IUser, IWallet } from '@/interface/interface';
-import { Status } from '@/enums/enums';
+import { Logo } from '@/v1/components/logo';
+import { session, SessionData } from '@/v1/session/session';
+import Defaults from '@/v1/defaults/defaults';
+import { IResponse, ISender, ITransaction, IUser, IWallet } from '@/v1/interface/interface';
+import { Status } from '@/v1/enums/enums';
 
 interface ILocation {
     country: string,
@@ -44,7 +39,6 @@ export function LoginForm() {
     });
     const [error, setError] = useState<string | null>(null);
     const sd: SessionData = session.getUserData();
-    const router = useRouter();
 
     useEffect(() => {
         getLocationFromIP();
@@ -152,12 +146,12 @@ export function LoginForm() {
     return (
         <div className='w-full max-w-md bg-white rounded-lg shadow-sm p-8'>
             <div className='flex items-center justify-between mb-8'>
-                <Link href='/' className='flex items-center space-x-2'>
+                <a href='/' className='flex items-center space-x-2'>
                     <Logo className='h-8 w-auto' />
-                </Link>
-                <Link href="/" className="text-gray-400 hover:text-gray-600">
+                </a>
+                <a href="/" className="text-gray-400 hover:text-gray-600">
                     <X className="h-6 w-6" />
-                </Link>
+                </a>
             </div>
 
             <div className='text-center mb-8'>
@@ -212,9 +206,9 @@ export function LoginForm() {
                         </button>
                     </div>
                     <div className='text-right mt-2'>
-                        <Link href='/forgot-password' className='text-sm text-primary hover:text-primary/80'>
+                        <a href='/forgot-password' className='text-sm text-primary hover:text-primary/80'>
                             Forgot Password?
-                        </Link>
+                        </a>
                     </div>
                 </div>
 
@@ -232,9 +226,9 @@ export function LoginForm() {
 
                 <div className='text-center text-sm text-gray-600'>
                     Don't have an account?{' '}
-                    <Link href='/request-access' className='text-primary hover:text-primary/80 font-medium'>
+                    <a href='/request-access' className='text-primary hover:text-primary/80 font-medium'>
                         Request Access
-                    </Link>
+                    </a>
                 </div>
             </form>
         </div>

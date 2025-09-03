@@ -1,16 +1,16 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
-import { AboutHero } from "@/components/about/about-hero"
-import { AboutValues } from "@/components/about/about-values"
-import { AboutVision } from "@/components/about/about-vision"
-import { AboutMission } from "@/components/about/about-mission"
-import { AboutCta } from "@/components/about/about-cta"
-import { IHandshakeClient, IUser } from "@/interface/interface"
-import { session, SessionData } from "@/session/session"
-import Handshake from "@/hash/handshake"
+import { Header } from "@/v1/components/header"
+import { Footer } from "@/v1/components/footer"
+import { AboutHero } from "@/v1/components/about/about-hero"
+import { AboutValues } from "@/v1/components/about/about-values"
+import { AboutVision } from "@/v1/components/about/about-vision"
+import { AboutMission } from "@/v1/components/about/about-mission"
+import { AboutCta } from "@/v1/components/about/about-cta"
+import { session, SessionData } from "@/v1/session/session"
+import Handshake from "@/v1/hash/handshake"
+import { IHandshakeClient, IPayment, ISender, IUser } from "@/v1/interface/interface"
 
 // Custom hook to manage authentication state
 const useAuth = () => {
@@ -25,16 +25,21 @@ const useAuth = () => {
         } else {
             const client: IHandshakeClient = Handshake.generate();
             console.log("client: ", client);
-            const sessionData: SessionData = {
-                user: {} as IUser,
+            const nsd: SessionData = {
+                user: {} as any,
                 activeWallet: '',
                 client: client,
                 deviceid: client.publicKey,
                 isLoggedIn: false,
                 devicename: "Unknown",
+                authorization: "",
+                wallets: [],
+                transactions: [],
+                sender: {} as ISender,
+                draftPayment: {} as IPayment
             };
 
-            session.login(sessionData);
+            session.login(nsd);
         }
     }, [])
 

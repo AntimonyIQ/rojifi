@@ -1,19 +1,23 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Header } from "@/components/header"
-import { Hero } from "@/components/hero"
-import { Stats } from "@/components/stats"
-import { Features } from "@/components/features"
-import { Testimonials } from "@/components/testimonials"
-import { Faq } from "@/components/faq"
-import { Cta } from "@/components/cta"
-import { Newsletter } from "@/components/newsletter"
-import { Footer } from "@/components/footer"
-import { session, SessionData } from "@/session/session"
-import Handshake from "@/hash/handshake"
-import { IHandshakeClient, IUser } from "@/interface/interface"
-import CookieConsent from "@/components/cookies"
+import { Header } from "@/v1/components/header"
+import { Hero } from "@/v1/components/hero"
+import { Stats } from "@/v1/components/stats"
+import { Features } from "@/v1/components/features"
+import { Testimonials } from "@/v1/components/testimonials"
+import { Faq } from "@/v1/components/faq"
+import { Cta } from "@/v1/components/cta"
+import { Newsletter } from "@/v1/components/newsletter"
+import { Footer } from "@/v1/components/footer"
+import { session, SessionData } from "@/v1/session/session"
+import Handshake from "@/v1/hash/handshake"
+import { IHandshakeClient, IPayment, ISender, IUser } from "@/v1/interface/interface"
+import CookieConsent from "@/v1/components/cookies";
+import { ThemeProvider } from '@/v1/components/theme-provider';
+import { Toaster } from 'sonner';
+import { Providers } from '@/v1/components/Providers';
+import { Analytics } from '@vercel/analytics/next';
 
 // Custom hook to manage authentication state
 const useAuth = () => {
@@ -37,7 +41,9 @@ const useAuth = () => {
                 devicename: "Unknown",
                 authorization: "",
                 wallets: [],
-                transactions: []
+                transactions: [],
+                sender: {} as ISender,
+                draftPayment: {} as IPayment,
             };
 
             session.login(sessionData);
@@ -51,17 +57,25 @@ export default function Home() {
     const { isLoggedIn, user } = useAuth()
 
     return (
-        <main className="flex min-h-screen flex-col">
-            <Header isLoggedIn={isLoggedIn} user={user} />
-            <Hero isLoggedIn={isLoggedIn} />
-            <Stats />
-            <Features />
-            <Testimonials />
-            <Faq />
-            <Cta isLoggedIn={isLoggedIn} />
-            <Newsletter />
-            <Footer />
-            <CookieConsent />
-        </main>
+        <>
+            <Providers>
+                <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} forcedTheme="light">
+                    <main className="flex min-h-screen flex-col">
+                        <Header isLoggedIn={isLoggedIn} user={user} />
+                        <Hero isLoggedIn={isLoggedIn} />
+                        <Stats />
+                        <Features />
+                        <Testimonials />
+                        <Faq />
+                        <Cta isLoggedIn={isLoggedIn} />
+                        <Newsletter />
+                        <Footer />
+                        <CookieConsent />
+                    </main>
+                    <Toaster richColors position="top-right" />
+                </ThemeProvider>
+            </Providers>
+            <Analytics />
+        </>
     )
 }

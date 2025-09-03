@@ -2,8 +2,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/v1/components/ui/button";
+import { Card, CardContent } from "@/v1/components/ui/card";
 import { Archive, ArrowUpRight, ExpandIcon, Info, Loader2, MoreHorizontal, Plus, Search, Trash2 } from "lucide-react";
 import Loading from "../loading";
 import { Input } from "../ui/input";
@@ -18,13 +18,13 @@ const countries = [
     { code: "SN", name: "Senegal", icon: "https://flagcdn.com/w320/sn.png", phoneCode: "+221" },
     { code: "TG", name: "Togo", icon: "https://flagcdn.com/w320/tg.png", phoneCode: "+228" },
 ];
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/v1/components/ui/select";
 import { Label } from "../ui/label";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from "@/components/ui/sheet";
-import Defaults from "@/defaults/defaults";
-import { session, SessionData } from "@/session/session";
-import { IPagination, IResponse, ISender, IUser } from "@/interface/interface";
-import { SenderStatus, Status, RequestStatus } from "@/enums/enums";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from "@/v1/components/ui/sheet";
+import Defaults from "@/v1/defaults/defaults";
+import { session, SessionData } from "@/v1/session/session";
+import { IPagination, IResponse, ISender } from "@/v1/interface/interface";
+import { SenderStatus, Status } from "@/v1/enums/enums";
 import { ILoginFormProps } from "../auth/login-form";
 
 import {
@@ -32,15 +32,13 @@ import {
     CommandGroup,
     CommandItem,
     CommandList,
-} from "@/components/ui/command"
+} from "@/v1/components/ui/command"
 import {
     Popover,
     PopoverContent,
     PopoverTrigger,
-} from "@/components/ui/popover"
+} from "@/v1/components/ui/popover"
 import { DropdownMenuSeparator } from "../ui/dropdown-menu";
-import { useParams } from "next/navigation";
-import Link from "next/link";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import { toast } from "sonner";
 import {
@@ -50,7 +48,8 @@ import {
     DialogTitle,
     DialogDescription,
     DialogFooter,
-} from "@/components/ui/dialog";
+} from "@/v1/components/ui/dialog";
+import { useParams } from "wouter";
 
 export function SenderView() {
     const [senders, setSenders] = useState<Array<ISender>>([]);

@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { API_BASE_URL } from '@/utils/constant';
-import { BankAccount, Bank, TransferResponse, InternationalAccountVerificationResponse } from '@/types/bank.type';
+import { API_BASE_URL } from '@/v1/utils/constant';
+import { BankAccount, Bank, TransferResponse, InternationalAccountVerificationResponse } from '@/v1/types/bank.type';
 
 // Fetch virtual accounts
 export const fetchVirtualAccounts = async (): Promise<BankAccount[]> => {

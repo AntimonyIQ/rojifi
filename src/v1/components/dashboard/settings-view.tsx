@@ -2,18 +2,18 @@
 
 import { useState, useEffect } from "react";
 import { X, Loader2, Eye, EyeOff, ChevronsUpDownIcon, CheckIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { useToast } from "@/components/ui/use-toast";
-import { fetchBankAccounts, addBankAccount, removeBankAccount, verifyBankAccount } from "@/services/bank.service";
-import { BankAccount, Bank } from "@/types/bank.type";
-import { IUser } from "@/interface/interface";
-import { session, SessionData } from "@/session/session";
-import { cn } from "@/lib/utils"
+import { Button } from "@/v1/components/ui/button";
+import { Input } from "@/v1/components/ui/input";
+import { Label } from "@/v1/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/v1/components/ui/select";
+import { Card, CardContent } from "@/v1/components/ui/card";
+import { Dialog, DialogContent } from "@/v1/components/ui/dialog";
+import { useToast } from "@/v1/components/ui/use-toast";
+import { fetchBankAccounts, addBankAccount, removeBankAccount, verifyBankAccount } from "@/v1/services/bank.service";
+import { BankAccount, Bank } from "@/v1/types/bank.type";
+import { IUser } from "@/v1/interface/interface";
+import { session, SessionData } from "@/v1/session/session";
+import { cn } from "@/v1/lib/utils"
 import {
     Command,
     CommandEmpty,
@@ -21,12 +21,12 @@ import {
     CommandInput,
     CommandItem,
     CommandList,
-} from "@/components/ui/command"
+} from "@/v1/components/ui/command"
 import {
     Popover,
     PopoverContent,
     PopoverTrigger,
-} from "@/components/ui/popover"
+} from "@/v1/components/ui/popover"
 import { Country, ICountry } from "country-state-city";
 
 export function SettingsView() {
@@ -100,10 +100,6 @@ function MyProfileTab() {
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.id]: e.target.value });
-    };
-
-    const handleSelectChange = (name: string, value: string) => {
-        setFormData({ ...formData, [name]: value });
     };
 
     const handleEnableEditing = () => {

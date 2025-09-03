@@ -2,23 +2,19 @@
 
 import type React from "react"
 import { useMemo, useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
+import { Button } from "@/v1/components/ui/button"
+import { Input } from "@/v1/components/ui/input"
+import { Label } from "@/v1/components/ui/label"
+import { Checkbox } from "@/v1/components/ui/checkbox"
 import { Mail, User, X, Briefcase, DollarSign, Map, Building, Mailbox, MessageSquare, MapPinHouse, ChevronsUpDownIcon, CheckIcon, ArrowUpRight } from "lucide-react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { Logo } from "@/components/logo"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-// import { Country, ICountry, } from 'country-state-city';
+import { Logo } from "@/v1/components/logo"
 import { Textarea } from "../ui/textarea";
 import countries from "../../data/country_state.json";
-import { session, SessionData } from "@/session/session"
+import { session, SessionData } from "@/v1/session/session"
 import { toast } from "sonner"
-import Defaults from "@/defaults/defaults"
-import { IResponse } from "@/interface/interface"
-import { cn } from "@/lib/utils"
+import Defaults from "@/v1/defaults/defaults"
+import { IResponse } from "@/v1/interface/interface"
+import { cn } from "@/v1/lib/utils"
 import {
     Command,
     CommandEmpty,
@@ -26,14 +22,15 @@ import {
     CommandInput,
     CommandItem,
     CommandList,
-} from "@/components/ui/command"
+} from "@/v1/components/ui/command"
 import {
     Popover,
     PopoverContent,
     PopoverTrigger,
-} from "@/components/ui/popover"
-import { Status } from "@/enums/enums"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
+} from "@/v1/components/ui/popover"
+import { Status } from "@/v1/enums/enums"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/v1/components/ui/dialog"
+import { Link } from "wouter"
 
 export function RequestAccessForm() {
     const [isLoading, setIsLoading] = useState(false)
@@ -64,7 +61,6 @@ export function RequestAccessForm() {
     // Display value for the volume input (with commas). formData.volume stores raw digits only.
     const formatNumber = (val: string) => (val ? val.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : val)
     const [displayVolume, setDisplayVolume] = useState<string>(formatNumber(formData.volume))
-    const router = useRouter();
     const sd: SessionData = session.getUserData();
 
     const isValidName = (name: string) => /^[A-Za-z]{2,}$/.test(name);
@@ -236,7 +232,7 @@ export function RequestAccessForm() {
                         <Button variant="outline" size="md" onClick={() => setShowSuccessModal(false)}>
                             Cancel
                         </Button>
-                        <Button size="md" onClick={() => { setShowSuccessModal(false); router.push("/"); }} className="text-white">
+                        <Button size="md" onClick={() => { setShowSuccessModal(false); window.location.href = "/"; }} className="text-white">
                             <ArrowUpRight size={16} />
                             Back to Homepage
                         </Button>

@@ -3,13 +3,13 @@
 import type React from "react"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Button } from "@/v1/components/ui/button"
+import { Input } from "@/v1/components/ui/input"
 import { motion } from "framer-motion"
 import { Mail } from "lucide-react"
-import Defaults from "@/defaults/defaults"
+import Defaults from "@/v1/defaults/defaults"
 import { toast } from "sonner"
-import { session, SessionData } from "@/session/session"
+import { session, SessionData } from "@/v1/session/session"
 
 export function Newsletter() {
     const [email, setEmail] = useState("")

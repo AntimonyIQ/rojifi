@@ -2,19 +2,19 @@
 
 import type React from "react"
 import { useState, useMemo } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
+import { Button } from "@/v1/components/ui/button"
+import { Input } from "@/v1/components/ui/input"
+import { Label } from "@/v1/components/ui/label"
+import { Checkbox } from "@/v1/components/ui/checkbox"
 import { Briefcase, Mail, MessageSquare, User, X } from "lucide-react"
-import Link from "next/link"
-import { Logo } from "@/components/logo"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Logo } from "@/v1/components/logo"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/v1/components/ui/select";
 import { Textarea } from "../ui/textarea"
-import Defaults from "@/defaults/defaults"
-import { session, SessionData } from "@/session/session"
+import Defaults from "@/v1/defaults/defaults"
+import { session, SessionData } from "@/v1/session/session"
 import { toast } from "sonner";
 import countries from "../../data/country_state.json";
+import { Link } from "wouter"
 
 export function ContactForm() {
     const [isLoading, setIsLoading] = useState(false);

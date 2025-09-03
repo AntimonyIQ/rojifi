@@ -1,5 +1,5 @@
-import Handshake from "@/hash/handshake";
-import { session, SessionData } from "@/session/session";
+import Handshake from "@/v1/hash/handshake";
+import { session, SessionData } from "@/v1/session/session";
 
 export default class Defaults {
 
