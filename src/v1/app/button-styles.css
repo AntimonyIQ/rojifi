@@ -1,0 +1,21 @@
+/* Custom button styles */
+.btn-outline-primary {
+  color: #0c4592 !important;
+  border-color: #0c4592 !important;
+  background-color: white !important;
+}
+
+.btn-outline-primary:hover {
+  background-color: rgba(12, 69, 146, 0.1) !important;
+  color: #0c4592 !important;
+}
+
+.btn-primary-white {
+  color: white !important;
+  background-color: #0c4592 !important;
+}
+
+.btn-primary-white:hover {
+  background-color: #0a3a7a !important;
+  color: white !important;
+}

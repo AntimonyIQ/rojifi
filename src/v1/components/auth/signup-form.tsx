@@ -1,0 +1,459 @@
+"use client"
+
+import type React from "react"
+import { useEffect, useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Eye, EyeOff, Mail, Lock, User, X, AlertCircle, ArrowUpRight } from "lucide-react"
+import Link from "next/link"
+import { useRouter, useParams } from "next/navigation"
+import { Logo } from "@/components/logo"
+import { OTPVerificationModal } from "../modal/otp";
+import { Carousel, ICarouselData } from "../carousel"
+import GlobeWrapper from "../globe"
+import { session, SessionData } from "@/session/session"
+import Defaults from "@/defaults/defaults"
+import { IRequestAccess, IResponse } from "@/interface/interface"
+import { Status } from "@/enums/enums"
+import { motion, Variants } from "framer-motion";
+import { toast } from "sonner"
+
+const logoVariants: Variants = {
+    animate: {
+        scale: [1, 1.1, 1],
+        opacity: [1, 0.7, 1],
+        transition: {
+            duration: 1.5,
+            repeat: Infinity,
+            ease: "easeInOut",
+        },
+    },
+}
+
+const carouselItems: ICarouselData[] = [
+    {
+        id: 1,
+        title: "Secure & Fast",
+        desc: "Experience lightning-fast transactions with military-grade encryption.",
+    },
+    {
+        id: 2,
+        title: "Global Access",
+        desc: "Use your wallet anywhere in the world with real-time support.",
+    },
+    {
+        id: 3,
+        title: "Smart Tools",
+        desc: "Swap, gift, and withdraw with built-in AI-assisted features.",
+    },
+];
+
+export function SignupForm() {
+    const [showPassword, setShowPassword] = useState(false);
+    const [showOtpModal, setShowOtpModal] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+    const [isLoading, setIsLoading] = useState(true)
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState<string | null>(null)
+    const [isNotApprove, setIsNotApprove] = useState(false)
+    const [formData, setFormData] = useState({
+        firstName: "",
+        lastName: "",
+        middleName: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+        agreeToTerms: false,
+        agreeToMarketing: false,
+    });
+    const router = useRouter();
+    const { id } = useParams();
+    const sd: SessionData = session.getUserData();
+
+    useEffect(() => {
+        loadData();
+    }, []);
+
+    const handleInputChange = (field: string, value: string | boolean) => {
+        let sanitizedValue = value;
+
+        if (typeof value === "string") {
+            switch (field) {
+                case "firstName":
+                case "lastName":
+                case "middleName":
+                    sanitizedValue = value.replace(/[^a-zA-Z]/g, "");
+                    break;
+
+                case "email":
+                    sanitizedValue = value.replace(/\s+/g, "").toLowerCase();
+                    sanitizedValue = sanitizedValue.replace(/[^a-z0-9@._-]/g, "");
+                    break;
+
+                case "phoneNumber":
+                    sanitizedValue = value.replace(/[^0-9]/g, "");
+                    break;
+            }
+        }
+
+        setFormData((prev) => ({ ...prev, [field]: sanitizedValue }));
+        setError(null);
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        setError(null)
+        console.log("sd:", sd)
+
+        if (!formData.agreeToTerms) {
+            setError("You must agree to the Terms and Conditions")
+            return
+        }
+
+        if (formData.password !== formData.confirmPassword) {
+            setError("Passwords don't match")
+            return
+        }
+
+        try {
+            setLoading(true)
+            const res = await fetch(`${Defaults.API_BASE_URL}/auth/email`, {
+                method: 'POST',
+                headers: {
+                    ...Defaults.HEADERS,
+                    'x-rojifi-handshake': sd.client.publicKey,
+                    'x-rojifi-deviceid': sd.deviceid,
+                },
+                body: JSON.stringify({
+                    rojifiId: id,
+                    password: formData.password
+                })
+            });
+            const data: IResponse = await res.json();
+            if (data.status === Status.ERROR) throw new Error(data.message || data.error);
+            if (data.status === Status.SUCCESS) {
+                setShowOtpModal(true);
+                toast.success("OTP sent successfully. Please verify your email to continue.", { duration: 8000 });
+            }
+        } catch (err: any) {
+            setError(err.message || "Failed to create account");
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const loadData = async () => {
+        try {
+            setIsLoading(true);
+            const res = await fetch(`${Defaults.API_BASE_URL}/requestaccess/approved/${id}`, {
+                method: 'GET',
+                headers: {
+                    ...Defaults.HEADERS,
+                    "Content-Type": "application/json",
+                    'x-rojifi-handshake': sd.client.publicKey,
+                    'x-rojifi-deviceid': sd.deviceid,
+                },
+            });
+            const data: IResponse = await res.json();
+            if (data.status === Status.ERROR) throw new Error(data.message || data.error);
+            if (data.status === Status.SUCCESS) {
+                if (!data.handshake) throw new Error('Unable to process login response right now, please try again.');
+                const parseData: IRequestAccess = Defaults.PARSE_DATA(data.data, sd.client.privateKey, data.handshake);
+                setFormData((prev) => ({
+                    ...prev,
+                    firstName: parseData.firstname,
+                    lastName: parseData.lastname,
+                    middleName: parseData.middlename,
+                    email: parseData.email,
+                }));
+            }
+        } catch (error: any) {
+            setError(error.message || "Failed to create account");
+            setIsNotApprove(true);
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
+    if (isLoading) {
+        return (
+            <div className="fixed top-0 bottom-0 left-0 right-0 z-50 flex items-center justify-center bg-white">
+                <div className="flex min-h-screen items-center justify-center bg-background">
+                    <motion.div variants={logoVariants} animate="animate">
+                        <Logo className="h-16 w-auto" />
+                    </motion.div>
+                </div>
+            </div>
+        )
+    }
+
+    if (isNotApprove) {
+        return (
+            <div className="fixed inset-0 bg-white flex items-center justify-center">
+                <div className="text-center max-w-lg px-6">
+                    <AlertCircle className="mx-auto h-12 w-12 text-gray-500" />
+                    <h2 className="mt-4 text-2xl font-semibold text-gray-900">Request access required</h2>
+                    <p className="mt-2 text-gray-600">You currently don't have access to this page. Please request access to continue.</p>
+                    <div className="mt-6">
+                        <Link href="/request-access" className="inline-flex">
+                            <Button className="px-6 py-2 bg-primary hover:bg-primary/90 text-white">
+                                <ArrowUpRight size={18} />
+                                Request Access
+                            </Button>
+                        </Link>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
+    return (
+        <div className="fixed top-0 bottom-0 left-0 right-0">
+            <div className="w-full h-full flex flex-row items-start justify-between">
+                <div className="w-full md:w-[40%] h-full overflow-y-auto custom-scroll px-4 py-6">
+                    <div className="p-4 max-w-md mx-auto">
+                        {/* Header */}
+                        <div className="flex items-center justify-between mb-8">
+                            <Link href="/" className="flex items-center space-x-2">
+                                <Logo className="h-8 w-auto" />
+                            </Link>
+                            <Link href="/" className="text-gray-400 hover:text-gray-600">
+                                <X className="h-6 w-6" />
+                            </Link>
+                        </div>
+
+                        {/* Form Content */}
+                        <div className="text-center mb-8">
+                            <h1 className="text-2xl font-bold text-gray-900 mb-2">Create an account on Rojifi Business</h1>
+                            <p className="text-gray-600">Let's start with your personal credentials</p>
+                        </div>
+
+                        <form className="space-y-6" onSubmit={handleSubmit}>
+                            {error && (
+                                <p className="text-red-500 text-sm text-center">{error}</p>
+                            )}
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <Label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
+                                        First name <span className="text-red-500">*</span>
+                                    </Label>
+                                    <div className="relative">
+                                        <Input
+                                            id="firstName"
+                                            name="firstName"
+                                            type="text"
+                                            autoComplete="given-name"
+                                            className="pl-10 h-12"
+                                            placeholder="First name"
+                                            value={formData.firstName}
+                                            disabled={true}
+                                            readOnly={true}
+                                            onChange={(_e) => { } /* handleInputChange("firstName", e.target.value) */}
+                                        />
+                                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <Label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
+                                        Last name
+                                    </Label>
+                                    <div className="relative">
+                                        <Input
+                                            id="lastName"
+                                            name="lastName"
+                                            type="text"
+                                            autoComplete="family-name"
+                                            className="pl-10 h-12"
+                                            placeholder="Last name"
+                                            value={formData.lastName}
+                                            disabled={true}
+                                            readOnly={true}
+                                            onChange={(_e) => { } /* handleInputChange("lastName", e.target.value) */}
+                                        />
+                                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <Label htmlFor="middleName" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Other Name <span className="text-red-500">*</span>
+                                </Label>
+                                <div className="relative">
+                                    <Input
+                                        id="middleName"
+                                        name="middleName"
+                                        type="text"
+                                        autoComplete="family-name"
+                                        className="pl-10 h-12"
+                                        placeholder="Other"
+                                        disabled={loading}
+                                        value={formData.middleName}
+                                        onChange={(e) => handleInputChange("middleName", e.target.value)}
+                                    />
+                                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                </div>
+                            </div>
+
+                            <div>
+                                <Label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Email address <span className="text-red-500">*</span>
+                                </Label>
+                                <div className="relative">
+                                    <Input
+                                        id="email"
+                                        name="email"
+                                        type="email"
+                                        autoComplete="email"
+                                        required
+                                        className="pl-10 h-12"
+                                        placeholder="Enter your email"
+                                        value={formData.email}
+                                        disabled={true}
+                                        readOnly={true}
+                                        onChange={(_e) => { } /* handleInputChange("email", e.target.value) */}
+                                    />
+                                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                </div>
+                            </div>
+
+                            <div>
+                                <Label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Password <span className="text-red-500">*</span>
+                                </Label>
+                                <div className="relative">
+                                    <Input
+                                        id="password"
+                                        name="password"
+                                        type={showPassword ? "text" : "password"}
+                                        autoComplete="new-password"
+                                        required
+                                        className="pl-10 pr-10 h-12"
+                                        placeholder="Password"
+                                        value={formData.password}
+                                        disabled={loading}
+                                        onChange={(e) => handleInputChange("password", e.target.value)}
+                                    />
+                                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                    <button
+                                        type="button"
+                                        className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                    >
+                                        {showPassword ? <EyeOff className="h-5 w-5 text-gray-400" /> : <Eye className="h-5 w-5 text-gray-400" />}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div>
+                                <Label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Confirm Password <span className="text-red-500">*</span>
+                                </Label>
+                                <div className="relative">
+                                    <Input
+                                        id="confirmPassword"
+                                        name="confirmPassword"
+                                        type={showConfirmPassword ? "text" : "password"}
+                                        autoComplete="new-password"
+                                        required
+                                        className="pl-10 pr-10 h-12"
+                                        placeholder="Confirm Password"
+                                        value={formData.confirmPassword}
+                                        disabled={loading}
+                                        onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
+                                    />
+                                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                    <button
+                                        type="button"
+                                        className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                    >
+                                        {showConfirmPassword ? (
+                                            <EyeOff className="h-5 w-5 text-gray-400" />
+                                        ) : (
+                                            <Eye className="h-5 w-5 text-gray-400" />
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div className="flex items-center space-x-2">
+                                    <Checkbox
+                                        id="agreeToTerms"
+                                        checked={formData.agreeToTerms}
+                                        required={true}
+                                        disabled={loading}
+                                        onCheckedChange={(checked) => handleInputChange("agreeToTerms", checked)}
+                                    />
+                                    <Label htmlFor="agreeToTerms" className="text-sm text-gray-600">
+                                        I agree to Rojifi's{" "}
+                                        <Link href="/privacy" className="text-primary hover:text-primary/80">
+                                            Privacy Policy
+                                        </Link>{" "}
+                                        and{" "}
+                                        <Link href="#" className="text-primary hover:text-primary/80">
+                                            Terms and Conditions
+                                        </Link>
+                                    </Label>
+                                </div>
+
+                                <div className="flex items-center space-x-2">
+                                    <Checkbox
+                                        id="agreeToMarketing"
+                                        disabled={loading}
+                                        checked={formData.agreeToMarketing}
+                                        onCheckedChange={(checked) => handleInputChange("agreeToMarketing", checked)}
+                                    />
+                                    <Label htmlFor="agreeToMarketing" className="text-sm text-gray-600">
+                                        I consent to receive electronic communications regarding my accounts and services
+                                    </Label>
+                                </div>
+                            </div>
+
+                            <div className="space-y-4">
+                                <Button type="submit" className="w-full h-12 bg-primary hover:bg-primary/90 text-white" disabled={loading}>
+                                    {loading ? "Creating account..." : "Submit"}
+                                </Button>
+                            </div>
+
+                            <div className="text-center text-sm text-gray-600">
+                                Have an account?{" "}
+                                <Link href="/login" className="text-primary hover:text-primary/80 font-medium">
+                                    Sign in
+                                </Link>
+                            </div>
+                        </form>
+                        <OTPVerificationModal
+                            isOpen={showOtpModal}
+                            onClose={() => setShowOtpModal(false)}
+                            email={formData.email}
+                            id={id as string}
+                            onSuccess={() => {
+                                setShowOtpModal(false);
+                                toast.success("Email verified successfully");
+                                window.location.href = `/signup/${id}/verification`;
+                            }}
+                        />
+                    </div>
+                </div>
+
+                <div className="w-[60%] hidden md:block h-full px-10 py-1 bg-primary relative">
+                    <div className="mt-12">
+                        <Carousel data={carouselItems} interval={4000} />
+                    </div>
+                    <div className="absolute bottom-5 left-5 px-5 right-0 flex justify-start items-center mt-6 text-white text-lg z-10">
+                        &copy; {new Date().getFullYear()} Rojifi. All rights reserved.
+                    </div>
+                    <div className="absolute -bottom-40 -right-40 flex justify-center items-center mt-6">
+                        <GlobeWrapper />
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}

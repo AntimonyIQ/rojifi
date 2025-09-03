@@ -6,11 +6,21 @@ import { IPagination, IResponse, IWallet } from "@/interface/interface";
 import { session, SessionData } from "@/session/session";
 import Defaults from "@/defaults/defaults";
 import { Status } from "@/enums/enums";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+
 
 export default function WalletsComponent({ userId }: { userId: string }) {
     const [wallets, setWallets] = useState<Array<IWallet>>([]);
     const [loading, setLoading] = useState<boolean>(true);
-    // Read-only list UI: no dialogs or manipulation state
     const [_pagination, setPagination] = useState<IPagination>({
         total: 0,
         totalPages: 0,
@@ -78,75 +88,83 @@ export default function WalletsComponent({ userId }: { userId: string }) {
         return `${symbol}${formatted}`;
     };
 
+    const countText = `${wallets.length} ${wallets.length === 1 ? 'wallet' : 'wallets'}`;
+
     return (
-        <div className="space-y-4">
-            <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-gray-700">Wallets</h3>
-                <p className="text-sm text-gray-500">{wallets.length} wallets</p>
-            </div>
-
-            <div className="overflow-x-auto">
-                <div className="min-w-full align-middle">
-                    <div className="overflow-hidden shadow-sm ring-1 ring-black ring-opacity-5 rounded-lg bg-white">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Wallet</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Balance</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Currency</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-100">
-                                {wallets.map((wallet: any, idx: number) => (
-                                    <tr key={idx} className="hover:bg-gray-50 transition-colors">
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="flex items-center gap-3">
-                                                <div className="flex-shrink-0">
-                                                    {wallet.icon ? (
-                                                        <img src={wallet.icon} alt={wallet.name ?? 'icon'} className="h-6 w-6 rounded-full object-cover" />
-                                                    ) : (
-                                                        <div className="h-9 w-9 rounded-full bg-primary-50 flex items-center justify-center text-primary">⚡</div>
-                                                    )}
-                                                </div>
-                                                <div>
-                                                    <div className="text-sm font-medium text-gray-900">{wallet.name ?? (wallet.currency && (wallet.currency as any).toString()) ?? '-'}</div>
-                                                    <div className="text-xs text-gray-500">{wallet.userId?.fullName ?? '-'}</div>
-                                                </div>
-                                            </div>
-                                        </td>
-
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm font-semibold text-gray-900">{formatBalance(wallet)}</div>
-                                        </td>
-
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="flex items-center gap-2">
-                                                {wallet.icon ? (
-                                                    <img src={wallet.icon} alt={wallet.name ?? 'icon'} className="h-6 w-6 rounded-full object-cover" />
-                                                ) : null}
-                                                <div className="text-sm text-gray-700">{(wallet.currency && (wallet.currency as any).toString()) ?? '-'}</div>
-                                            </div>
-                                        </td>
-
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            {wallet.status ? (
-                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${wallet.status === 'active' || wallet.activated ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                                                    {wallet.status ?? (wallet.activated ? 'active' : 'inactive')}
-                                                </span>
-                                            ) : (
-                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${wallet.activated ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                                                    {wallet.activated ? 'active' : 'inactive'}
-                                                </span>
-                                            )}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+        <Card>
+            <CardHeader className="px-6 py-5 border-b border-gray-200">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <div>
+                        <CardTitle className="text-base font-semibold text-gray-800">User Wallets</CardTitle>
+                        <div className="text-xs text-gray-500 mt-1">Read-only list of wallets for this user</div>
+                    </div>
+                    <div className="flex items-center gap-2 mt-2 sm:mt-0">
+                        <Badge variant="secondary" className="text-sm font-medium px-3 py-1">
+                            {countText}
+                        </Badge>
                     </div>
                 </div>
-            </div>
-        </div>
+            </CardHeader>
+
+            <CardContent className="p-0">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Wallet</TableHead>
+                            <TableHead>Balance</TableHead>
+                            <TableHead>Currency</TableHead>
+                            <TableHead>Status</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {wallets.length === 0 ? (
+                            <TableRow className="hover:bg-transparent">
+                                <TableCell colSpan={4}>
+                                    <div className="w-full flex flex-col items-center justify-center py-8">
+                                        <div className="text-sm text-gray-500">No wallets found for this user.</div>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        ) : (
+                            wallets.map((wallet: IWallet, idx: number) => (
+                                <TableRow key={idx} className="hover:bg-gray-50">
+                                    <TableCell>
+                                        <div className="flex items-center gap-3">
+                                            {wallet.icon ? (
+                                                <img src={wallet.icon} alt={wallet.name ?? 'icon'} className="h-6 w-6 rounded-full object-cover" />
+                                            ) : (
+                                                <div className="h-9 w-9 rounded-full bg-primary-50 flex items-center justify-center text-primary">⚡</div>
+                                            )}
+                                            <div>
+                                                <div className="text-sm font-medium text-gray-900">{wallet.name ?? (wallet.currency && (wallet.currency as any).toString()) ?? '-'}</div>
+                                                <div className="text-xs text-gray-500">{wallet.userId?.fullName ?? '-'}</div>
+                                            </div>
+                                        </div>
+                                    </TableCell>
+
+                                    <TableCell>
+                                        <div className="text-sm font-semibold text-gray-900">{formatBalance(wallet)}</div>
+                                    </TableCell>
+
+                                    <TableCell>
+                                        <div className="flex items-center gap-2">
+                                            {wallet.icon ? (
+                                                <img src={wallet.icon} alt={wallet.name ?? 'icon'} className="h-6 w-6 rounded-full object-cover" />
+                                            ) : null}
+                                            <div className="text-sm text-gray-700">{(wallet.currency && (wallet.currency as any).toString()) ?? '-'}</div>
+                                        </div>
+                                    </TableCell>
+
+                                    <TableCell>
+                                        <Badge variant={wallet.activated ? 'default' : 'secondary'}>
+                                            {wallet.activated ? 'active' : 'inactive'}
+                                        </Badge>
+                                    </TableCell>
+                                </TableRow>
+                            )))}
+                    </TableBody>
+                </Table>
+            </CardContent>
+        </Card>
     );
 }

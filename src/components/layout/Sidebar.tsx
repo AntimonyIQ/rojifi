@@ -135,9 +135,9 @@ export default function Sidebar() {
             label: "OTC",
         },
         {
-            href: "/virtual-cards",
+            href: "/virtual-card",
             icon: <CreditCardIcon className="h-5 w-5" />,
-            label: "Virtual Cards",
+            label: "Virtual Card",
         },
         {
             href: "/senders",

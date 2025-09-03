@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 // @ts-ignore
-import { Users, CreditCard, DollarSign, UserCheck } from "lucide-react";
+import { Users, CreditCard, DollarSign, UserCheck, Receipt, ReceiptText, ArrowUpRight } from "lucide-react";
 import KpiCard from "@/components/dashboard/KpiCard";
 // @ts-ignore
 import RevenueChart from "@/components/dashboard/RevenueChart";
@@ -13,12 +13,27 @@ import { fetchDashboardStats, fetchRecentTransactions, fetchChartData, } from "@
 import { useFetchDashboardOverview } from "@/hooks/useStaff";
 import { ITransaction } from "@/interface/interface";
 import { useEffect, useState } from "react";
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button";
+import { Country, ICountry } from "country-state-city";
 
 export default function DashboardPage() {
     const [transactions, setTransactions] = useState<Array<ITransaction>>([]);
     const [loading, setLoading] = useState<boolean>(true);
+    const [openDetails, setOpenDetails] = useState<boolean>(false);
     const { data: dashboardData, isLoading: statsLoading } =
-        useFetchDashboardOverview(); 9
+        useFetchDashboardOverview();
 
     const currentDate = new Date();
     const thirtyDaysAgo = new Date(currentDate);
@@ -49,7 +64,7 @@ export default function DashboardPage() {
             className="space-y-6"
         >
             {/* KPI Cards Row */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <KpiCard
                     title="Total Users"
                     value={dashboardData?.total_users.toLocaleString() || "0"}
@@ -61,24 +76,26 @@ export default function DashboardPage() {
                 />
 
                 <KpiCard
-                    title="Total Transactions"
+                    title="Total Daily Transactions"
                     value={dashboardData?.total_transactions?.toLocaleString() || "0"}
                     percentageChange={dashboardData?.transaction_growth || 0}
-                    icon={CreditCard}
+                    icon={ArrowUpRight}
                     iconColor="text-blue-500"
                     iconBgColor="bg-blue-50"
                     loading={statsLoading}
+                    fieldKey="Transaction"
                 />
 
-                {/* <KpiCard
-          title="Revenue"
-          value={`$${dashboardData?.revenue.toLocaleString() || "0"}`}
-          percentageChange={dashboardData?.revenue_growth || 0}
-          icon={DollarSign}
-          iconColor="text-indigo-500"
-          iconBgColor="bg-indigo-50"
-          loading={statsLoading}
-        /> */}
+                <KpiCard
+                    title="Total Transactions"
+                    value={dashboardData?.total_transactions?.toLocaleString() || "0"}
+                    percentageChange={dashboardData?.transaction_growth || 0}
+                    icon={ArrowUpRight}
+                    iconColor="text-blue-500"
+                    iconBgColor="bg-blue-50"
+                    loading={statsLoading}
+                    fieldKey="Transaction"
+                />
 
                 <KpiCard
                     title="Active Users"
@@ -91,20 +108,27 @@ export default function DashboardPage() {
                 />
             </div>
 
-            {/* Analytics Charts Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
-                {/* <RevenueChart
-          data={chartData?.revenue || []}
-          loading={chartDataLoading}
-        /> */}
-
-                <TransactionVolumeChart
-                // data={transactionVolume || []}
-                // loading={chartDataLoading}
-                />
+            {/** Dialog modal to show total transactions for each currency */}
+            <div>
+                <Dialog open={openDetails} onOpenChange={setOpenDetails}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Total Transactions</DialogTitle>
+                            <DialogDescription>
+                                View the total transactions for each currency.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter>
+                            <Button variant="outline">Close</Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             </div>
 
-            {/* Recent Transactions Table */}
+            <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
+                <TransactionVolumeChart />
+            </div>
+
             <RecentTransactionsTable
                 transactions={transactions}
                 loading={loading}

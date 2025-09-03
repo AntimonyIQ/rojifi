@@ -11,10 +11,10 @@ import { format } from "date-fns";
 import { AlertCircle, User as UserIcon, CreditCard, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { useFetchUserTransactions } from "@/hooks/useTransaction";
 import KycForm from "./Kycform";
 import WalletsComponent from "./WalletComponent";
-import { ITransaction, IUser } from "@/interface/interface";
+import { IUser } from "@/interface/interface";
+import TransactionsComponent from "./TransactionComponent";
 
 interface UserDetailsDialogProps {
     user: IUser | null;
@@ -28,8 +28,6 @@ export default function UserDetailsDialog({
     onOpenChange,
 }: UserDetailsDialogProps) {
     if (!user) return null;
-
-    const { data: recentTransactions } = useFetchUserTransactions(user._id);
 
     const getStatusColor = (status: string) => {
         switch (status.toLowerCase()) {
@@ -73,7 +71,7 @@ export default function UserDetailsDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[750px] max-h-[90vh] overflow-auto hide-scrollbar">
+            <DialogContent className="sm:max-w-[1350px] max-h-[90vh] overflow-auto hide-scrollbar">
                 <DialogHeader>
                     <DialogTitle className="text-xl font-semibold">
                         User Details
@@ -104,7 +102,7 @@ export default function UserDetailsDialog({
                         <TabsTrigger value="transactions">Transactions</TabsTrigger>
                         <TabsTrigger value="kyc">Kyc</TabsTrigger>
                         <TabsTrigger value="wallets">Wallets</TabsTrigger>
-                        {/* <TabsTrigger value="activity">Activity</TabsTrigger> */}
+                        {/* <TabsTrigger value="activity">Activity</TabsTrigger>  */}
                     </TabsList>
                     <TabsContent value="profile" className="space-y-4 mt-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -136,60 +134,7 @@ export default function UserDetailsDialog({
                             </div>
                         </div>
                     </TabsContent>
-                    <TabsContent value="transactions" className="mt-4">
-                        <div className="rounded-md border">
-                            <div className="py-4 px-4 flex items-center justify-between border-b">
-                                <h3 className="text-sm font-medium">Recent Transactions</h3>
-                                <p className="text-xs text-gray-500">Last 30 days</p>
-                            </div>
-                            {recentTransactions && recentTransactions.length > 0 ? (
-                                <div className="divide-y">
-                                    {recentTransactions.map((transaction: ITransaction) => (
-                                        <div
-                                            key={transaction._id}
-                                            className="px-4 py-3 flex items-center justify-between"
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                                                    <CreditCard className="h-4 w-4 text-blue-700" />
-                                                </div>
-                                                <div>
-                                                    <p className="text-sm font-medium capitalize">
-                                                        {transaction.type}
-                                                    </p>
-                                                    <p className="text-xs text-gray-500">
-                                                        {format(
-                                                            new Date(transaction.createdAt),
-                                                            "MMM d, yyyy"
-                                                        )}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <div className="text-right">
-                                                <p className="text-sm font-medium">
-                                                    {transaction.senderCurrency}
-                                                    {transaction.amount}
-                                                </p>
-                                                <Badge
-                                                    className={cn(
-                                                        "text-xs",
-                                                        getStatusColor(transaction.status)
-                                                    )}
-                                                >
-                                                    {transaction.status}
-                                                </Badge>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="py-8 text-center text-gray-500 flex flex-col items-center">
-                                    <CreditCard className="h-8 w-8 text-gray-400 mb-2" />
-                                    <p>No recent transactions</p>
-                                </div>
-                            )}
-                        </div>
-                    </TabsContent>
+
                     <TabsContent value="activity" className="mt-4">
                         <div className="rounded-md border">
                             <div className="py-4 px-4 flex items-center justify-between border-b">
@@ -197,6 +142,9 @@ export default function UserDetailsDialog({
                                 <p className="text-xs text-gray-500">Last 7 days</p>
                             </div>
                         </div>
+                    </TabsContent>
+                    <TabsContent value="transactions" className="mt-4">
+                        <TransactionsComponent userId={user._id} />
                     </TabsContent>
                     <TabsContent value="wallets">
                         <WalletsComponent userId={user._id} />
