@@ -4,7 +4,8 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/v1/components/ui/button";
 import { Card, CardContent } from "@/v1/components/ui/card";
-import { Archive, ArrowUpRight, ExpandIcon, Info, Loader2, MoreHorizontal, Plus, Search, Trash2 } from "lucide-react";
+import { Archive, ArrowUpRight, ExpandIcon, Info, Loader2, MoreHorizontal, Plus, Search, Trash2, Building2, User, Mail, Phone, MapPin, Calendar, FileText, Shield, CheckCircle } from "lucide-react";
+import { motion } from "framer-motion";
 import Loading from "../loading";
 import { Input } from "../ui/input";
 import EmptySender from "../emptysender";
@@ -661,117 +662,276 @@ export function SenderView() {
 
                 {showConfirmModal === false && selectedBusiness && (
                     <Sheet open={showDetails} onOpenChange={setShowDetails}>
-                        <SheetContent side="right" className="w-full sm:max-w-full p-0">
-                            <SheetHeader className="p-5">
-                                <SheetTitle className="text-xl font-bold">Sender's Business Details</SheetTitle>
-                                <SheetDescription className="mb-4 text-gray-600">
-                                    Please provide the sender's business details for onboarding and compliance.
-                                </SheetDescription>
-                            </SheetHeader>
-                            <div className="space-y-4 p-5 sm:px-72 overflow-y-auto" style={{ maxHeight: "80vh" }}>
-                                {/* Sender Email */}
-                                <div className="w-full">
-                                    <Label htmlFor="senderEmail">Sender's Email <span className="text-red-500">*</span></Label>
-                                    <Input id="senderEmail" type="email" placeholder="Enter sender's email" className="w-full" />
+                        <SheetContent side="right" className="w-full sm:max-w-full p-0 bg-gradient-to-br from-slate-50 to-slate-100">
+                            <div className="flex flex-col h-full">
+                                {/* Enhanced Header */}
+                                <div className=" p-6 text-white">
+                                    <motion.div
+                                        initial={{ opacity: 0, y: -20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.5 }}
+                                    >
+                                        <div className="flex items-center gap-3 mb-2 text-gray-950">
+                                            <Building2 className="h-6 w-6" />
+                                            <h2 className="text-2xl font-bold text-gray-950">Business Details</h2>
+                                        </div>
+                                        <p className="text-gray-500">
+                                            Provide comprehensive business information for compliance and verification
+                                        </p>
+                                    </motion.div>
                                 </div>
 
-                                {/* Sender Phone Number */}
-                                <div className="w-full">
-                                    <Label htmlFor="senderPhone">Sender's Phone Number <span className="text-red-500">*</span></Label>
-                                    <div className="flex gap-2">
-                                        <Select defaultValue={selectedCountry}>
-                                            <SelectTrigger className="w-28">
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {countries.map((country) => (
-                                                    <SelectItem key={country.code} value={country.code}>
-                                                        <span className="inline-flex items-center gap-2">
-                                                            <span>
-                                                                <img src={country.icon} alt={`${country.name} flag`} className="w-4 h-4" />
-                                                            </span>
-                                                            <span>{country.phoneCode}</span>
-                                                        </span>
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                        <Input id="senderPhone" type="tel" placeholder="Phone number" className="flex-1" />
+                                {/* Content Area */}
+                                <div className="flex-1 overflow-y-auto p-6">
+                                    <div className="max-w-4xl mx-auto space-y-6">
+                                        {/* Contact Information Card */}
+                                        <motion.div
+                                            initial={{ opacity: 0, x: -20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ duration: 0.5, delay: 0.1 }}
+                                        >
+                                            <Card className="overflow-hidden shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+                                                <div className="bg-gray-100 p-4">
+                                                    <div className="flex items-center gap-2 text-gray-950">
+                                                        <Mail className="h-5 w-5 text-gray-950" />
+                                                        <h3 className="font-semibold text-gray-950">Contact Information</h3>
+                                                    </div>
+                                                </div>
+                                                <CardContent className="p-6 space-y-4">
+                                                    <div className="grid md:grid-cols-2 gap-4">
+                                                        <div className="space-y-2">
+                                                            <Label htmlFor="senderEmail" className="text-sm font-medium flex items-center gap-2">
+                                                                <Mail className="h-4 w-4 text-emerald-600" />
+                                                                Email Address <span className="text-red-500">*</span>
+                                                            </Label>
+                                                            <Input
+                                                                id="senderEmail"
+                                                                type="email"
+                                                                placeholder="sender@company.com"
+                                                                className="border-2 focus:border-emerald-500 transition-colors"
+                                                            />
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <Label htmlFor="senderPhone" className="text-sm font-medium flex items-center gap-2">
+                                                                <Phone className="h-4 w-4 text-emerald-600" />
+                                                                Phone Number <span className="text-red-500">*</span>
+                                                            </Label>
+                                                            <div className="flex gap-2">
+                                                                <Select defaultValue={selectedCountry}>
+                                                                    <SelectTrigger className="w-32 border-2 focus:border-emerald-500">
+                                                                        <SelectValue />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                        {countries.map((country) => (
+                                                                            <SelectItem key={country.code} value={country.code}>
+                                                                                <span className="inline-flex items-center gap-2">
+                                                                                    <img src={country.icon} alt={`${country.name} flag`} className="w-4 h-4 rounded-sm" />
+                                                                                    <span>{country.phoneCode}</span>
+                                                                                </span>
+                                                                            </SelectItem>
+                                                                        ))}
+                                                                    </SelectContent>
+                                                                </Select>
+                                                                <Input
+                                                                    id="senderPhone"
+                                                                    type="tel"
+                                                                    placeholder="Phone number"
+                                                                    className="flex-1 border-2 focus:border-emerald-500 transition-colors"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+                                        </motion.div>
+
+                                        {/* Business Information Card */}
+                                        <motion.div
+                                            initial={{ opacity: 0, x: 20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ duration: 0.5, delay: 0.2 }}
+                                        >
+                                            <Card className="overflow-hidden shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+                                                <div className="bg-gray-100 p-4">
+                                                    <div className="flex items-center gap-2 text-gray-950">
+                                                        <Building2 className="h-5 w-5" />
+                                                        <h3 className="font-semibold">Business Information</h3>
+                                                    </div>
+                                                </div>
+                                                <CardContent className="p-6 space-y-4">
+                                                    <div className="grid md:grid-cols-2 gap-4">
+                                                        <div className="space-y-2">
+                                                            <Label htmlFor="companyName" className="text-sm font-medium flex items-center gap-2">
+                                                                <Building2 className="h-4 w-4 text-blue-600" />
+                                                                Company Name
+                                                            </Label>
+                                                            <Input
+                                                                id="companyName"
+                                                                type="text"
+                                                                placeholder="Company name"
+                                                                readOnly
+                                                                disabled
+                                                                className="bg-gray-50 border-2"
+                                                            />
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <Label htmlFor="countryOfInc" className="text-sm font-medium flex items-center gap-2">
+                                                                <MapPin className="h-4 w-4 text-blue-600" />
+                                                                Country of Incorporation <span className="text-red-500">*</span>
+                                                            </Label>
+                                                            <Input
+                                                                id="countryOfInc"
+                                                                type="text"
+                                                                value={countries.find(c => c.code === selectedCountry)?.name || ""}
+                                                                readOnly
+                                                                className="bg-gray-50 border-2"
+                                                            />
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <Label htmlFor="percentageOwnership" className="text-sm font-medium flex items-center gap-2">
+                                                                <FileText className="h-4 w-4 text-blue-600" />
+                                                                Ownership Percentage <span className="text-red-500">*</span>
+                                                            </Label>
+                                                            <Input
+                                                                id="percentageOwnership"
+                                                                type="number"
+                                                                placeholder="e.g., 25"
+                                                                min="0"
+                                                                max="100"
+                                                                className="border-2 focus:border-blue-500 transition-colors"
+                                                            />
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <Label htmlFor="dateOfInc" className="text-sm font-medium flex items-center gap-2">
+                                                                <Calendar className="h-4 w-4 text-blue-600" />
+                                                                Date of Incorporation
+                                                            </Label>
+                                                            <Input
+                                                                id="dateOfInc"
+                                                                type="date"
+                                                                className="border-2 focus:border-blue-500 transition-colors"
+                                                            />
+                                                        </div>
+                                                        <div className="space-y-2 md:col-span-2">
+                                                            <Label htmlFor="affiliatedBusiness" className="text-sm font-medium flex items-center gap-2">
+                                                                <Shield className="h-4 w-4 text-blue-600" />
+                                                                Affiliated Status
+                                                            </Label>
+                                                            <Select>
+                                                                <SelectTrigger className="border-2 focus:border-blue-500">
+                                                                    <SelectValue placeholder="Select affiliated status" />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    <SelectItem value="not_reported">Not Reported</SelectItem>
+                                                                    <SelectItem value="live">Live</SelectItem>
+                                                                </SelectContent>
+                                                            </Select>
+                                                        </div>
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+                                        </motion.div>
+
+                                        {/* Address Information Card */}
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ duration: 0.5, delay: 0.3 }}
+                                        >
+                                            <Card className="overflow-hidden shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+                                                <div className="bg-gray-100 p-4">
+                                                    <div className="flex items-center gap-2 text-gray-950">
+                                                        <MapPin className="h-5 w-5 text-gray-950" />
+                                                        <h3 className="font-semibold text-gray-950">Business Address</h3>
+                                                    </div>
+                                                </div>
+                                                <CardContent className="p-6 space-y-4">
+                                                    <div className="grid md:grid-cols-2 gap-4">
+                                                        <div className="space-y-2">
+                                                            <Label className="text-sm font-medium text-gray-900">Country</Label>
+                                                            <Input
+                                                                id="addressCountry"
+                                                                type="text"
+                                                                placeholder="Country"
+                                                                value={countries.find(c => c.code === selectedCountry)?.name || ""}
+                                                                readOnly
+                                                                className="bg-gray-50 border-2"
+                                                            />
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <Label className="text-sm font-medium text-gray-900">State/Province</Label>
+                                                            <Input
+                                                                id="addressState"
+                                                                type="text"
+                                                                placeholder="State or Province"
+                                                                className="border-2 focus:border-purple-500 transition-colors"
+                                                            />
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <Label className="text-sm font-medium text-gray-900">City</Label>
+                                                            <Input
+                                                                id="addressCity"
+                                                                type="text"
+                                                                placeholder="City"
+                                                                className="border-2 focus:border-purple-500 transition-colors"
+                                                            />
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <Label className="text-sm font-medium text-gray-900">Postal Code</Label>
+                                                            <Input
+                                                                id="addressPostal"
+                                                                type="text"
+                                                                placeholder="Postal Code"
+                                                                className="border-2 focus:border-purple-500 transition-colors"
+                                                            />
+                                                        </div>
+                                                        <div className="space-y-2 md:col-span-2">
+                                                            <Label className="text-sm font-medium text-gray-900">Street Address</Label>
+                                                            <Input
+                                                                id="addressStreet"
+                                                                type="text"
+                                                                placeholder="Complete street address"
+                                                                className="border-2 focus:border-purple-500 transition-colors"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+                                        </motion.div>
                                     </div>
                                 </div>
 
-                                {/* Country of Incorporation */}
-                                <div className="w-full">
-                                    <Label htmlFor="countryOfInc">Country of Incorporation <span className="text-red-500">*</span></Label>
-                                    <Input id="countryOfInc" type="text" value={countries.find(c => c.code === selectedCountry)?.name || ""} readOnly className="w-full bg-gray-100" />
-                                </div>
-
-                                {/* Percentage Ownership */}
-                                <div className="w-full">
-                                    <Label htmlFor="percentageOwnership">Percentage Ownership <span className="text-red-500">*</span></Label>
-                                    <Input id="percentageOwnership" type="text" placeholder="Enter percentage" className="w-full" />
-                                </div>
-
-                                {/* Affiliated Status */}
-                                <div className="w-full">
-                                    <Label htmlFor="affiliatedBusiness">Affiliated Status</Label>
-                                    <Select >
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue id="affiliatedBusiness" placeholder="Select affiliated status" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="not_reported">Not Reported</SelectItem>
-                                            <SelectItem value="live">Live</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-
-                                {/* Date of Incorporation */}
-                                <div className="w-full">
-                                    <Label htmlFor="dateOfInc">Date of Incorporation</Label>
-                                    <Input id="dateOfInc" type="date" className="w-full" />
-                                </div>
-
-                                {/** Name of the company */}
-                                <div className="w-full">
-                                    <Label htmlFor="companyName">Name of the Company</Label>
-                                    <Input id="companyName" type="text" placeholder="Enter company name" readOnly disabled className="w-full" />
-                                </div>
-
-                                {/* Full Name (first name, middle and last name)
-                                <div className="w-full">
-                                    <Label>Full Name</Label>
-                                    <div className="flex flex-col gap-2 w-full">
-                                        <Input id="firstName" type="text" placeholder="First Name" />
-                                        <div className="grid grid-cols-2 gap-2">
-                                            <Input id="middleName" type="text" placeholder="Middle Name" />
-                                            <Input id="lastName" type="text" placeholder="Last Name" />
+                                {/* Enhanced Footer */}
+                                <div className="border-t bg-white/90 backdrop-blur-sm p-6">
+                                    <div className="max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+                                        <div className="flex items-center text-sm text-gray-600">
+                                            <Shield className="h-4 w-4 mr-2 text-green-600" />
+                                            Secure encrypted data transmission
+                                        </div>
+                                        <div className="flex gap-3">
+                                            <Button
+                                                variant="outline"
+                                                onClick={() => setShowDetails(false)}
+                                                className="min-w-24"
+                                            >
+                                                Cancel
+                                            </Button>
+                                            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                                                <Button
+                                                    className=" text-white min-w-32"
+                                                    onClick={() => {
+                                                        setShowDetails(false);
+                                                        setShowSenderProfileSheet(true);
+                                                    }}
+                                                >
+                                                    Continue
+                                                    <ArrowUpRight className="ml-2 h-4 w-4" />
+                                                </Button>
+                                            </motion.div>
                                         </div>
                                     </div>
                                 </div>
-                                */}
-
-                                {/* Sender Address */}
-                                <div className="w-full">
-                                    <Label>Address of the company</Label>
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <Input id="addressCountry" type="text" placeholder="Country" value={countries.find(c => c.code === selectedCountry)?.name || ""} readOnly className="bg-gray-100" />
-                                        <Input id="addressState" type="text" placeholder="State" />
-                                        <Input id="addressCity" type="text" placeholder="City" />
-                                        <Input id="addressPostal" type="text" placeholder="Postal Code" />
-                                    </div>
-                                    <Input id="addressStreet" type="text" placeholder="Street Address" className="w-full mt-2" />
-                                </div>
                             </div>
-                            <SheetFooter className="mt-6 flex flex-row items-center justify-between w-full p-5 absolute bottom-0 left-0 right-0 border-t border-gray-200">
-                                <Button variant="outline" onClick={() => setShowDetails(false)}>Cancel</Button>
-                                <Button variant="default" className="bg-primary hover:bg-primary/90 text-white"
-                                    onClick={() => {
-                                        setShowDetails(false);
-                                        setShowSenderProfileSheet(true);
-                                    }}
-                                >Continue</Button>
-                            </SheetFooter>
                         </SheetContent>
                     </Sheet>
                 )}
@@ -779,164 +939,385 @@ export function SenderView() {
                 {/* Sender Details Sheet */}
                 {showSenderProfileSheet && (
                     <Sheet open={showSenderProfileSheet} onOpenChange={setShowSenderProfileSheet}>
-                        <SheetContent side="right" className="w-full sm:max-w-full p-0">
-                            <SheetHeader className="p-5">
-                                <SheetTitle className="text-xl font-bold">Sender Profile Details</SheetTitle>
-                                <SheetDescription className="mb-4 text-gray-600">
-                                    Please provide the sender's personal profile details for compliance and onboarding.
-                                </SheetDescription>
-                            </SheetHeader>
-                            <div className="space-y-4 p-5 sm:px-72 overflow-y-auto" style={{ maxHeight: "80vh" }}>
-                                {/* First Name */}
-                                <div className="w-full">
-                                    <Label htmlFor="firstName">First Name</Label>
-                                    <Input id="firstName" type="text" placeholder="Enter first name" required className="w-full" />
+                        <SheetContent side="right" className="w-full sm:max-w-full p-0 bg-gradient-to-br from-slate-50 to-slate-100">
+                            <div className="flex flex-col h-full">
+                                {/* Enhanced Header */}
+                                <div className=" p-6 text-gray-950">
+                                    <motion.div
+                                        initial={{ opacity: 0, y: -20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.5 }}
+                                    >
+                                        <div className="flex items-center gap-3 mb-2">
+                                            <User className="h-6 w-6" />
+                                            <h2 className="text-2xl font-bold">Sender Profile Details</h2>
+                                        </div>
+                                        <p className="text-gray-500">
+                                            Complete personal profile information for compliance verification
+                                        </p>
+                                    </motion.div>
                                 </div>
-                                {/* Middle Name */}
-                                <div className="w-full">
-                                    <Label htmlFor="middleName">Middle Name</Label>
-                                    <Input id="middleName" type="text" placeholder="Enter middle name" className="w-full" />
-                                </div>
-                                {/* Last Name */}
-                                <div className="w-full">
-                                    <Label htmlFor="lastName">Last Name</Label>
-                                    <Input id="lastName" type="text" placeholder="Enter last name" required className="w-full" />
-                                </div>
-                                {/* Birth Date */}
-                                <div className="w-full">
-                                    <Label htmlFor="birthDate">Date of Birth</Label>
-                                    <Input id="birthDate" type="date" className="w-full" />
-                                </div>
-                                {/* Position */}
-                                <div className="w-full">
-                                    <Label htmlFor="position">Position</Label>
-                                    <Input id="position" type="text" placeholder="Enter position" required className="w-full" />
-                                </div>
-                                {/* Birth Country */}
-                                <div className="w-full">
-                                    <Label htmlFor="birthCountry">Birth Country</Label>
-                                    <Select>
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue id="birthCountry" placeholder="Select birth country" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {countries.map((country) => (
-                                                <SelectItem key={country.code} value={country.code}>
-                                                    <span className="inline-flex items-center gap-2">
-                                                        <span>
-                                                            <img src={country.icon} alt={`${country.name} flag`} className="w-4 h-4" />
-                                                        </span>
-                                                        <span>{country.name}</span>
-                                                    </span>
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                {/* Is UBO */}
-                                <div className="w-full">
-                                    <Label htmlFor="isUBO">Is Beneficial Owner?</Label>
-                                    <Select>
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue id="isUBO" placeholder="Select option" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="true">Yes</SelectItem>
-                                            <SelectItem value="false">No</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                {/* Ownership Percentage */}
-                                <div className="w-full">
-                                    <Label htmlFor="ownershipPercentage">Ownership Percentage</Label>
-                                    <Input id="ownershipPercentage" type="number" placeholder="Enter ownership percentage" required className="w-full" />
-                                </div>
-                                {/* Roles */}
-                                <div className="w-full">
-                                    <Label htmlFor="roles">Role</Label>
-                                    <Select>
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue id="roles" placeholder="Select role" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="shareholder">Shareholder</SelectItem>
-                                            <SelectItem value="legal_representative">Legal Representative</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                {/* Address */}
-                                <div className="w-full">
-                                    <Label>Address</Label>
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <Select>
-                                            <SelectTrigger className="w-full">
-                                                <SelectValue placeholder="Country" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {countries.map((country) => (
-                                                    <SelectItem key={country.code} value={country.code}>
-                                                        <span className="inline-flex items-center gap-2">
-                                                            <span>
-                                                                <img src={country.icon} alt={`${country.name} flag`} className="w-4 h-4" />
-                                                            </span>
-                                                            <span>{country.name}</span>
-                                                        </span>
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                        <Input id="addressState" type="text" placeholder="State" />
-                                        <Input id="addressCity" type="text" placeholder="City" />
-                                        <Input id="addressPostal" type="text" placeholder="Postal Code" />
+
+                                {/* Content Area */}
+                                <div className="flex-1 overflow-y-auto p-6">
+                                    <div className="max-w-4xl mx-auto space-y-6">
+                                        {/* Personal Information Card */}
+                                        <motion.div
+                                            initial={{ opacity: 0, x: -20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ duration: 0.5, delay: 0.1 }}
+                                        >
+                                            <Card className="overflow-hidden shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+                                                <div className="bg-gray-100 p-4">
+                                                    <div className="flex items-center gap-2 text-gray-900">
+                                                        <User className="h-5 w-5" />
+                                                        <h3 className="font-semibold">Personal Information</h3>
+                                                    </div>
+                                                </div>
+                                                <CardContent className="p-6 space-y-4">
+                                                    <div className="grid md:grid-cols-3 gap-4">
+                                                        <div className="space-y-2">
+                                                            <Label htmlFor="firstName" className="text-sm font-medium">
+                                                                First Name *
+                                                            </Label>
+                                                            <Input
+                                                                id="firstName"
+                                                                type="text"
+                                                                placeholder="Enter first name"
+                                                                required
+                                                                className="border-2 focus:border-blue-500 transition-colors"
+                                                            />
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <Label htmlFor="middleName" className="text-sm font-medium">
+                                                                Middle Name
+                                                            </Label>
+                                                            <Input
+                                                                id="middleName"
+                                                                type="text"
+                                                                placeholder="Enter middle name"
+                                                                className="border-2 focus:border-blue-500 transition-colors"
+                                                            />
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <Label htmlFor="lastName" className="text-sm font-medium">
+                                                                Last Name *
+                                                            </Label>
+                                                            <Input
+                                                                id="lastName"
+                                                                type="text"
+                                                                placeholder="Enter last name"
+                                                                required
+                                                                className="border-2 focus:border-blue-500 transition-colors"
+                                                            />
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <Label htmlFor="birthDate" className="text-sm font-medium flex items-center gap-2">
+                                                                <Calendar className="h-4 w-4 text-blue-600" />
+                                                                Date of Birth
+                                                            </Label>
+                                                            <Input
+                                                                id="birthDate"
+                                                                type="date"
+                                                                className="border-2 focus:border-blue-500 transition-colors"
+                                                            />
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <Label htmlFor="position" className="text-sm font-medium flex items-center gap-2">
+                                                                <Building2 className="h-4 w-4 text-blue-600" />
+                                                                Position *
+                                                            </Label>
+                                                            <Input
+                                                                id="position"
+                                                                type="text"
+                                                                placeholder="e.g., CEO, Director"
+                                                                required
+                                                                className="border-2 focus:border-blue-500 transition-colors"
+                                                            />
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <Label htmlFor="birthCountry" className="text-sm font-medium flex items-center gap-2">
+                                                                <MapPin className="h-4 w-4 text-blue-600" />
+                                                                Birth Country
+                                                            </Label>
+                                                            <Select>
+                                                                <SelectTrigger className="border-2 focus:border-blue-500">
+                                                                    <SelectValue placeholder="Select birth country" />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    {countries.map((country) => (
+                                                                        <SelectItem key={country.code} value={country.code}>
+                                                                            <span className="inline-flex items-center gap-2">
+                                                                                <img src={country.icon} alt={`${country.name} flag`} className="w-4 h-4 rounded-sm" />
+                                                                                <span>{country.name}</span>
+                                                                            </span>
+                                                                        </SelectItem>
+                                                                    ))}
+                                                                </SelectContent>
+                                                            </Select>
+                                                        </div>
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+                                        </motion.div>
+
+                                        {/* Business Role & Ownership Card */}
+                                        <motion.div
+                                            initial={{ opacity: 0, x: 20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ duration: 0.5, delay: 0.2 }}
+                                        >
+                                            <Card className="overflow-hidden shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+                                                <div className="bg-gray-100 p-4">
+                                                    <div className="flex items-center gap-2 text-gray-900">
+                                                        <Shield className="h-5 w-5" />
+                                                        <h3 className="font-semibold">Business Role & Ownership</h3>
+                                                    </div>
+                                                </div>
+                                                <CardContent className="p-6 space-y-4">
+                                                    <div className="grid md:grid-cols-2 gap-4">
+                                                        <div className="space-y-2">
+                                                            <Label htmlFor="isUBO" className="text-sm font-medium flex items-center gap-2">
+                                                                <CheckCircle className="h-4 w-4 text-purple-600" />
+                                                                Is Beneficial Owner?
+                                                            </Label>
+                                                            <Select>
+                                                                <SelectTrigger className="border-2 focus:border-purple-500">
+                                                                    <SelectValue placeholder="Select option" />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    <SelectItem value="true">Yes</SelectItem>
+                                                                    <SelectItem value="false">No</SelectItem>
+                                                                </SelectContent>
+                                                            </Select>
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <Label htmlFor="ownershipPercentage" className="text-sm font-medium flex items-center gap-2">
+                                                                <FileText className="h-4 w-4 text-purple-600" />
+                                                                Ownership Percentage *
+                                                            </Label>
+                                                            <Input
+                                                                id="ownershipPercentage"
+                                                                type="number"
+                                                                placeholder="Enter percentage"
+                                                                min="0"
+                                                                max="100"
+                                                                required
+                                                                className="border-2 focus:border-purple-500 transition-colors"
+                                                            />
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <Label htmlFor="roles" className="text-sm font-medium flex items-center gap-2">
+                                                                <User className="h-4 w-4 text-purple-600" />
+                                                                Role
+                                                            </Label>
+                                                            <Select>
+                                                                <SelectTrigger className="border-2 focus:border-purple-500">
+                                                                    <SelectValue placeholder="Select role" />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    <SelectItem value="shareholder">Shareholder</SelectItem>
+                                                                    <SelectItem value="legal_representative">Legal Representative</SelectItem>
+                                                                </SelectContent>
+                                                            </Select>
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <Label htmlFor="votingRightsPercentage" className="text-sm font-medium flex items-center gap-2">
+                                                                <Shield className="h-4 w-4 text-purple-600" />
+                                                                Voting Rights %
+                                                            </Label>
+                                                            <Input
+                                                                id="votingRightsPercentage"
+                                                                type="number"
+                                                                placeholder="Enter voting rights %"
+                                                                min="0"
+                                                                max="100"
+                                                                className="border-2 focus:border-purple-500 transition-colors"
+                                                            />
+                                                        </div>
+                                                        <div className="space-y-2 md:col-span-2">
+                                                            <Label htmlFor="isBusinessContact" className="text-sm font-medium flex items-center gap-2">
+                                                                <Mail className="h-4 w-4 text-purple-600" />
+                                                                Is Business Contact?
+                                                            </Label>
+                                                            <Select>
+                                                                <SelectTrigger className="border-2 focus:border-purple-500">
+                                                                    <SelectValue placeholder="Select option" />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    <SelectItem value="true">Yes</SelectItem>
+                                                                    <SelectItem value="false">No</SelectItem>
+                                                                </SelectContent>
+                                                            </Select>
+                                                        </div>
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+                                        </motion.div>
+
+                                        {/* Contact & Address Card */}
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ duration: 0.5, delay: 0.3 }}
+                                        >
+                                            <Card className="overflow-hidden shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+                                                <div className="bg-gray-100 p-4">
+                                                    <div className="flex items-center gap-2 text-gray-900">
+                                                        <MapPin className="h-5 w-5" />
+                                                        <h3 className="font-semibold">Contact & Address Information</h3>
+                                                    </div>
+                                                </div>
+                                                <CardContent className="p-6 space-y-4">
+                                                    <div className="space-y-2">
+                                                        <Label htmlFor="email" className="text-sm font-medium flex items-center gap-2">
+                                                            <Mail className="h-4 w-4 text-orange-600" />
+                                                            Email Address
+                                                        </Label>
+                                                        <Input
+                                                            id="email"
+                                                            type="email"
+                                                            placeholder="personal@email.com"
+                                                            className="border-2 focus:border-orange-500 transition-colors"
+                                                        />
+                                                    </div>
+                                                    <div className="grid md:grid-cols-2 gap-4">
+                                                        <div className="space-y-2">
+                                                            <Label className="text-sm font-medium text-orange-700">Country</Label>
+                                                            <Select>
+                                                                <SelectTrigger className="border-2 focus:border-orange-500">
+                                                                    <SelectValue placeholder="Select country" />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    {countries.map((country) => (
+                                                                        <SelectItem key={country.code} value={country.code}>
+                                                                            <span className="inline-flex items-center gap-2">
+                                                                                <img src={country.icon} alt={`${country.name} flag`} className="w-4 h-4 rounded-sm" />
+                                                                                <span>{country.name}</span>
+                                                                            </span>
+                                                                        </SelectItem>
+                                                                    ))}
+                                                                </SelectContent>
+                                                            </Select>
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <Label className="text-sm font-medium text-orange-700">State/Province</Label>
+                                                            <Input
+                                                                id="addressState"
+                                                                type="text"
+                                                                placeholder="State or Province"
+                                                                className="border-2 focus:border-orange-500 transition-colors"
+                                                            />
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <Label className="text-sm font-medium text-orange-700">City</Label>
+                                                            <Input
+                                                                id="addressCity"
+                                                                type="text"
+                                                                placeholder="City"
+                                                                className="border-2 focus:border-orange-500 transition-colors"
+                                                            />
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <Label className="text-sm font-medium text-orange-700">Postal Code</Label>
+                                                            <Input
+                                                                id="addressPostal"
+                                                                type="text"
+                                                                placeholder="Postal Code"
+                                                                className="border-2 focus:border-orange-500 transition-colors"
+                                                            />
+                                                        </div>
+                                                        <div className="space-y-2 md:col-span-2">
+                                                            <Label className="text-sm font-medium text-orange-700">Street Address</Label>
+                                                            <Input
+                                                                id="addressStreet"
+                                                                type="text"
+                                                                placeholder="Complete street address"
+                                                                className="border-2 focus:border-orange-500 transition-colors"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+                                        </motion.div>
+
+                                        {/* Tax & Identity Card */}
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ duration: 0.5, delay: 0.4 }}
+                                        >
+                                            <Card className="overflow-hidden shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+                                                <div className="bg-gray-100 p-4">
+                                                    <div className="flex items-center gap-2 text-gray-900">
+                                                        <FileText className="h-5 w-5" />
+                                                        <h3 className="font-semibold">Tax & Identity Information</h3>
+                                                    </div>
+                                                </div>
+                                                <CardContent className="p-6 space-y-4">
+                                                    <div className="grid md:grid-cols-2 gap-4">
+                                                        <div className="space-y-2">
+                                                            <Label htmlFor="taxId" className="text-sm font-medium flex items-center gap-2">
+                                                                <FileText className="h-4 w-4 text-green-600" />
+                                                                Tax Identification Number
+                                                            </Label>
+                                                            <Input
+                                                                id="taxId"
+                                                                type="text"
+                                                                placeholder="Enter tax ID"
+                                                                className="border-2 focus:border-green-500 transition-colors"
+                                                            />
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <Label htmlFor="ssn" className="text-sm font-medium flex items-center gap-2">
+                                                                <Shield className="h-4 w-4 text-green-600" />
+                                                                Social Security Number
+                                                            </Label>
+                                                            <Input
+                                                                id="ssn"
+                                                                type="text"
+                                                                placeholder="XXX-XX-XXXX"
+                                                                className="border-2 focus:border-green-500 transition-colors"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+                                        </motion.div>
                                     </div>
-                                    <Input id="addressStreet" type="text" placeholder="Street Address" className="w-full mt-2" />
                                 </div>
-                                {/* Email (required if business contact) */}
-                                <div className="w-full">
-                                    <Label htmlFor="email">Email</Label>
-                                    <Input id="email" type="email" placeholder="Enter email" className="w-full" />
-                                </div>
-                                {/* Is Business Contact */}
-                                <div className="w-full">
-                                    <Label htmlFor="isBusinessContact">Is Business Contact?</Label>
-                                    <Select>
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue id="isBusinessContact" placeholder="Select option" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="true">Yes</SelectItem>
-                                            <SelectItem value="false">No</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                {/* Voting Rights Percentage */}
-                                <div className="w-full">
-                                    <Label htmlFor="votingRightsPercentage">Voting Rights Percentage</Label>
-                                    <Input id="votingRightsPercentage" type="number" placeholder="Enter voting rights percentage" className="w-full" />
-                                </div>
-                                {/* Tax ID */}
-                                <div className="w-full">
-                                    <Label htmlFor="taxId">Tax Identification Number</Label>
-                                    <Input id="taxId" type="text" placeholder="Enter tax ID" className="w-full" />
-                                </div>
-                                {/* SSN */}
-                                <div className="w-full">
-                                    <Label htmlFor="ssn">Social Security Number</Label>
-                                    <Input id="ssn" type="text" placeholder="XXX-XX-XXXX" className="w-full" />
+
+                                {/* Enhanced Footer */}
+                                <div className="border-t bg-white/90 backdrop-blur-sm p-6">
+                                    <div className="max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+                                        <div className="flex items-center text-sm text-gray-600">
+                                            <Shield className="h-4 w-4 mr-2 text-green-600" />
+                                            All information is encrypted and secure
+                                        </div>
+                                        <div className="flex gap-3">
+                                            <Button
+                                                variant="outline"
+                                                onClick={() => setShowSenderProfileSheet(false)}
+                                                className="min-w-24"
+                                            >
+                                                Cancel
+                                            </Button>
+                                            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                                                <Button
+                                                    className=" text-white min-w-40"
+                                                    onClick={(): void => {
+                                                        setShowSenderProfileSheet(false);
+                                                        setKycSheet(true);
+                                                    }}
+                                                >
+                                                    Save Profile
+                                                    <CheckCircle className="ml-2 h-4 w-4" />
+                                                </Button>
+                                            </motion.div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <SheetFooter className="mt-6 flex flex-row items-center justify-between w-full p-5 absolute bottom-0 left-0 right-0 border-t border-gray-200">
-                                <Button variant="outline" onClick={() => setShowSenderProfileSheet(false)}>Cancel</Button>
-                                <Button
-                                    variant="default"
-                                    className="bg-primary hover:bg-primary/90 text-white"
-                                    onClick={(): void => {
-                                        setShowSenderProfileSheet(false);
-                                        setKycSheet(true);
-                                    }}>
-                                    Save Sender Profile
-                                </Button>
-                            </SheetFooter>
                         </SheetContent>
                     </Sheet>
                 )}

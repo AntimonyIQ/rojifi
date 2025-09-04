@@ -160,145 +160,195 @@ export function SwapView() {
     const canConfirmSwap = !loading && !isInsufficientBalance && amount > 0;
 
     return (
-        <div className="space-y-6">
-            {/* Overview Header */}
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-2xl font-semibold text-gray-900">Swap</h1>
-                    <p className="text-sm text-gray-500 mt-1">
-                        Convert your assets seamlessly with our swap feature
-                    </p>
-                </div>
-                <div className="flex items-center gap-4">
-                    <button
-                        onClick={() => setHideBalances(!hideBalances)}
-                        className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700"
-                    >
-                        <EyeOff className="h-4 w-4" />
-                        Hide Balances
-                    </button>
-                </div>
-            </div>
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30 p-6">
+            <div className="max-w-4xl mx-auto space-y-8">
+                {/* Premium Header */}
+                <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-center space-y-4"
+                >
+                    <div className="inline-flex items-center gap-3 px-6 py-3 bg-white/80 backdrop-blur-sm rounded-full shadow-lg border border-white/20">
+                        <div className="flex items-center gap-2">
+                            <motion.div
+                                animate={{ rotate: [0, 180, 360] }}
+                                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                                className="p-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full"
+                            >
+                                <ArrowLeftRight className="h-5 w-5 text-white" />
+                            </motion.div>
+                            <div className="text-left">
+                                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                                    Currency Swap
+                                </h1>
+                                <p className="text-sm text-gray-600">Exchange currencies instantly at live rates</p>
+                            </div>
+                        </div>
+                        <button
+                            onClick={() => setHideBalances(!hideBalances)}
+                            className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800 bg-gray-100/70 hover:bg-gray-200/70 rounded-full transition-all"
+                        >
+                            <EyeOff className="h-4 w-4" />
+                            {hideBalances ? "Show" : "Hide"}
+                        </button>
+                    </div>
+                </motion.div>
 
-            {/* Swap Section */}
-            <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                    {!loading && (
-                        <h2 className="text-xl font-medium text-gray-900 flex flex-row items-center gap-2 justify-start">
-                            {fromCurrency} <ArrowLeftRight size={18} /> {toCurrency}
-                        </h2>
-                    )}
-                </div>
-
-                <div className="w-full flex flex-col md:flex-row items-start justify-center pt-5 gap-5">
-                    <Card className="w-full max-w-2xl">
-                        <CardContent className="p-6 border rounded-xl space-y-6">
+                {/* Main Swap Interface */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="flex justify-center"
+                >
+                    <Card className="w-full max-w-lg shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
+                        <CardContent className="p-0">
                             {loading ? (
-                                <div className="m-40"><Loading /></div>
+                                <div className="flex items-center justify-center py-20">
+                                    <Loading />
+                                </div>
                             ) : (
                                 <>
-                                    {/** Swap Title & Rate */}
-                                    <div className="flex flex-col items-center justify-center mb-4 gap-2">
-                                        <h2 className="text-xl font-medium text-gray-900">Swap Currencies</h2>
-                                        <p className="text-sm text-gray-500 border rounded-full px-4 py-2 flex flex-row items-center justify-center gap-2">
+                                    {/* Header with Rate */}
+                                    <div className="px-8 py-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+                                        <div className="text-center space-y-3">
+                                            <h2 className="text-xl font-semibold">Exchange Rate</h2>
                                             <motion.div
-                                                animate={{
-                                                    opacity: [1, 0.3, 1], // fade in & out
-                                                }}
-                                                transition={{
-                                                    duration: 1,
-                                                    repeat: Infinity,
-                                                    ease: "easeInOut",
-                                                }}
-                                                className="inline-block mr-1"
+                                                initial={{ scale: 0.9 }}
+                                                animate={{ scale: 1 }}
+                                                className="inline-flex items-center gap-3 px-4 py-2 bg-white/20 rounded-full backdrop-blur-sm"
                                             >
-                                                <CircleDot
-                                                    className={isLive ? "text-green-500" : "text-red-500"}
-                                                    size={12}
-                                                />
+                                                <motion.div
+                                                    animate={{
+                                                        scale: [1, 1.1, 1],
+                                                        opacity: [1, 0.7, 1],
+                                                    }}
+                                                    transition={{
+                                                        duration: 2,
+                                                        repeat: Infinity,
+                                                        ease: "easeInOut",
+                                                    }}
+                                                >
+                                                    <CircleDot
+                                                        className={isLive ? "text-green-300" : "text-red-300"}
+                                                        size={14}
+                                                    />
+                                                </motion.div>
+                                                <span className="text-sm font-medium">
+                                                    1 {toCurrency} ≈ {getRateReversed()} {fromCurrency}
+                                                </span>
+                                                <div className={`px-2 py-0.5 rounded-full text-xs font-medium ${isLive
+                                                    ? 'bg-green-500/30 text-green-100'
+                                                    : 'bg-red-500/30 text-red-100'
+                                                    }`}>
+                                                    {isLive ? 'LIVE' : 'OFFLINE'}
+                                                </div>
                                             </motion.div>
-                                            {/* Rate: 1 {fromCurrency} ≈ {getRate()} {toCurrency} */}
-                                            Rate: 1 {toCurrency} ≈ {getRateReversed()} {fromCurrency}
-                                        </p>
+                                        </div>
                                     </div>
 
-                                    {/* From Currency */}
-                                    <div className="space-y-2">
-                                        <div className="w-full flex flex-row items-center justify-between gap-2">
-                                            <label className="text-sm font-medium text-gray-700">From</label>
-                                            <div className="flex flex-row items-center justify-center gap-2">
-                                                <p className="text-sm text-gray-500 mt-1">
-                                                    Balance: {hideBalances
-                                                        ? "•••••"
-                                                        : (() => {
-                                                            const currency = currencies.find((c) => c.currency === fromCurrency);
-                                                            if (!currency) return "N/A";
-                                                            return `${currency.symbol}${currency.balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-                                                        })()
-                                                    }
-                                                </p>
-                                                <div
-                                                    className="text-xs text-blue-500 border border-blue-500 rounded-full cursor-pointer px-2"
-                                                    onClick={() => setAmount(currencies.find((c) => c.currency === fromCurrency)?.balance ?? 0)}>
-                                                    max
+                                    {/* Swap Form */}
+                                    <div className="px-8 py-8 space-y-8">
+                                        {/* From Currency */}
+                                        <motion.div
+                                            initial={{ opacity: 0, x: -20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            className="space-y-3"
+                                        >
+                                            <div className="flex items-center justify-between">
+                                                <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                                    From
+                                                </label>
+                                                <div className="flex items-center gap-3">
+                                                    <p className="text-sm text-gray-600">
+                                                        Balance: {hideBalances
+                                                            ? "•••••"
+                                                            : (() => {
+                                                                const currency = currencies.find((c) => c.currency === fromCurrency);
+                                                                if (!currency) return "N/A";
+                                                                return `${currency.symbol}${currency.balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                                                            })()
+                                                        }
+                                                    </p>
+                                                    <motion.button
+                                                        whileHover={{ scale: 1.05 }}
+                                                        whileTap={{ scale: 0.95 }}
+                                                        className="px-3 py-1 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-full transition-all"
+                                                        onClick={() => setAmount(currencies.find((c) => c.currency === fromCurrency)?.balance ?? 0)}
+                                                    >
+                                                        MAX
+                                                    </motion.button>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <Select
-                                                value={fromCurrency}
-                                                onValueChange={handleFromChange}
+                                            <div className="relative">
+                                                <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-gray-50 to-gray-100/50 rounded-2xl border border-gray-200 focus-within:border-blue-300 focus-within:ring-4 focus-within:ring-blue-50 transition-all">
+                                                    <Select value={fromCurrency} onValueChange={handleFromChange}>
+                                                        <SelectTrigger className="w-32 border-0 bg-white shadow-sm">
+                                                            <SelectValue />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {currencies.map((c) => (
+                                                                <SelectItem key={c.currency} value={c.currency}>
+                                                                    <div className="flex items-center gap-2">
+                                                                        <img src={c.icon} alt="" className="w-5 h-5 rounded-full" />
+                                                                        <span className="font-medium">{c.currency}</span>
+                                                                    </div>
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <Input
+                                                        type="text"
+                                                        placeholder="0.00"
+                                                        value={amount ? amount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 }) : ""}
+                                                        onChange={(e) => {
+                                                            const val = e.target.value.replace(/,/g, "");
+                                                            if (/^\d*\.?\d{0,2}$/.test(val)) {
+                                                                setAmount(val === "" ? 0 : Number(val));
+                                                            }
+                                                        }}
+                                                        className="border-0 bg-transparent text-xl font-semibold text-gray-900 placeholder:text-gray-400 focus:ring-0 focus:outline-none"
+                                                        inputMode="decimal"
+                                                    />
+                                                </div>
+                                                {isInsufficientBalance && (
+                                                    <motion.p
+                                                        initial={{ opacity: 0, y: -10 }}
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                        className="text-xs text-red-500 mt-2 flex items-center gap-1"
+                                                    >
+                                                        <span className="w-1 h-1 bg-red-500 rounded-full"></span>
+                                                        Insufficient balance
+                                                    </motion.p>
+                                                )}
+                                            </div>
+                                        </motion.div>
+
+                                        {/* Swap Button */}
+                                        <div className="flex justify-center">
+                                            <motion.button
+                                                whileHover={{ scale: 1.1, rotate: 180 }}
+                                                whileTap={{ scale: 0.9 }}
+                                                onClick={handleSwap}
+                                                className="p-4 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
                                             >
-                                                <SelectTrigger className="w-28">
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {currencies.map((c) => (
-                                                        <SelectItem key={c.currency} value={c.currency} >
-                                                            <div className="!flex !flex-row !items-center gap-1">
-                                                                <img src={c.icon} alt="" width={18} height={18} />
-                                                                {c.currency}
-                                                            </div>
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                            <Input
-                                                type="text"
-                                                placeholder="0.00"
-                                                value={amount ? amount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 }) : ""}
-                                                onChange={(e) => {
-                                                    // Only allow numbers and up to one decimal point
-                                                    const val = e.target.value.replace(/,/g, "");
-                                                    if (/^\d*\.?\d{0,2}$/.test(val)) {
-                                                        setAmount(val === "" ? 0 : Number(val));
-                                                    }
-                                                }}
-                                                className="flex-1"
-                                                inputMode="decimal"
-                                                pattern="^\d*\.?\d{0,2}$"
-                                            />
+                                                <ArrowLeftRight className="h-6 w-6" />
+                                            </motion.button>
                                         </div>
-                                    </div>
 
-                                    {/* Swap Button */}
-                                    <div className="flex justify-center">
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={handleSwap}
-                                            className="rounded-full border shadow-sm"
+                                        {/* To Currency */}
+                                        <motion.div
+                                            initial={{ opacity: 0, x: 20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            className="space-y-3"
                                         >
-                                            <ArrowLeftRight className="h-5 w-5" />
-                                        </Button>
-                                    </div>
-
-                                    {/* To Currency */}
-                                    <div className="space-y-2">
-                                        <div className="w-full flex flex-row items-center justify-between gap-2">
-                                            <label className="text-sm font-medium text-gray-700">To</label>
-                                            <div className="flex flex-row items-center justify-center gap-2">
-                                                <p className="text-sm text-gray-500 mt-1">
+                                            <div className="flex items-center justify-between">
+                                                <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                                    <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
+                                                    To
+                                                </label>
+                                                <p className="text-sm text-gray-600">
                                                     Balance: {hideBalances
                                                         ? "•••••"
                                                         : (() => {
@@ -309,102 +359,152 @@ export function SwapView() {
                                                     }
                                                 </p>
                                             </div>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <Select
-                                                value={toCurrency}
-                                                onValueChange={handleToChange}
-                                            >
-                                                <SelectTrigger className="w-28">
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {currencies
-                                                        .filter((c) => c.currency !== Fiat.NGN)
-                                                        .map((c) => (
-                                                            <SelectItem key={c.currency} value={c.currency}>
-                                                                <div className="!flex !flex-row !items-center gap-1">
-                                                                    <img src={c.icon} alt="" width={18} height={18} />
-                                                                    {c.currency}
-                                                                </div>
-                                                            </SelectItem>
-                                                        ))}
-                                                </SelectContent>
-                                            </Select>
-                                            <Input
-                                                type="text"
-                                                disabled
-                                                value={
-                                                    (() => {
-                                                        const converted = getConverted();
-                                                        // Extract symbol and number
-                                                        const match = converted.match(/^(\D*)([\d,.]+)/);
-                                                        if (!match) return converted;
-                                                        const symbol = match[1];
-                                                        const num = match[2].replace(/,/g, "");
-                                                        const formatted = Number(num).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                                                        return `${symbol}${formatted}`;
-                                                    })()
-                                                }
-                                                placeholder="0.00"
-                                                className="flex-1 bg-gray-50"
-                                                inputMode="decimal"
-                                                pattern="^\d*\.?\d{0,2}$"
-                                            />
-                                        </div>
-                                    </div>
+                                            <div className="relative">
+                                                <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-indigo-50 to-purple-50/50 rounded-2xl border border-indigo-200">
+                                                    <Select value={toCurrency} onValueChange={handleToChange}>
+                                                        <SelectTrigger className="w-32 border-0 bg-white shadow-sm">
+                                                            <SelectValue />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {currencies
+                                                                .filter((c) => c.currency !== Fiat.NGN)
+                                                                .map((c) => (
+                                                                    <SelectItem key={c.currency} value={c.currency}>
+                                                                        <div className="flex items-center gap-2">
+                                                                            <img src={c.icon} alt="" className="w-5 h-5 rounded-full" />
+                                                                            <span className="font-medium">{c.currency}</span>
+                                                                        </div>
+                                                                    </SelectItem>
+                                                                ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <Input
+                                                        type="text"
+                                                        disabled
+                                                        value={
+                                                            (() => {
+                                                                const converted = getConverted();
+                                                                const match = converted.match(/^(\D*)([\d,.]+)/);
+                                                                if (!match) return converted;
+                                                                const symbol = match[1];
+                                                                const num = match[2].replace(/,/g, "");
+                                                                const formatted = Number(num).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                                                                return `${symbol}${formatted}`;
+                                                            })()
+                                                        }
+                                                        placeholder="0.00"
+                                                        className="border-0 bg-transparent text-xl font-semibold text-gray-900 placeholder:text-gray-400 focus:ring-0 focus:outline-none"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </motion.div>
 
-                                    {/* Confirm Button */}
-                                    <div className="w-full flex flex-row items-center justify-start gap-2 pt-5">
-                                        <Link href={`/dashboard/${wallet}`} className="flex flex-col items-center text-center justify-center py-2 hover:bg-slate-50 gap-2 w-full capitalize border rounded-lg">
-                                            Cancel
-                                        </Link>
-                                        <Button
-                                            className="w-full bg-primary hover:bg-primary/90 text-white"
-                                            disabled={!canConfirmSwap}
-                                            title={loading ? "Loading rates..." : isInsufficientBalance ? "Insufficient balance" : amount <= 0 ? "Enter amount" : "Confirm Swap"}
-                                            onClick={() => {
-                                                if (!canConfirmSwap) return;
-                                                performSwap();
-                                                setSuccessfulSwap(true);
-                                            }}
-                                        >
-                                            Confirm Swap
-                                        </Button>
+                                        {/* Action Buttons */}
+                                        <div className="flex gap-4 pt-4">
+                                            <Link
+                                                href={`/dashboard/${wallet}`}
+                                                className="flex-1"
+                                            >
+                                                <motion.button
+                                                    whileHover={{ scale: 1.02 }}
+                                                    whileTap={{ scale: 0.98 }}
+                                                    className="w-full py-4 px-6 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-2xl font-medium transition-all"
+                                                >
+                                                    Cancel
+                                                </motion.button>
+                                            </Link>
+                                            <motion.button
+                                                whileHover={{ scale: 1.02 }}
+                                                whileTap={{ scale: 0.98 }}
+                                                disabled={!canConfirmSwap}
+                                                onClick={() => {
+                                                    if (!canConfirmSwap) return;
+                                                    performSwap();
+                                                    setSuccessfulSwap(true);
+                                                }}
+                                                className="flex-1 py-4 px-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:from-gray-300 disabled:to-gray-400 text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl disabled:shadow-none transition-all duration-300"
+                                            >
+                                                {loading ? "Loading..." : isInsufficientBalance ? "Insufficient Balance" : amount <= 0 ? "Enter Amount" : "Confirm Swap"}
+                                            </motion.button>
+                                        </div>
                                     </div>
                                 </>
                             )}
                         </CardContent>
                     </Card>
+                </motion.div>
 
+                {/* Additional Info Cards */}
+                <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.4 }}
+                    >
+                        <Card className="p-6 bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="p-2 bg-green-100 rounded-lg">
+                                    <CheckCircle className="h-5 w-5 text-green-600" />
+                                </div>
+                                <h3 className="font-semibold text-gray-900">Instant Exchange</h3>
+                            </div>
+                            <p className="text-sm text-gray-600">
+                                Your currencies are exchanged instantly at the current market rate with no hidden fees.
+                            </p>
+                        </Card>
+                    </motion.div>
+
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.5 }}
+                    >
+                        <Card className="p-6 bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="p-2 bg-blue-100 rounded-lg">
+                                    <CircleDot className="h-5 w-5 text-blue-600" />
+                                </div>
+                                <h3 className="font-semibold text-gray-900">Live Rates</h3>
+                            </div>
+                            <p className="text-sm text-gray-600">
+                                Real-time exchange rates updated every 30 seconds to ensure you get the best value.
+                            </p>
+                        </Card>
+                    </motion.div>
                 </div>
             </div>
 
+            {/* Enhanced Dialogs */}
             <Dialog open={showDialog} onOpenChange={setShowDialog}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Activate Currency</DialogTitle>
-                        <DialogDescription>
-                            <div className="flex flex-row items-center gap-1 mb-4">
-                                <img src={pendingCurrency?.icon} alt="" width={20} height={20} />
-                                {pendingCurrency?.currency} is not yet activated. Would you like to activate it now?
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader className="text-center space-y-4">
+                        <div className="mx-auto w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                            <ArrowUpRight className="h-6 w-6 text-blue-600" />
+                        </div>
+                        <DialogTitle className="text-xl font-semibold">Activate Currency</DialogTitle>
+                        <DialogDescription className="text-gray-600">
+                            <div className="flex items-center justify-center gap-2 mb-3">
+                                <img src={pendingCurrency?.icon} alt="" className="w-6 h-6 rounded-full" />
+                                <span className="font-medium">{pendingCurrency?.currency}</span>
                             </div>
+                            This currency is not yet activated in your account. Would you like to activate it now?
                         </DialogDescription>
                     </DialogHeader>
-                    <DialogFooter className="flex gap-2">
+                    <DialogFooter className="flex gap-3 sm:flex-row">
                         <Button
                             variant="outline"
                             onClick={() => {
                                 setShowDialog(false);
                                 setPendingCurrency(null);
                             }}
+                            className="flex-1"
                         >
                             Cancel
                         </Button>
-                        <Button className="text-white">
-                            <Link href={`/dashboard/${pendingCurrency?.currency}`} className="flex items-center gap-2">
+                        <Button className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white">
+                            <Link href={`/dashboard/${pendingCurrency?.currency}`} className="flex items-center justify-center gap-2 w-full">
                                 <ArrowUpRight size={16} />
-                                Activate
+                                Activate Now
                             </Link>
                         </Button>
                     </DialogFooter>
@@ -412,43 +512,41 @@ export function SwapView() {
             </Dialog>
 
             <Dialog open={successfulSwap} onOpenChange={setSuccessfulSwap}>
-                <DialogContent>
-                    <DialogHeader className="w-full flex flex-col items-center justify-center text-center gap-1">
-                        <DialogTitle className="flex flex-col items-center justify-center gap-6 mt-5">
-                            <motion.div
-                                initial={{ scale: 0.8, opacity: 0 }}
-                                animate={{ scale: 1.1, opacity: 1 }}
-                                transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                            >
-                                <CheckCircle size={54} className="text-green-500" />
-                            </motion.div>
-                            <motion.span
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.2, duration: 0.4 }}
-                                className="font-semibold text-lg"
-                            >
-                                Swap Successfully
-                            </motion.span>
-                            {/** <ConfettiExplosion zIndex={300} force={0.6} duration={5500} particleCount={80} width={500} /> */}
-                        </DialogTitle>
-                        <DialogDescription>
-                            Your swap has been completed successfully.
-                        </DialogDescription>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader className="text-center space-y-6">
+                        <motion.div
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                            className="mx-auto"
+                        >
+                            <div className="w-16 h-16 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center shadow-lg">
+                                <CheckCircle size={32} className="text-white" />
+                            </div>
+                        </motion.div>
+                        <div className="space-y-2">
+                            <DialogTitle className="text-2xl font-bold text-gray-900">
+                                Swap Successful!
+                            </DialogTitle>
+                            <DialogDescription className="text-gray-600">
+                                Your currency exchange has been completed successfully. The funds are now available in your account.
+                            </DialogDescription>
+                        </div>
                     </DialogHeader>
-                    <DialogFooter className="flex gap-2">
+                    <DialogFooter className="flex gap-3 sm:flex-row pt-4">
                         <Button
                             variant="outline"
                             onClick={() => {
                                 setSuccessfulSwap(false);
                                 setPendingCurrency(null);
                             }}
+                            className="flex-1"
                         >
                             Close
                         </Button>
-                        <Button className="text-white">
-                            <Link href={`/dashboard/${wallet}`} className="flex items-center gap-2">
-                                Dashboard
+                        <Button className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white">
+                            <Link href={`/dashboard/${wallet}`} className="flex items-center justify-center gap-2 w-full">
+                                View Dashboard
                             </Link>
                         </Button>
                     </DialogFooter>

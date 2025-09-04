@@ -4,7 +4,6 @@ import { motion } from "framer-motion"
 import { Button } from "@/v1/components/ui/button"
 import { ArrowRight, Wallet, RefreshCw, Globe } from "lucide-react"
 import { Link } from "wouter"
-import businessMan from "../../public/business-man.png"
 
 export function MultiCurrencyFeatures() {
     return (

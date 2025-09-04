@@ -2,10 +2,9 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/v1/components/ui/card";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, TrendingUp, Shield, Clock, Copy, ArrowDown, Building, Network, Wallet2, Info, AlertTriangle } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/v1/components/ui/select";
 import { Button } from "@/v1/components/ui/button";
-import { Copy } from "lucide-react";
 // import QRCode from "react-qr-code";
 import { QRCode } from 'react-qrcode-logo';
 import { toast } from "sonner";
@@ -29,6 +28,7 @@ export function DepositView() {
     const [selectedCurrency, setSelectedCurrency] = useState<IWallet | null>(null);
     const [usdToken, setUsdToken] = useState("USDT");
     const [network, setNetwork] = useState("BNB");
+    const [_selectedDepositOption, setSelectedDepositOption] = useState<any>(null);
 
     const [successfulDeposit, setSuccessfulDeposit] = useState(false);
     const [depositAmount, setDepositAmount] = useState("1,000.00");
@@ -52,8 +52,82 @@ export function DepositView() {
             const first = sel.deposit[0] as any;
             const defaultVal = first.institution ?? first.currency ?? first.network ?? usdToken;
             setUsdToken(defaultVal);
+            setSelectedDepositOption(first);
         }
     }, [wallet]);
+
+    // Get unique cryptocurrencies (no duplicates)
+    const getUniqueCryptocurrencies = () => {
+        if (!selectedCurrency?.deposit) return [];
+
+        const uniqueCryptos = selectedCurrency.deposit.reduce((acc: any[], token: any) => {
+            const existing = acc.find(item => item.currency === token.currency);
+            if (!existing) {
+                acc.push(token);
+            }
+            return acc;
+        }, []);
+
+        return uniqueCryptos;
+    };
+
+    // Get networks for selected cryptocurrency
+    const getNetworksForCrypto = (cryptoCurrency: string) => {
+        if (!selectedCurrency?.deposit) return [];
+
+        return selectedCurrency.deposit.filter(token => token.currency === cryptoCurrency);
+    };
+
+    // Handle cryptocurrency selection
+    const handleCryptoChange = (cryptoValue: string) => {
+        setUsdToken(cryptoValue);
+        const networks = getNetworksForCrypto(cryptoValue);
+        if (networks.length > 0) {
+            setNetwork(networks[0].network);
+            setSelectedDepositOption(networks[0]);
+        }
+    };
+
+    // Handle network selection
+    const handleNetworkChange = (networkValue: string) => {
+        setNetwork(networkValue);
+        const depositOption = selectedCurrency?.deposit.find(
+            token => token.currency === usdToken && token.network === networkValue
+        );
+        if (depositOption) {
+            setSelectedDepositOption(depositOption);
+        }
+    };
+
+    const handleCopy = (text: string) => {
+        navigator.clipboard.writeText(text);
+        toast.success("Copied to clipboard!");
+    };
+
+    // Get the deposit address or account details
+    const getDepositDetails = () => {
+        if (selectedCurrency?.currency === Fiat.NGN) {
+            const bankOption = selectedCurrency.deposit.find(d => d.institution === usdToken);
+            return {
+                label: "Account Number",
+                value: bankOption?.accountNumber || "0123456789",
+                accountName: "John Doe",
+                institution: bankOption?.institution || "First Bank",
+                icon: bankOption?.icon
+            };
+        } else {
+            const cryptoOption = selectedCurrency?.deposit.find(
+                d => d.currency === usdToken && d.network === network
+            );
+            return {
+                label: `${network} Address`,
+                value: cryptoOption?.address || "0x1234abcd5678ef901234abcd5678ef90abcdef12",
+                network: network,
+                currency: usdToken,
+                icon: cryptoOption?.icon
+            };
+        }
+    };
 
     const simulateDeposit = () => {
         // generate a mock deposit amount between 50,000 and 10,000,000
@@ -91,330 +165,385 @@ export function DepositView() {
         };
     }, []);
 
-    // human-friendly network labels used in the UI disclaimer
-    const networkLabelMap: Record<string, string> = {
-        BNB: 'Binance Smart Chain (BEP20)',
-        TRX: 'Tron (TRC20)',
-        ETH: 'Ethereum (ERC20)',
-        Matic: 'Polygon (ERC20-compatible)',
-        Solana: 'Solana (SPL)'
-    };
-    const networkLabel = networkLabelMap[network] || network;
-
-    // short names for titles and sample deposit addresses per network
-    const shortNetworkNameMap: Record<string, string> = {
-        BNB: 'Binance Smart Chain',
-        TRX: 'Tron',
-        ETH: 'Ethereum',
-        Matic: 'Polygon',
-        Solana: 'Solana'
-    };
-
-    const sampleAddressMap: Record<string, string> = {
-        // BEP20/Ethereum-style addresses
-        BNB: '0xBnbBnbBnbBnbBnbBnbBnbBnbBnbBnbBnbBnbBnb1',
-        ETH: '0x1234abcd5678ef901234abcd5678ef90abcdef12',
-        Matic: '0xMaticMaticMaticMaticMaticMaticMaticMatic1',
-        // Tron and Solana style samples
-        TRX: 'TXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
-        Solana: 'So11111111111111111111111111111111111111112'
-    };
-
-    const depositLabel = `${shortNetworkNameMap[network] || network} Deposit Address`;
-    const depositAddress = sampleAddressMap[network] || sampleAddressMap['ETH'];
-
-    const accNum = "0123456789";
-    const accName = "John Doe";
-
-    const handleCopy = (text: string) => {
-        navigator.clipboard.writeText(text);
-        toast.success("Copied to clipboard!");
-    };
+    const depositDetails = getDepositDetails();
 
     return (
-        <div className="space-y-6">
-            {/* Overview Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-semibold text-gray-900">Make Deposit</h1>
-                    <p className="text-sm text-gray-500 mt-1">
-                        Deposit funds into your account to start using our services
-                    </p>
-                </div>
-            </div>
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30 p-6">
+            <div className="max-w-4xl mx-auto space-y-8">
+                {/* Premium Header */}
+                <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-center space-y-4"
+                >
+                    <div className="inline-flex items-center gap-3 px-6 py-3 bg-white/80 backdrop-blur-sm rounded-full shadow-lg border border-white/20">
+                        <div className="flex items-center gap-3">
+                            <motion.div
+                                animate={{
+                                    y: [0, -5, 0],
+                                    rotateY: [0, 180, 360]
+                                }}
+                                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                                className="p-2 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full"
+                            >
+                                <ArrowDown className="h-5 w-5 text-white" />
+                            </motion.div>
+                            <div className="text-left">
+                                <h1 className="text-xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+                                    Deposit {selectedCurrency?.currency}
+                                </h1>
+                                <p className="text-sm text-gray-500">Fund your wallet securely</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-100 rounded-full">
+                            <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                            <span className="text-xs font-medium text-emerald-700">Secure</span>
+                        </div>
+                    </div>
+                </motion.div>
 
-            {/* Deposit Section */}
-            <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-medium text-gray-900 flex flex-row items-center gap-1">
-                        Deposit
-                        <img src={selectedCurrency?.icon} alt="" width={18} height={18} />
-                        {selectedCurrency?.currency}
-                    </h2>
-                </div>
-
-                <div className="w-full flex flex-col items-center justify-center pt-5">
-                    <Card className="w-full max-w-3xl">
-                        <CardContent className="p-6 border rounded-xl space-y-6">
-                            {selectedCurrency?.currency === Fiat.NGN && (
-                                <div className="space-y-6 w-full flex flex-col md:flex-row items-start justify-between gap-5">
-                                    <div className="flex flex-col items-start gap-3">
-
-                                        <div className="w-full">
-                                            <p className="text-sm font-medium text-gray-700 mb-2">
-                                                Select Bank
+                {/* Main Deposit Interface */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="flex justify-center"
+                >
+                    <Card className="w-full max-w-4xl shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
+                        <CardContent className="p-0">
+                            {/* Header Section */}
+                            <div className="px-8 py-6 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-t-xl">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                                            <img src={selectedCurrency?.icon} alt="" className="w-7 h-7 rounded-full" />
+                                        </div>
+                                        <div>
+                                            <h2 className="text-xl font-bold">Deposit {selectedCurrency?.currency}</h2>
+                                            <p className="text-emerald-100 text-sm">
+                                                {selectedCurrency?.currency === Fiat.NGN ? 'Bank Transfer' : 'Cryptocurrency'}
                                             </p>
-                                            <Select value={usdToken} onValueChange={setUsdToken}>
-                                                <SelectTrigger className="w-32 md:w-full">
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent className="w-full">
-                                                    {selectedCurrency && selectedCurrency.deposit.map((token, idx) => (
-                                                        <SelectItem key={idx} value={token.institution}>
-                                                            <div className="!flex !flex-row !items-center gap-2">
-                                                                <img src={token.icon} alt="" width={18} height={18} className="rounded-full" />
-                                                                {token.institution}
-                                                            </div>
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-
-                                        <p className="text-xs text-blue-600 bg-blue-50 border border-blue-200 p-3 rounded-lg">
-                                            ℹ️ Please ensure you are depositing funds from a Nigerian bank account registered in your name. Deposits from third-party accounts or other sources may be rejected and cannot be recovered. Double-check your account details before transferring funds.
-                                        </p>
-
-                                        <div className="flex flex-row items-center justify-center md:hidden w-full ">
-                                            <div className="flex justify-center">
-                                                <QRCode
-                                                    value={accNum}
-                                                    size={200}
-                                                    logoImage="/favicon.png"   // path to your logo
-                                                    logoPaddingRadius={120}
-                                                    logoWidth={40}              // adjust size
-                                                    removeQrCodeBehindLogo={true}
-                                                    qrStyle="squares"           // or 'dots'
-                                                    eyeRadius={4}               // rounded edges
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-2 w-full">
-                                            <p className="font-medium">Banking Deposit Account</p>
-                                            <div className="flex items-center justify-between gap-2 bg-gray-50 border p-2 rounded-lg">
-                                                <span className="truncate">{accNum}</span>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    onClick={() => handleCopy(accNum)}
-                                                >
-                                                    <Copy size={16} />
-                                                </Button>
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-2 w-full">
-                                            <p className="font-medium">Account Name</p>
-                                            <div className="flex items-center justify-between gap-2 bg-gray-50 border p-2 rounded-lg">
-                                                <span className="truncate">{accName}</span>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    onClick={() => handleCopy(accName)}
-                                                >
-                                                    <Copy size={16} />
-                                                </Button>
-                                            </div>
-                                        </div>
-
-                                        <div className="mt-5">
-                                            <div className="flex flex-row items-center justify-start gap-1 text-sm text-gray-500 w-full">
-                                                <span><Loading /></span>
-                                                Detecting Deposit Transaction...
-                                            </div>
                                         </div>
                                     </div>
-
-                                    <div className="hidden md:block">
-                                        <div className="flex justify-center">
-                                            <QRCode
-                                                value={accNum}
-                                                size={200}
-                                                logoImage="/favicon.png"   // path to your logo
-                                                logoPaddingRadius={120}
-                                                logoWidth={40}              // adjust size
-                                                removeQrCodeBehindLogo={true}
-                                                qrStyle="squares"           // or 'dots'
-                                                eyeRadius={4}               // rounded edges
-                                            />
-                                        </div>
+                                    <div className="text-right">
+                                        <p className="text-emerald-100 text-sm">Current Balance</p>
+                                        <p className="text-xl font-bold">{selectedCurrency?.symbol}{selectedCurrency?.balance.toLocaleString()}</p>
                                     </div>
                                 </div>
-                            )}
+                            </div>
 
-                            {selectedCurrency?.currency === Fiat.USD && (
-                                <div className="space-y-6 w-full flex flex-col md:flex-row items-start justify-between gap-5">
-                                    <div className="flex flex-col items-start gap-3">
+                            {/* Content Section */}
+                            <div className="p-8">
+                                {selectedCurrency?.currency === Fiat.NGN ? (
+                                    /* NGN Bank Deposit Section */
+                                    <div className="grid lg:grid-cols-2 gap-8">
+                                        <div className="space-y-6">
+                                            <div className="space-y-3">
+                                                <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                                    <Building className="h-4 w-4 text-emerald-600" />
+                                                    Select Bank
+                                                </label>
+                                                <Select value={usdToken} onValueChange={setUsdToken}>
+                                                    <SelectTrigger className="h-12 border-2 border-gray-200 hover:border-emerald-300 focus:border-emerald-500 transition-colors">
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {selectedCurrency?.deposit.map((token, idx) => (
+                                                            <SelectItem key={idx} value={token.institution}>
+                                                                <div className="flex items-center gap-3">
+                                                                    <img src={token.icon} alt="" width={20} height={20} className="rounded-full" />
+                                                                    <span className="font-medium">{token.institution}</span>
+                                                                </div>
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
 
-                                        <div className="w-full">
-                                            <p className="text-sm font-medium text-gray-700 mb-2">
-                                                Select Stablecoin
-                                            </p>
-                                            <Select value={usdToken} onValueChange={setUsdToken}>
-                                                <SelectTrigger className="w-full">
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent className="w-full">
-                                                    {selectedCurrency && selectedCurrency.deposit.map((token, idx) => (
-                                                        <SelectItem key={idx} value={token.currency}>
-                                                            <div className="!flex !flex-row !items-center gap-1">
-                                                                <img src={token.icon} alt="" width={18} height={18} />
-                                                                {token.currency}
-                                                            </div>
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
+                                            <motion.div
+                                                initial={{ opacity: 0, x: -20 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                className="p-4 bg-blue-50 border border-blue-200 rounded-xl"
+                                            >
+                                                <div className="flex items-start gap-3">
+                                                    <Info className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                                                    <div className="text-sm text-blue-800">
+                                                        <p className="font-medium mb-1">Important Notice</p>
+                                                        <p>Only send funds from a Nigerian bank account registered in your name. Third-party transfers will be rejected.</p>
+                                                    </div>
+                                                </div>
+                                            </motion.div>
+
+                                            <div className="space-y-4">
+                                                <div className="space-y-3">
+                                                    <label className="text-sm font-semibold text-gray-700">Account Number</label>
+                                                    <div className="flex items-center gap-3 p-4 bg-gray-50 border-2 border-gray-200 rounded-xl hover:bg-gray-100 transition-colors">
+                                                        <span className="flex-1 font-mono text-lg font-semibold">{depositDetails.value}</span>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={() => handleCopy(depositDetails.value)}
+                                                            className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-100"
+                                                        >
+                                                            <Copy className="h-4 w-4" />
+                                                        </Button>
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-3">
+                                                    <label className="text-sm font-semibold text-gray-700">Account Name</label>
+                                                    <div className="flex items-center gap-3 p-4 bg-gray-50 border-2 border-gray-200 rounded-xl hover:bg-gray-100 transition-colors">
+                                                        <span className="flex-1 font-semibold">{depositDetails.accountName}</span>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={() => handleCopy(depositDetails.accountName!)}
+                                                            className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-100"
+                                                        >
+                                                            <Copy className="h-4 w-4" />
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
+                                                <Loading />
+                                                <span>Monitoring for incoming deposits...</span>
+                                            </div>
                                         </div>
 
-                                        <div className="w-full">
-                                            <p className="text-sm font-medium text-gray-700 mb-2">
-                                                Select Network
-                                            </p>
-                                            <Select value={network} onValueChange={setNetwork}>
-                                                <SelectTrigger className="w-full">
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent className="w-full">
-                                                    {selectedCurrency && selectedCurrency.deposit.map((token, idx) => (
-                                                        <SelectItem key={idx} value={token.network}>
-                                                            <div className="!flex !flex-row !items-center gap-1">
-                                                                <img src={token.icon} alt="" width={18} height={18} />
-                                                                {token.network}
-                                                            </div>
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-
-                                        <p className="text-xs text-yellow-600 bg-yellow-50 border border-yellow-200 p-3 rounded-lg w-full">
-                                            ⚠️ Send only <span className="font-semibold">{usdToken}</span> on {networkLabel}. Transfers via other networks will not be credited and cannot be recovered. Confirm the selected network in your wallet or exchange before sending.
-                                        </p>
-
-                                        <div className="flex flex-row items-center justify-center md:hidden w-full ">
-                                            <div className="flex justify-center">
+                                        <div className="flex justify-center lg:justify-end">
+                                            <div className="p-6 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl border border-emerald-200">
                                                 <QRCode
-                                                    value={depositAddress}
-                                                    size={200}
-                                                    logoImage="/favicon.png"   // path to your logo
+                                                    value={depositDetails.value}
+                                                    size={220}
+                                                    logoImage="/favicon.png"
                                                     logoPaddingRadius={120}
-                                                    logoWidth={40}              // adjust size
+                                                    logoWidth={45}
                                                     removeQrCodeBehindLogo={true}
-                                                    qrStyle="squares"           // or 'dots'
-                                                    eyeRadius={4}               // rounded edges
+                                                    qrStyle="squares"
+                                                    eyeRadius={8}
                                                 />
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-2 w-full">
-                                            <p className="font-medium">{depositLabel}</p>
-                                            <div className="flex items-center justify-between gap-2 bg-gray-50 border p-2 rounded-lg">
-                                                <span className="truncate text-xs md:text-base">{depositAddress}</span>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    onClick={() => handleCopy(depositAddress)}
-                                                >
-                                                    <Copy size={16} />
-                                                </Button>
-                                            </div>
-                                        </div>
-
-                                        <div className="mt-5">
-                                            <div className="flex flex-row items-center justify-start gap-1 text-sm text-gray-500 w-full">
-                                                <span><Loading /></span>
-                                                Detecting Deposit Transaction...
+                                                <p className="text-center text-sm text-gray-600 mt-3 font-medium">
+                                                    Scan to copy account number
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
+                                ) : (
+                                    /* Cryptocurrency Deposit Section */
+                                    <div className="grid lg:grid-cols-2 gap-8">
+                                        <div className="space-y-6">
+                                            <div className="grid md:grid-cols-2 gap-4">
+                                                <div className="space-y-3">
+                                                    <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                                        <Wallet2 className="h-4 w-4 text-emerald-600" />
+                                                        Cryptocurrency
+                                                    </label>
+                                                    <Select value={usdToken} onValueChange={handleCryptoChange}>
+                                                        <SelectTrigger className="h-12 border-2 border-gray-200 hover:border-emerald-300 focus:border-emerald-500 transition-colors">
+                                                            <SelectValue />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {getUniqueCryptocurrencies().map((token, idx) => (
+                                                                <SelectItem key={idx} value={token.currency}>
+                                                                    <div className="flex items-center gap-3">
+                                                                        <img src={token.icon} alt="" width={20} height={20} className="rounded-full" />
+                                                                        <span className="font-medium">{token.currency}</span>
+                                                                    </div>
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
 
-                                    <div className="hidden md:block">
-                                        <div className="flex justify-center">
-                                            <QRCode
-                                                value={depositAddress}
-                                                size={200}
-                                                logoImage="/favicon.png"   // path to your logo
-                                                logoPaddingRadius={120}
-                                                logoWidth={40}              // adjust size
-                                                removeQrCodeBehindLogo={true}
-                                                qrStyle="squares"           // or 'dots'
-                                                eyeRadius={4}               // rounded edges
-                                            />
+                                                <div className="space-y-3">
+                                                    <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                                        <Network className="h-4 w-4 text-emerald-600" />
+                                                        Network
+                                                    </label>
+                                                    <Select value={network} onValueChange={handleNetworkChange}>
+                                                        <SelectTrigger className="h-12 border-2 border-gray-200 hover:border-emerald-300 focus:border-emerald-500 transition-colors">
+                                                            <SelectValue />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {getNetworksForCrypto(usdToken).map((token, idx) => (
+                                                                <SelectItem key={idx} value={token.network}>
+                                                                    <div className="flex items-center gap-3">
+                                                                        <div className="w-5 h-5 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full flex items-center justify-center">
+                                                                            <span className="text-white text-xs font-bold">{token.network.charAt(0)}</span>
+                                                                        </div>
+                                                                        <span className="font-medium">{token.network}</span>
+                                                                    </div>
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                            </div>
+
+                                            <motion.div
+                                                initial={{ opacity: 0, x: -20 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                className="p-4 bg-amber-50 border border-amber-200 rounded-xl"
+                                            >
+                                                <div className="flex items-start gap-3">
+                                                    <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                                                    <div className="text-sm text-amber-800">
+                                                        <p className="font-medium mb-1">Network Warning</p>
+                                                        <p>Only send <span className="font-semibold">{usdToken}</span> on the <span className="font-semibold">{network}</span> network. Wrong network transfers cannot be recovered.</p>
+                                                    </div>
+                                                </div>
+                                            </motion.div>
+
+                                            <div className="space-y-3">
+                                                <label className="text-sm font-semibold text-gray-700">Deposit Address</label>
+                                                <div className="flex items-center gap-3 p-4 bg-gray-50 border-2 border-gray-200 rounded-xl hover:bg-gray-100 transition-colors">
+                                                    <span className="flex-1 font-mono text-sm break-all">{depositDetails.value}</span>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={() => handleCopy(depositDetails.value)}
+                                                        className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-100 flex-shrink-0"
+                                                    >
+                                                        <Copy className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
+                                                <Loading />
+                                                <span>Monitoring blockchain for deposits...</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex justify-center lg:justify-end">
+                                            <div className="p-6 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl border border-emerald-200">
+                                                <QRCode
+                                                    value={depositDetails.value}
+                                                    size={220}
+                                                    logoImage="/favicon.png"
+                                                    logoPaddingRadius={120}
+                                                    logoWidth={45}
+                                                    removeQrCodeBehindLogo={true}
+                                                    qrStyle="squares"
+                                                    eyeRadius={8}
+                                                />
+                                                <p className="text-center text-sm text-gray-600 mt-3 font-medium">
+                                                    Scan to copy address
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            )}
-
-                            {/* TODO: EUR Deposit (instructions pending) */}
-                            {/* {selectedCurrency.name === "EUR" && (
-                                <div>EUR Deposit Instructions Here</div>
-                            )} */}
-
-                            {/* TODO: GBP Deposit (instructions pending) */}
-                            {/* {selectedCurrency.name === "GBP" && (
-                                <div>GBP Deposit Instructions Here</div>
-                            )} */}
+                                )}
+                            </div>
                         </CardContent>
                     </Card>
+                </motion.div>
 
-                    <div className="flex items-center justify-between w-full max-w-3xl mt-6">
-                        <a href={`/dashboard/${wallet}`} className="bg-black hover:bg-slate-800 text-white capitalize px-10 py-2 rounded-lg">
-                            cancel
-                        </a>
-                    </div>
+                {/* Feature Cards */}
+                <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.4 }}
+                    >
+                        <Card className="p-6 bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-shadow">
+                            <div className="flex items-center gap-3 mb-3">
+                                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+                                    <Shield className="h-5 w-5 text-white" />
+                                </div>
+                                <h3 className="font-semibold text-gray-800">Secure Deposits</h3>
+                            </div>
+                            <p className="text-sm text-gray-600">Bank-grade security with multi-layer encryption and fraud protection.</p>
+                        </Card>
+                    </motion.div>
+
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.5 }}
+                    >
+                        <Card className="p-6 bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-shadow">
+                            <div className="flex items-center gap-3 mb-3">
+                                <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center">
+                                    <Clock className="h-5 w-5 text-white" />
+                                </div>
+                                <h3 className="font-semibold text-gray-800">Instant Processing</h3>
+                            </div>
+                            <p className="text-sm text-gray-600">Funds are credited immediately upon confirmation of your deposit.</p>
+                        </Card>
+                    </motion.div>
+
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.6 }}
+                    >
+                        <Card className="p-6 bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-shadow">
+                            <div className="flex items-center gap-3 mb-3">
+                                <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
+                                    <TrendingUp className="h-5 w-5 text-white" />
+                                </div>
+                                <h3 className="font-semibold text-gray-800">Low Fees</h3>
+                            </div>
+                            <p className="text-sm text-gray-600">Competitive rates with transparent pricing and no hidden charges.</p>
+                        </Card>
+                    </motion.div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex justify-center gap-4 max-w-4xl mx-auto">
+                    <Button
+                        variant="outline"
+                        className="px-8 py-3 h-auto border-2 hover:bg-gray-50"
+                        onClick={() => window.history.back()}
+                    >
+                        Go Back
+                    </Button>
+                    <Button
+                        className="px-8 py-3 h-auto bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white"
+                        onClick={() => window.location.href = `/dashboard/${wallet}`}
+                    >
+                        View Dashboard
+                    </Button>
                 </div>
             </div>
 
+            {/* Enhanced Success Dialog */}
             <Dialog open={successfulDeposit} onOpenChange={setSuccessfulDeposit}>
-                <DialogContent>
-                    <DialogHeader className="w-full flex flex-col items-center justify-center text-center gap-1">
-                        <DialogTitle className="flex flex-col items-center justify-center gap-6 mt-5">
-                            <motion.div
-                                initial={{ scale: 0.8, opacity: 0 }}
-                                animate={{ scale: 1.1, opacity: 1 }}
-                                transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                            >
-                                <CheckCircle size={54} className="text-green-500" />
-                            </motion.div>
-                            <motion.span
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.2, duration: 0.4 }}
-                                className="font-semibold text-lg"
-                            >
-                                Deposit Successful
-                            </motion.span>
-                            {/** <ConfettiExplosion zIndex={300} force={0.6} duration={5500} particleCount={80} width={500} /> */}
-                        </DialogTitle>
-                        <DialogDescription>
-                            Your USD wallet has been credited with ${depositAmount}.
-                        </DialogDescription>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader className="text-center space-y-6">
+                        <motion.div
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                            className="mx-auto"
+                        >
+                            <div className="w-16 h-16 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full flex items-center justify-center mx-auto">
+                                <CheckCircle className="h-8 w-8 text-white" />
+                            </div>
+                        </motion.div>
+                        <div className="space-y-2">
+                            <DialogTitle className="text-xl font-bold">Deposit Successful!</DialogTitle>
+                            <DialogDescription className="text-gray-600">
+                                Your {selectedCurrency?.currency} wallet has been credited with {selectedCurrency?.symbol}{depositAmount}.
+                            </DialogDescription>
+                        </div>
                     </DialogHeader>
-                    <DialogFooter className="flex gap-2">
+                    <DialogFooter className="flex gap-3 sm:flex-row pt-4">
                         <Button
                             variant="outline"
-                            onClick={() => {
-                                setSuccessfulDeposit(false);
-                            }}
+                            onClick={() => setSuccessfulDeposit(false)}
+                            className="flex-1"
                         >
                             Close
                         </Button>
-                        <Button className="text-white">
-                            <a href={`/dashboard/${wallet}`} className="flex items-center gap-2">
-                                Dashboard
-                            </a>
+                        <Button
+                            className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white"
+                            onClick={() => window.location.href = `/dashboard/${wallet}`}
+                        >
+                            View Dashboard
                         </Button>
                     </DialogFooter>
                 </DialogContent>

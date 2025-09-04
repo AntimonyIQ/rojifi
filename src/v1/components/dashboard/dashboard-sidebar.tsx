@@ -62,12 +62,13 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ open, setOpe
     }, [sd.user, sd.sender])
 
     const handleLogout = () => {
-        session.logout();
-        window.location.href = '/login';
+        setShowLogoutDialog(true);
     }
 
     const confirmLogout = async () => {
-
+        setShowLogoutDialog(false);
+        session.logout();
+        window.location.href = '/login';
     }
 
     const cancelLogout = () => {
@@ -112,20 +113,26 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ open, setOpe
             {/* Logout Confirmation Dialog */}
             {showLogoutDialog && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-lg p-6 max-w-sm w-full">
-                        <h3 className="text-lg font-medium text-gray-900 mb-4">Confirm Logout</h3>
-                        <p className="text-sm text-gray-500 mb-6">Are you sure you want to log out?</p>
-                        <div className="flex justify-end gap-3">
+                    <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-2xl border">
+                        <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-red-100 rounded-full">
+                            <LogOut className="w-6 h-6 text-red-600" />
+                        </div>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2 text-center">Confirm Logout</h3>
+                        <p className="text-sm text-gray-600 mb-6 text-center">
+                            Are you sure you want to log out of your account? You'll need to sign in again to access your dashboard.
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-3">
                             <button
                                 onClick={cancelLogout}
-                                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800"
+                                className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={confirmLogout}
-                                className="px-4 py-2 text-sm bg-primary text-white rounded-md hover:bg-primary-dark"
+                                className="flex-1 px-4 py-2 text-sm font-medium bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
                             >
+                                <LogOut className="w-4 h-4" />
                                 Logout
                             </button>
                         </div>
