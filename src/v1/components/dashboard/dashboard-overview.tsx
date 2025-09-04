@@ -181,6 +181,19 @@ export function DashboardOverview() {
         );
     }
 
+    // Render NGN first, then USD, then other currencies
+    const sortedWallets = wallets.slice().sort((a, b) => {
+        const priority = (c: string) => {
+            if (c === Fiat.NGN) return 0;
+            if (c === Fiat.USD) return 1;
+            return 2;
+        };
+        const pa = priority(String(a.currency));
+        const pb = priority(String(b.currency));
+        if (pa !== pb) return pa - pb;
+        return String(a.currency).localeCompare(String(b.currency));
+    });
+
     return (
         <div className="flex flex-col lg:flex-row gap-6">
             <div className="flex-1 space-y-6 min-w-0">
@@ -220,7 +233,7 @@ export function DashboardOverview() {
                         <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
                             <div className="w-full lg:w-auto">
                                 <div className="flex flex-wrap gap-1 p-1 bg-gray-100 rounded-lg">
-                                    {wallets.map(tab => (
+                                    {sortedWallets.map(tab => (
                                         <button
                                             key={tab.currency}
                                             onClick={(): void => {
