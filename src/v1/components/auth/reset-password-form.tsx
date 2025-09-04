@@ -6,7 +6,7 @@ import { Button } from "@/v1/components/ui/button"
 import { Input } from "@/v1/components/ui/input"
 import { Label } from "@/v1/components/ui/label"
 import { Eye, EyeOff, Lock } from "lucide-react"
-import { Link, useSearchParams } from "wouter"
+import { Link } from "wouter"
 
 export function ResetPasswordForm() {
     const [showPassword, setShowPassword] = useState(false)
@@ -18,8 +18,10 @@ export function ResetPasswordForm() {
         password: "",
         confirmPassword: "",
     })
-    const [searchParams] = useSearchParams()
-    const token = searchParams.get("token")
+
+    // Get token from URL search params
+    const urlParams = new URLSearchParams(window.location.search)
+    const token = urlParams.get("token")
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()

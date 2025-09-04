@@ -3,6 +3,8 @@
 import { Button } from "@/v1/components/ui/button"
 import { Input } from "@/v1/components/ui/input"
 import { motion } from "framer-motion"
+import nigeriaFlag from "../../public/nigeria-flag.png"
+import usaFlag from "../../public/usa-flag.png"
 
 export function CardsHero() {
     return (
@@ -127,7 +129,7 @@ export function CardsHero() {
                                 <div className="flex items-center gap-4 p-3 bg-blue-50 rounded-md">
                                     <div className="h-6 w-6 rounded-full overflow-hidden flex-shrink-0">
                                         <img
-                                            src="/nigeria-flag.png"
+                                            src={nigeriaFlag}
                                             alt="Nigeria"
                                             width={24}
                                             height={24}
@@ -139,7 +141,7 @@ export function CardsHero() {
                                 <div className="flex items-center gap-4 p-3 bg-blue-50 rounded-md">
                                     <div className="h-6 w-6 rounded-full overflow-hidden flex-shrink-0">
                                         <img
-                                            src="/usa-flag.png"
+                                            src={usaFlag}
                                             alt="USA"
                                             width={24}
                                             height={24}

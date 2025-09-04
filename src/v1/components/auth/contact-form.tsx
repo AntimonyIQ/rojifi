@@ -6,9 +6,8 @@ import { Button } from "@/v1/components/ui/button"
 import { Input } from "@/v1/components/ui/input"
 import { Label } from "@/v1/components/ui/label"
 import { Checkbox } from "@/v1/components/ui/checkbox"
-import { Briefcase, Mail, MessageSquare, User, X } from "lucide-react"
+import { Briefcase, CheckIcon, ChevronsUpDownIcon, Mail, MessageSquare, User, X } from "lucide-react"
 import { Logo } from "@/v1/components/logo"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/v1/components/ui/select";
 import { Textarea } from "../ui/textarea"
 import Defaults from "@/v1/defaults/defaults"
 import { session, SessionData } from "@/v1/session/session"
@@ -28,8 +27,10 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/v1/components/ui/popover"
+import { cn } from "@/v1/lib/utils"
 
 export function ContactForm() {
+    const [popOpen, setPopOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [formData, setFormData] = useState({
@@ -297,18 +298,52 @@ export function ContactForm() {
                         Phone Number <span className="text-red-500">*</span>
                     </Label>
                     <div className="flex gap-2">
-                        <Select value={formData.countryCode} onValueChange={(value) => handleInputChange("countryCode", value)}>
-                            <SelectTrigger className="w-24">
-                                <SelectValue placeholder="Code" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {uniqueCountries.map((country) => (
-                                    <SelectItem key={country.iso2 ?? country.phonecode} value={country.phonecode}>
-                                        {country.emoji} {country.phonecode}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                        <Popover open={popOpen} onOpenChange={() => setPopOpen(!popOpen)}>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    role="combobox"
+                                    size="md"
+                                    aria-expanded={popOpen}
+                                    className="w-28 justify-between"
+                                >
+                                    <img src={`https://flagcdn.com/w320/${uniqueCountries.find((country) => country.phonecode === formData.countryCode)?.iso2.toLowerCase()}.png`} alt="" width={18} height={18} />
+                                    {formData.countryCode
+                                        ? uniqueCountries.find((country) => country.phonecode === formData.countryCode)?.phonecode
+                                        : "Select country..."}
+                                    <ChevronsUpDownIcon className="ml-1 h-4 w-4 shrink-0 opacity-50" />
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-60 p-0">
+                                <Command>
+                                    <CommandInput placeholder="Search framework..." />
+                                    <CommandList>
+                                        <CommandEmpty>No country found.</CommandEmpty>
+                                        <CommandGroup>
+                                            {uniqueCountries.map((country) => (
+                                                <CommandItem
+                                                    key={country.name}
+                                                    value={country.phonecode}
+                                                    onSelect={(currentValue) => {
+                                                        handleInputChange("countryCode", currentValue)
+                                                        setPopOpen(false)
+                                                    }}
+                                                >
+                                                    <CheckIcon
+                                                        className={cn(
+                                                            "mr-2 h-4 w-4",
+                                                            formData.countryCode === country.phonecode ? "opacity-100" : "opacity-0"
+                                                        )}
+                                                    />
+                                                    <img src={`https://flagcdn.com/w320/${country.iso2.toLowerCase()}.png`} alt="" width={18} height={18} />
+                                                    +{country.phonecode} {country.name}
+                                                </CommandItem>
+                                            ))}
+                                        </CommandGroup>
+                                    </CommandList>
+                                </Command>
+                            </PopoverContent>
+                        </Popover>
                         <Input
                             className="flex-1"
                             value={formData.phoneNumber}

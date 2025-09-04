@@ -1,6 +1,10 @@
 import { motion } from "framer-motion"
 import { ArrowRight, CheckCircle2 } from "lucide-react"
 import { Link } from "wouter"
+import sendReceiveIcon from "../public/send-receive-money-icon.svg"
+import globalTradingIcon from "../public/global-trading-icon.svg"
+import exchangeRatesIcon from "../public/exchange-rates-icon.svg"
+import virtualCardIcon from "../public/virtual-card-icon.svg"
 
 export function Features() {
     return (
@@ -32,7 +36,7 @@ export function Features() {
                         transition={{ duration: 0.5, delay: 0.2 }}
                     >
                         <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-lg bg-white p-3 shadow-sm">
-                            <img src="/send-receive-money-icon.svg" alt="Send and Receive Money" width={40} height={40} />
+                            <img src={sendReceiveIcon} alt="Send and Receive Money" width={40} height={40} />
                         </div>
                         <h3 className="text-xl font-bold">Send and Receive Money in Local Currencies</h3>
                         <ul className="mt-4 space-y-3">
@@ -59,7 +63,7 @@ export function Features() {
                         transition={{ duration: 0.5, delay: 0.3 }}
                     >
                         <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-lg bg-white p-3 shadow-sm">
-                            <img src="/global-trading-icon.svg" alt="Global Trading" width={40} height={40} />
+                            <img src={globalTradingIcon} alt="Global Trading" width={40} height={40} />
                         </div>
                         <h3 className="text-xl font-bold">Expand Your Global Reach with Comprehensive Trading Solutions</h3>
                         <ul className="mt-4 space-y-3">
@@ -90,7 +94,7 @@ export function Features() {
                         transition={{ duration: 0.5, delay: 0.4 }}
                     >
                         <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-lg bg-white p-3 shadow-sm">
-                            <img src="/exchange-rates-icon.svg" alt="Exchange Rates" width={40} height={40} />
+                            <img src={exchangeRatesIcon} alt="Exchange Rates" width={40} height={40} />
                         </div>
                         <h3 className="text-xl font-bold">Unlock Value with Competitive Foreign Exchange Rates</h3>
                         <ul className="mt-4 space-y-3">
@@ -121,7 +125,7 @@ export function Features() {
                         transition={{ duration: 0.5, delay: 0.5 }}
                     >
                         <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-lg bg-white p-3 shadow-sm">
-                            <img src="/virtual-card-icon.svg" alt="Virtual Cards" width={40} height={40} />
+                            <img src={virtualCardIcon} alt="Virtual Cards" width={40} height={40} />
                         </div>
                         <h3 className="text-xl font-bold">Virtual Cards for Effortless Transactions</h3>
                         <ul className="mt-4 space-y-3">

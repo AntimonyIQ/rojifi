@@ -4,6 +4,7 @@ import { motion } from "framer-motion"
 import { ArrowRight, Globe, Zap, DollarSign } from "lucide-react"
 import { Button } from "@/v1/components/ui/button"
 import { Link } from "wouter"
+import tradingHorizons from "../../public/trading-horizons.png"
 
 export function OtcFeatures() {
     return (
@@ -82,7 +83,7 @@ export function OtcFeatures() {
                         transition={{ duration: 0.5, delay: 0.2 }}
                     >
                         <img
-                            src="/trading-horizons.png"
+                            src={tradingHorizons}
                             alt="Business handshake"
                             className="w-full h-full object-cover"
                             width={600}

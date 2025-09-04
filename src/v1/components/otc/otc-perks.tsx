@@ -4,6 +4,7 @@ import { motion } from "framer-motion"
 import { Button } from "@/v1/components/ui/button"
 import { CheckCircle } from "lucide-react"
 import { Link } from "wouter"
+import unbeatablePerks from "../../public/unbeatable-perks.png"
 
 export function OtcPerks() {
     const perks = [
@@ -50,7 +51,7 @@ export function OtcPerks() {
                         transition={{ duration: 0.5, delay: 0.2 }}
                     >
                         <img
-                            src="/unbeatable-perks.png"
+                            src={unbeatablePerks}
                             alt="Hand holding money"
                             className="max-w-full h-auto"
                             width={400}

@@ -1,6 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
+import businessmanOffice from "../../public/smiling-businessman-office.png"
 
 export function AboutMission() {
     return (
@@ -74,7 +75,7 @@ export function AboutMission() {
                         transition={{ duration: 0.5, delay: 0.2 }}
                     >
                         <img
-                            src="/smiling-businessman-office.png"
+                            src={businessmanOffice}
                             alt="Smiling businessman in office"
                             width={600}
                             height={600}

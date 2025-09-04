@@ -5,6 +5,8 @@ import { Input } from "@/v1/components/ui/input"
 import { ArrowRight } from "lucide-react"
 import { motion } from "framer-motion"
 import { Link } from "wouter"
+import nigeriaFlag from "../../public/nigeria-flag.png"
+import usaFlag from "../../public/usa-flag.png"
 
 export function OtcHero() {
     return (
@@ -62,7 +64,7 @@ export function OtcHero() {
                                     <div className="w-32 rounded-md border border-input bg-background px-3 py-2 flex items-center gap-2">
                                         <div className="h-5 w-5 rounded-full overflow-hidden flex-shrink-0">
                                             <img
-                                                src="/nigeria-flag.png"
+                                                src={nigeriaFlag}
                                                 alt="Nigeria"
                                                 width={20}
                                                 height={20}
@@ -83,7 +85,7 @@ export function OtcHero() {
                                     <div className="w-32 rounded-md border border-input bg-background px-3 py-2 flex items-center gap-2">
                                         <div className="h-5 w-5 rounded-full overflow-hidden flex-shrink-0">
                                             <img
-                                                src="/usa-flag.png"
+                                                src={usaFlag}
                                                 alt="USA"
                                                 width={20}
                                                 height={20}

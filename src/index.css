@@ -70,8 +70,19 @@
 }
 
 @layer base {
-  * {
+  *, *::before, *::after {
     @apply border-border;
+    box-sizing: border-box;
+  }
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+  }
+  #root {
+    margin: 0;
+    padding: 0;
+    width: 100%;
   }
   body {
     @apply bg-background text-foreground;

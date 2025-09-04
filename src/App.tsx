@@ -1,26 +1,27 @@
 import { Route, Switch } from "wouter";
-// import DashboardPage from "@/v1/app/dashboard/page";
-// import UsersPage from "@/app/users/page";
-// import TransactionsPage from "@/app/transactions/page";
-// import AnalyticsPage from "@/app/analytics/page";
-// import SettingsPage from "@/app/settings/page";
-// import StaffManagementPage from "@/app/staff/page";
 
-// import MessagingPage from "@/app/messaging/page";
 import NotFound from "@/pages/not-found";
-// import DashboardLayout from "@/components/layout/DashboardLayout";
 import { AnimatePresence } from "framer-motion";
 import { ProtectedRoute } from "./app/ProtectedRoute";
 import { RedirectIfAuthenticated } from "./app/RedirectIfAuthenticated";
-// import WalletsPage from "./app/wallets/page";
-// import OTCPage from "./app/otc/page";
-// import VirtualCardPage from "./app/virtualcard/page";
-// import SendersPage from "./app/senders/page";
 import LoginPage from "./v1/app/login/page";
 import { DashboardLayout } from "./v1/components/dashboard/dashboard-layout";
 import Home from "./v1/app/page";
 import ContactPage from "./v1/app/contactus/page";
 import DashboardPage from "./v1/app/dashboard/[wallet]/page";
+import VirtualCardPage from "./v1/app/dashboard/[wallet]/virtualcard/page";
+import BeneficiaryPage from "./v1/app/dashboard/[wallet]/beneficiary/page";
+import WalletPage from "./v1/app/dashboard/[wallet]/wallet/page";
+import TeamsPage from "./v1/app/dashboard/[wallet]/teams/page";
+import StatementPage from "./v1/app/dashboard/[wallet]/statement/page";
+import SwapPage from "./v1/app/dashboard/[wallet]/swap/page";
+import SenderPage from "./v1/app/dashboard/[wallet]/sender/page";
+import OTCDashboardPage from "./v1/app/dashboard/[wallet]/otc/page";
+import PaymentPage from "./v1/app/dashboard/[wallet]/payment/page";
+import BusinessProfilePage from "./v1/app/dashboard/[wallet]/businessprofile/page";
+import DepositPage from "./v1/app/dashboard/[wallet]/deposit/page";
+import SettingsPage from "./v1/app/dashboard/[wallet]/settings/page";
+import TransactionsPage from "./v1/app/dashboard/[wallet]/transactions/page";
 import AboutPage from "./v1/app/about/page";
 import CardsPage from "./v1/app/cards/page";
 import ForgotPasswordPage from "./v1/app/forgot-password/page";
@@ -28,12 +29,15 @@ import HelpPage from "./v1/app/help/page";
 import MulticurrencyPage from "./v1/app/multicurrency/page";
 import OnboardingPage from "./v1/app/onboarding/page";
 import OtcPage from "./v1/app/otc/page";
-import OtpPage from "./v1/app/otp/page";
+// import OtpPage from "./v1/app/otp/page";
 import PrivacyPage from "./v1/app/privacy/page";
 import RequestAccessPage from "./v1/app/request-access/page";
 import ResetPasswordPage from "./v1/app/reset-password/page";
 import VerifyEmailPage from "./v1/app/verify-email/page";
 import React from "react";
+import SignupPage from "./v1/app/signup/[id]/page";
+import KYCKYBVerificationPage from "./v1/app/signup/[id]/verification/page";
+// ...existing code...
 
 function AppRoute({
     path,
@@ -63,11 +67,13 @@ function App() {
         { path: "/multicurrency", element: <MulticurrencyPage /> },
         { path: "/onboarding", element: <OnboardingPage /> },
         { path: "/otc", element: <OtcPage /> },
-        { path: "/otp", element: <OtpPage /> },
+        // { path: "/otp", element: <OtpPage /> },
         { path: "/privacy", element: <PrivacyPage /> },
         { path: "/request-access", element: <RequestAccessPage /> },
         { path: "/reset-password", element: <ResetPasswordPage /> },
         { path: "/verify-email", element: <VerifyEmailPage /> },
+        { path: "/signup/:id/verification", element: <KYCKYBVerificationPage /> },
+        { path: "/signup/:id", element: <SignupPage /> },
     ];
 
     return (
@@ -76,6 +82,20 @@ function App() {
                 <RedirectIfAuthenticated path="/login">
                     <LoginPage />
                 </RedirectIfAuthenticated>
+                <AppRoute path="/dashboard/:wallet/virtualcard" page={VirtualCardPage} />
+                <AppRoute path="/dashboard/:wallet/bankstatement" page={StatementPage} />
+                <AppRoute path="/dashboard/:wallet/beneficiary" page={BeneficiaryPage} />
+                <AppRoute path="/dashboard/:wallet/wallet" page={WalletPage} />
+                <AppRoute path="/dashboard/:wallet/teams" page={TeamsPage} />
+                <AppRoute path="/dashboard/:wallet/statement" page={StatementPage} />
+                <AppRoute path="/dashboard/:wallet/swap" page={SwapPage} />
+                <AppRoute path="/dashboard/:wallet/sender" page={SenderPage} />
+                <AppRoute path="/dashboard/:wallet/otc" page={OTCDashboardPage} />
+                <AppRoute path="/dashboard/:wallet/payment" page={PaymentPage} />
+                <AppRoute path="/dashboard/:wallet/businessprofile" page={BusinessProfilePage} />
+                <AppRoute path="/dashboard/:wallet/deposit" page={DepositPage} />
+                <AppRoute path="/dashboard/:wallet/settings" page={SettingsPage} />
+                <AppRoute path="/dashboard/:wallet/transactions" page={TransactionsPage} />
                 <AppRoute path="/dashboard/:wallet" page={DashboardPage} />
 
                 {routes.map((r, i) => (

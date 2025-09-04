@@ -1,6 +1,11 @@
 "use client"
 
 import { motion } from "framer-motion"
+import usaFlag from "../../public/usa-flag.png"
+import ukFlag from "../../public/uk-flag.png"
+import ghanaFlag from "../../public/ghana-flag.png"
+import nigeriaFlag from "../../public/nigeria-flag.png"
+import southAfricaFlag from "../../public/south-africa-flag.png"
 
 export function OtcStats() {
     return (
@@ -21,20 +26,20 @@ export function OtcStats() {
                     <div className="mt-10 grid grid-cols-3 gap-6 md:grid-cols-6">
                         <div className="flex flex-col items-center">
                             <div className="h-12 w-12 rounded-full overflow-hidden">
-                                <img src="/usa-flag.png" alt="USD" width={48} height={48} className="h-full w-full object-cover" />
+                                <img src={usaFlag} alt="USD" width={48} height={48} className="h-full w-full object-cover" />
                             </div>
                             <span className="mt-2 text-sm font-medium">USD</span>
                         </div>
                         <div className="flex flex-col items-center">
                             <div className="h-12 w-12 rounded-full overflow-hidden">
-                                <img src="/uk-flag.png" alt="GBP" width={48} height={48} className="h-full w-full object-cover" />
+                                <img src={ukFlag} alt="GBP" width={48} height={48} className="h-full w-full object-cover" />
                             </div>
                             <span className="mt-2 text-sm font-medium">GBP</span>
                         </div>
                         <div className="flex flex-col items-center">
                             <div className="h-12 w-12 rounded-full overflow-hidden">
                                 <img
-                                    src="/nigeria-flag.png"
+                                    src={nigeriaFlag}
                                     alt="NGN"
                                     width={48}
                                     height={48}
@@ -45,14 +50,14 @@ export function OtcStats() {
                         </div>
                         <div className="flex flex-col items-center">
                             <div className="h-12 w-12 rounded-full overflow-hidden">
-                                <img src="/ghana-flag.png" alt="GHS" width={48} height={48} className="h-full w-full object-cover" />
+                                <img src={ghanaFlag} alt="GHS" width={48} height={48} className="h-full w-full object-cover" />
                             </div>
                             <span className="mt-2 text-sm font-medium">GHS</span>
                         </div>
                         <div className="flex flex-col items-center">
                             <div className="h-12 w-12 rounded-full overflow-hidden">
                                 <img
-                                    src="/south-africa-flag.png"
+                                    src={southAfricaFlag}
                                     alt="ZAR"
                                     width={48}
                                     height={48}

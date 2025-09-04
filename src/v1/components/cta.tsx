@@ -1,6 +1,7 @@
 import { Button } from "@/v1/components/ui/button"
 import { motion } from "framer-motion"
 import { Link } from "wouter"
+import wavebg from "../public/wave-background.png"
 
 interface CtaProps {
     isLoggedIn: boolean
@@ -19,7 +20,7 @@ export function Cta({ isLoggedIn }: CtaProps) {
                 >
                     {/* Wave background image */}
                     <div className="absolute inset-0 z-0 opacity-20">
-                        <img src="/wave-background.png" alt="" className="w-full h-full object-cover" aria-hidden="true" />
+                        <img src={wavebg} alt="" className="w-full h-full object-cover" aria-hidden="true" />
                     </div>
 
                     {/* Content */}

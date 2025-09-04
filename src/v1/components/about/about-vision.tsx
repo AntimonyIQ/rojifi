@@ -1,6 +1,8 @@
 "use client"
 
 import { motion } from "framer-motion"
+import vision3 from "../../public/vision3.png"
+import vision1 from "../../public/vision1.jpeg"
 
 export function AboutVision() {
     return (
@@ -17,7 +19,7 @@ export function AboutVision() {
                         <div className="grid grid-cols-2 gap-4">
                             <div className="rounded-xl w-[300px] h-[300px] overflow-hidden bg-lime-200">
                                 <img
-                                    src="/vision3.png?height=250&width=250&query=business handshake"
+                                    src={vision3}
                                     alt="Business handshake"
                                     width={200}
                                     height={200}
@@ -26,7 +28,7 @@ export function AboutVision() {
                             </div>
                             <div className="rounded-xl w-[300px] h-[300px] overflow-hidden">
                                 <img
-                                    src="/vision1.jpeg?height=300&width=300&query=team collaboration in office"
+                                    src={vision1}
                                     alt="Team collaboration in office"
                                     width={300}
                                     height={300}

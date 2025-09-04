@@ -1,4 +1,5 @@
 import { motion } from "framer-motion"
+import flagsBackground from "../public/flags-background.png"
 
 export function HeroBackground() {
     return (
@@ -9,7 +10,7 @@ export function HeroBackground() {
                 animate={{ opacity: 1 }}
                 transition={{ duration: 1.5 }}
             >
-                <img src="/flags-background.png" alt="" className="w-full h-auto" aria-hidden="true" />
+                <img src={flagsBackground} alt="" className="w-full h-auto" aria-hidden="true" />
             </motion.div>
         </div>
     )
