@@ -4,10 +4,8 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/v1/components/ui/button";
 import { Card, CardContent } from "@/v1/components/ui/card";
-import { WalletService } from "@/v1/services/wallet.service";
 import Loading from "../loading";
 import EmptyTransaction from "../emptytx";
-import { Transaction } from "@/v1/types/wallet.type";
 import { ArrowUpRight, MoreVertical, Repeat, Search, Trash } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import {
@@ -21,62 +19,24 @@ import {
 import { toast } from "sonner";
 import { Input } from "../ui/input";
 import PayAgainModal from "./pay-again-modal";
+import { ITransaction } from "@/v1/interface/interface";
 
 export function BeneficiaryView() {
-    const [hideBalances, setHideBalances] = useState(false);
-    const [totalItems, setTotalItems] = useState(0);
-    const [totalPages, setTotalPages] = useState(1);
+    // const [hideBalances] = useState(false); // TODO: Implement balance hiding
+    const [totalItems] = useState(0); // TODO: Implement pagination
+    const [totalPages] = useState(1); // TODO: Implement pagination
     const [loading, setLoading] = useState<boolean>(true);
-    const [beneficiaries, setBeneficiaries] = useState<Transaction[]>([
-        {
-            id: "txn_987654",
-            reference: "REF-20240612-CHASE",
-            amount: "1500.00",
-            type: "credit",
-            status: "processing",
-            created_at: new Date().toISOString(),
-            completed_date: new Date().toISOString(), // new Date().toLocaleDateString("en-GB"),
-            reference_beneficiary: "REF-20240612-CHASE",
-            wallet: "USD",
-            sender_fullname: "Cecilia & Jacin Enterprise",
-            beneficiary_fullname: "Foshan City Chihu Furniture Co., LTD",
-            beneficiary_account: "1234567890",
-            beneficiary_country: "USA",
-            beneficiary_address: "270 Park Ave, New York, NY 10017",
-            beneficiary_email: "support@chase.com",
-            beneficiary_phone: "+1 800-935-9935",
-            swift_code: "CHASUS33",
-            bank_name: "JPMORGAN CHASE BANK, N.A., NEW YORK BRANCH (ORGANIZED UNDER THE LAWS OF THE STATE OF NEW YORK WITH LIMITED LIABILITY)",
-            bank_address: "270 Park Ave, New York, NY 10017",
-            attachment: "https://cdn.pixabay.com/photo/2025/08/04/14/58/tools-9754352_1280.jpg",
-            invoice_number: "INV-20240612-001",
-            invoice_date: new Date().toLocaleDateString("en-GB"),
-            purpose_of_transaction: "Payment for services",
-            tracking_number: "TRK-20240612-CHASE",
-            processed_date: new Date().toISOString(),
-            initiated_date: new Date().toISOString(),
-            created_by: "John Doe",
-            receipt: "https://bitcoin.org/bitcoin.pdf",
-            mt103: "https://bitcoin.org/bitcoin.pdf",
-            fees: [
-                {
-                    amount: "10.00",
-                    currency: "USD"
-                }
-            ]
-        }
+    const [beneficiaries, setBeneficiaries] = useState<ITransaction[]>([
     ]);
-
-    const walletService = new WalletService();
 
     const [currentPage, setCurrentPage] = useState(1);
     const [statusFilter, setStatusFilter] = useState("All");
-    const [currencyFilter, setCurrencyFilter] = useState("All");
+    // const [currencyFilter] = useState("All"); // TODO: Implement currency filtering
     const itemsPerPage = 10;
-    const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
-    const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
+    const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
+    // const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-    const [beneficiaryToDelete, setBeneficiaryToDelete] = useState<Transaction | null>(null);
+    const [beneficiaryToDelete, setBeneficiaryToDelete] = useState<any>(null);
     const [search, setSearch] = useState("");
     const [payAgainOpen, setPayAgainOpen] = useState(false);
     const [viewDetailsOpen, setViewDetailsOpen] = useState(false);
@@ -90,9 +50,7 @@ export function BeneficiaryView() {
     const fetchBeneficiaries = async () => {
         try {
             setLoading(true);
-            const offset = (currentPage - 1) * itemsPerPage + 1;
-            const response = await walletService.getUserTransactionHistory(offset, itemsPerPage);
-            if (response.status === 200) { }
+
         } catch (error) {
             console.error("Error fetching transaction history:", error);
         } finally {
@@ -103,7 +61,8 @@ export function BeneficiaryView() {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
 
-    const handleViewDetails = (event: Event): void => {
+    // TODO: Implement view details, pay again, and delete functionality
+    /* const handleViewDetails = (event: Event): void => {
         event.preventDefault();
         event.stopPropagation();
         // Open transaction modal for the selected beneficiary
@@ -128,9 +87,9 @@ export function BeneficiaryView() {
             setBeneficiaryToDelete(selectedTransaction);
             setShowDeleteDialog(true);
         }
-    };
+    }; */
 
-    const openDeleteDialog = (beneficiary: Transaction, event?: Event) => {
+    const openDeleteDialog = (beneficiary: ITransaction, event?: Event) => {
         if (event) {
             try {
                 event.preventDefault();
@@ -145,7 +104,7 @@ export function BeneficiaryView() {
         if (!beneficiaryToDelete) return;
         try {
             // TODO: call API to delete beneficiary via walletService when available
-            setBeneficiaries((prev) => prev.filter((b) => b.id !== beneficiaryToDelete.id));
+            setBeneficiaries((prev) => prev.filter((b) => b._id !== beneficiaryToDelete.id));
             toast.success("Beneficiary deleted successfully");
         } catch (err) {
             console.error("Error deleting beneficiary:", err);
@@ -156,7 +115,7 @@ export function BeneficiaryView() {
         }
     };
 
-    const handlePayAgainSubmit = async (data: any) => {
+    const handlePayAgainSubmit = async (_data: any) => {
         try {
             // TODO: call API to pay again via walletService when available
             toast.success("Payment initiated successfully");
@@ -253,19 +212,19 @@ export function BeneficiaryView() {
                                     <tbody>
                                         {beneficiaries.map((beneficiary) => (
                                             <tr
-                                                key={beneficiary.id}
+                                                key={beneficiary._id}
                                                 className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors">
-                                                <td className="py-4 px-6 text-sm text-gray-900 font-medium whitespace-nowrap max-w-xs truncate" title={beneficiary.beneficiary_fullname}>
-                                                    {beneficiary.beneficiary_fullname}
+                                                <td className="py-4 px-6 text-sm text-gray-900 font-medium whitespace-nowrap max-w-xs truncate" title={beneficiary.beneficiaryAccountName}>
+                                                    {beneficiary.beneficiaryAccountName}
                                                 </td>
-                                                <td className="py-4 px-6 text-sm text-gray-600 whitespace-nowrap max-w-xs truncate" title={beneficiary.beneficiary_account}>
-                                                    {beneficiary.beneficiary_account}
+                                                <td className="py-4 px-6 text-sm text-gray-600 whitespace-nowrap max-w-xs truncate" title={beneficiary.beneficiaryAccountNumber}>
+                                                    {beneficiary.beneficiaryAccountNumber}
                                                 </td>
-                                                <td className="py-4 px-6 text-sm text-gray-600 whitespace-nowrap max-w-xs truncate" title={beneficiary.bank_name}>
-                                                    {beneficiary.bank_name}
+                                                <td className="py-4 px-6 text-sm text-gray-600 whitespace-nowrap max-w-xs truncate" title={beneficiary.beneficiaryBankName}>
+                                                    {beneficiary.beneficiaryBankName}
                                                 </td>
-                                                <td className="py-4 px-6 text-sm text-gray-600 whitespace-nowrap max-w-xs truncate" title={beneficiary.beneficiary_country}>
-                                                    {beneficiary.beneficiary_country}
+                                                <td className="py-4 px-6 text-sm text-gray-600 whitespace-nowrap max-w-xs truncate" title={beneficiary.beneficiaryCountry}>
+                                                    {beneficiary.beneficiaryCountry}
                                                 </td>
                                                 <td className="py-4 px-6">
                                                     <DropdownMenu>
@@ -402,6 +361,6 @@ export function BeneficiaryView() {
 
             <PayAgainModal open={payAgainOpen} onClose={() => setPayAgainOpen(false)} transaction={beneficiaries[0]} onSubmit={handlePayAgainSubmit} />
 
-        </div>
+        </div >
     );
 }

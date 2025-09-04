@@ -1,16 +1,16 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
-import { OtcHero } from "@/components/otc/otc-hero"
-import { OtcFeatures } from "@/components/otc/otc-features"
-import { OtcPerks } from "@/components/otc/otc-perks"
-import { OtcStats } from "@/components/otc/otc-stats"
-import { OtcCta } from "@/components/otc/otc-cta"
-import { IHandshakeClient, IUser } from "@/interface/interface"
-import { session, SessionData } from "@/session/session"
-import Handshake from "@/hash/handshake"
+import { Header } from "@/v1/components/header"
+import { Footer } from "@/v1/components/footer"
+import { OtcHero } from "@/v1/components/otc/otc-hero"
+import { OtcFeatures } from "@/v1/components/otc/otc-features"
+import { OtcPerks } from "@/v1/components/otc/otc-perks"
+import { OtcStats } from "@/v1/components/otc/otc-stats"
+import { OtcCta } from "@/v1/components/otc/otc-cta"
+import { IHandshakeClient, IPayment, ISender, IUser } from "@/v1/interface/interface"
+import { session, SessionData } from "@/v1/session/session"
+import Handshake from "@/v1/hash/handshake"
 
 // Custom hook to manage authentication state
 const useAuth = () => {
@@ -32,6 +32,11 @@ const useAuth = () => {
                 deviceid: client.publicKey,
                 isLoggedIn: false,
                 devicename: "Unknown",
+                authorization: "",
+                wallets: [],
+                transactions: [],
+                sender: {} as ISender,
+                draftPayment: {} as IPayment
             };
 
             session.login(sessionData);

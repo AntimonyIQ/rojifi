@@ -80,7 +80,7 @@ class AddTeamModal extends React.Component<IProps, IState> {
     }
 
     render(): React.ReactNode {
-        const { open, onOpenChange, onSubmit } = this.props;
+        const { open, onOpenChange } = this.props; // Unused: onSubmit
         const { email, role, loading } = this.state;
         return (
             <Dialog open={open} onOpenChange={onOpenChange}>

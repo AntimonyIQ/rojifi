@@ -6,7 +6,6 @@ import { Button } from "@/v1/components/ui/button"
 import { Input } from "@/v1/components/ui/input"
 import { Label } from "@/v1/components/ui/label"
 import { Eye, EyeOff, Lock } from "lucide-react"
-import { resetPassword } from "@/v1/services/auth.service" // Import the auth service function
 import { Link, useSearchParams } from "wouter"
 
 export function ResetPasswordForm() {
@@ -39,7 +38,6 @@ export function ResetPasswordForm() {
         setIsLoading(true)
 
         try {
-            await resetPassword(token, formData.password)
             setIsLoading(false)
             setIsSuccess(true)
         } catch (err: any) {

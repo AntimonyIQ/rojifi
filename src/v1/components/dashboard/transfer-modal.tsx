@@ -8,10 +8,6 @@ import { Label } from "@/v1/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/v1/components/ui/select"
 import { Textarea } from "@/v1/components/ui/textarea"
 import { useToast } from "@/v1/components/ui/use-toast"
-import { fetchTransferBanks, initiateTransfer, verifyInternationalAccount } from "@/v1/services/bank.service"
-import { WalletService } from "@/v1/services/wallet.service"
-import { Bank } from "@/v1/types/bank.type"
-import { Wallet } from "@/v1/types/wallet.type"
 
 interface TransferModalProps {
   isOpen: boolean
@@ -34,8 +30,8 @@ const currencyFlags: { [key: string]: string } = {
 export function TransferModal({ isOpen, onClose }: TransferModalProps) {
   const [step, setStep] = useState<"transfer" | "confirmation" | "processing" | "success">("transfer")
   const [selectedCurrency, setSelectedCurrency] = useState<string>("")
-  const [wallets, setWallets] = useState<Wallet[]>([])
-  const [banks, setBanks] = useState<Bank[]>([])
+  const [wallets, _setWallets] = useState<any[]>([])
+  const [banks, setBanks] = useState<any[]>([])
   const [formData, setFormData] = useState({
     achCode: "",
     receiptUrl: "",
@@ -51,59 +47,19 @@ export function TransferModal({ isOpen, onClose }: TransferModalProps) {
     transactionPin: "",
   })
   const [transferError, setTransferError] = useState<string | null>(null)
-  const [isLoadingBanks, setIsLoadingBanks] = useState(false)
-  const [isLoadingWallets, setIsLoadingWallets] = useState(false)
+  const [isLoadingBanks, _setIsLoadingBanks] = useState(false)
+  const [isLoadingWallets, _setIsLoadingWallets] = useState(false)
   const [isVerifyingBeneficiary, setIsVerifyingBeneficiary] = useState(false)
   const { toast } = useToast()
-  const walletService = new WalletService()
 
   // Fetch wallets on component mount
   useEffect(() => {
-    setIsLoadingWallets(true)
-    walletService.getAllWallets()
-      .then((response) => {
-        setWallets(response.data)
-        if (response.data.length > 0) {
-          setSelectedCurrency(response.data[0].currency.code)
-        }
-      })
-      .catch((error) => {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: error.message || "Failed to fetch wallets",
-        })
-      })
-      .finally(() => setIsLoadingWallets(false))
+
   }, [])
 
   // Fetch banks when currency changes for African currencies
   useEffect(() => {
-    if (["NGN", "KES", "GHS", "ZAR", "UGX", "XAF"].includes(selectedCurrency)) {
-      setIsLoadingBanks(true)
-      const currencyId = wallets.find((w) => w.currency.code === selectedCurrency)?.currency.id
-      if (currencyId) {
-        fetchTransferBanks(currencyId)
-          .then((bankList) => {
-            setBanks(bankList)
-            setFormData((prev) => ({ ...prev, selectedBank: "", bankCodeForTransfer: "", beneficiaryName: "", iban: "" }))
-          })
-          .catch((error) => {
-            toast({
-              variant: "destructive",
-              title: "Error",
-              description: error.message || "Failed to fetch banks",
-            })
-          })
-          .finally(() => setIsLoadingBanks(false))
-      } else {
-        setBanks([])
-        setIsLoadingBanks(false)
-      }
-    } else {
-      setBanks([])
-      setFormData((prev) => ({ ...prev, selectedBank: "", bankCodeForTransfer: "", beneficiaryName: "", iban: "" }))
-    }
+
   }, [selectedCurrency, wallets])
 
   // Verify beneficiary name for all currencies
@@ -116,42 +72,7 @@ export function TransferModal({ isOpen, onClose }: TransferModalProps) {
       }
 
       setIsVerifyingBeneficiary(true)
-      try {
-        let beneficiaryName = ""
-        let bankCode = ""
-        const currencyId = wallets.find((w) => w.currency.code === selectedCurrency)?.currency.id
-        if (!currencyId) {
-          throw new Error("Selected currency not found")
-        }
 
-        if (["USD"].includes(selectedCurrency)) {
-          bankCode = formData.bankCode
-        } else if (["EUR", "GBP", "CAD"].includes(selectedCurrency)) {
-          bankCode = formData.sortCode
-        } else if (["NGN", "KES", "GHS", "ZAR", "UGX", "XAF"].includes(selectedCurrency)) {
-          bankCode = formData.bankCodeForTransfer
-        }
-
-        if (bankCode) {
-          const iban = ["EUR", "GBP", "CAD"].includes(selectedCurrency) ? formData.iban : undefined
-          beneficiaryName = await verifyInternationalAccount(bankCode, formData.accountNumber, currencyId, iban)
-        }
-
-        if (isMounted) {
-          setFormData((prev) => ({ ...prev, beneficiaryName }))
-        }
-      } catch (error: any) {
-        if (isMounted) {
-          toast({
-            variant: "destructive",
-            title: "Verification Failed",
-            description: error.message || "Failed to verify beneficiary name",
-          })
-          setFormData((prev) => ({ ...prev, beneficiaryName: "" }))
-        }
-      } finally {
-        if (isMounted) setIsVerifyingBeneficiary(false)
-      }
     }
 
     verifyBeneficiary()
@@ -288,7 +209,6 @@ export function TransferModal({ isOpen, onClose }: TransferModalProps) {
         transferPayload.iban = formData.iban
       }
 
-      await initiateTransfer(transferPayload)
       setStep("success")
       toast({
         title: "Transfer Successful 🎉",

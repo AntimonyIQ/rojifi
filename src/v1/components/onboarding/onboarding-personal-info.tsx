@@ -8,7 +8,6 @@ import { Label } from "@/v1/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/v1/components/ui/select"
 import { OnboardingProgress } from "./onboarding-progress"
 import { OnboardingSidebar } from "./onboarding-sidebar"
-import { updateUser } from "@/v1/services/auth.service"
 
 interface OnboardingPersonalInfoProps {
     data: {
@@ -22,7 +21,7 @@ interface OnboardingPersonalInfoProps {
     onPrev: () => void;
 }
 
-export function OnboardingPersonalInfo({ data, onUpdate, onNext, onPrev }: OnboardingPersonalInfoProps) {
+export function OnboardingPersonalInfo({ data, onUpdate, onNext }: OnboardingPersonalInfoProps) {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
@@ -77,12 +76,7 @@ export function OnboardingPersonalInfo({ data, onUpdate, onNext, onPrev }: Onboa
         }
 
         try {
-            const payload = {
-                firstname: data.firstname,
-                lastname: data.lastname,
-                phone: `${data.countryCode}${data.phoneNumber}`,
-            }
-            await updateUser(payload)
+
             onNext()
         } catch (err: any) {
             setError(err.message || "Failed to save information. Please check your phone number.")

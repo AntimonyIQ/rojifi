@@ -10,9 +10,9 @@ import { usePathname } from "wouter/use-browser-location";
 import { Link } from "wouter";
 
 export function BankStatementView() {
-    const [totalTransactions, setTotalTransactions] = useState<number>(1);
-    const [email, setEmail] = useState<string>("antimonyiq@gmail.com");
-    const [months, setMonths] = useState<number>(3); // default: 3 months
+    const [totalTransactions] = useState<number>(1); // TODO: Implement dynamic transaction count
+    const [email] = useState<string>("antimonyiq@gmail.com"); // TODO: Implement dynamic email
+    const [months] = useState<number>(3); // TODO: Implement month selection
 
     const [fromDate, setFromDate] = useState<string>("");
     const [toDate, setToDate] = useState<string>("");

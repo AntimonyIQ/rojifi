@@ -15,22 +15,20 @@ import { IResponse, ITransaction, IUser, IWallet } from "@/v1/interface/interfac
 import { Fiat, Status } from "@/v1/enums/enums";
 import Defaults from "@/v1/defaults/defaults";
 import { ILoginFormProps } from "../auth/login-form";
-import { useRouter } from "wouter";
 import { usePathname } from "wouter/use-browser-location";
 
 export function DashboardOverview() {
-    const router = useRouter();
     const pathname = usePathname();
     const [hideBalances, setHideBalances] = useState(false);
-    const [isLive, setIsLive] = useState<boolean>(true);
+    const [isLive, _setIsLive] = useState<boolean>(true);
     const [user, setUser] = useState<IUser | null>(null)
-    const [loadingRates, setLoadingRates] = useState<boolean>(false);
+    const [loadingRates, _setLoadingRates] = useState<boolean>(false);
     const [isStatisticsModalOpen, setIsStatisticsModalOpen] = useState<boolean>(false);
     const [wallets, setWallets] = useState<Array<IWallet>>([])
     const [selectedCurrency, setSelectedCurrency] = useState<Fiat>(Fiat.NGN);
     const [transactions, setTransactions] = useState<Array<ITransaction>>([]);
     const [withdrawalActivated, setWithdrawalActivated] = useState<boolean>(false);
-    const [withdrawEnabled, setWithdrawEnabled] = useState<boolean>(false);
+    const [withdrawEnabled, _setWithdrawEnabled] = useState<boolean>(false);
     const [activeWallet, setActiveWallet] = useState<IWallet | undefined>(undefined);
     const [activationLoading, setActivationLoading] = useState<boolean>(false);
     const sd: SessionData = session.getUserData();

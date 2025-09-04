@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import { Header } from "@/v1/components/header"
 import { Hero } from "@/v1/components/hero"
@@ -16,8 +14,7 @@ import { IHandshakeClient, IPayment, ISender, IUser } from "@/v1/interface/inter
 import CookieConsent from "@/v1/components/cookies";
 import { ThemeProvider } from '@/v1/components/theme-provider';
 import { Toaster } from 'sonner';
-import { Providers } from '@/v1/components/Providers';
-import { Analytics } from '@vercel/analytics/next';
+import { Analytics } from '@vercel/analytics/react';
 
 // Custom hook to manage authentication state
 const useAuth = () => {
@@ -58,23 +55,21 @@ export default function Home() {
 
     return (
         <>
-            <Providers>
-                <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} forcedTheme="light">
-                    <main className="flex min-h-screen flex-col">
-                        <Header isLoggedIn={isLoggedIn} user={user} />
-                        <Hero isLoggedIn={isLoggedIn} />
-                        <Stats />
-                        <Features />
-                        <Testimonials />
-                        <Faq />
-                        <Cta isLoggedIn={isLoggedIn} />
-                        <Newsletter />
-                        <Footer />
-                        <CookieConsent />
-                    </main>
-                    <Toaster richColors position="top-right" />
-                </ThemeProvider>
-            </Providers>
+            <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} forcedTheme="light">
+                <main className="flex min-h-screen flex-col">
+                    <Header isLoggedIn={isLoggedIn} user={user} />
+                    <Hero isLoggedIn={isLoggedIn} />
+                    <Stats />
+                    <Features />
+                    <Testimonials />
+                    <Faq />
+                    <Cta isLoggedIn={isLoggedIn} />
+                    <Newsletter />
+                    <Footer />
+                    <CookieConsent />
+                </main>
+                <Toaster richColors position="top-right" />
+            </ThemeProvider>
             <Analytics />
         </>
     )

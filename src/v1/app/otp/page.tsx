@@ -1,5 +1,5 @@
 "use client"
-import { OTPVerificationForm } from "@/components/auth/otp-form"
+import { OTPVerificationForm } from "@/v1/components/auth/otp-form"
 
 export default function OtpPage() {
   return (

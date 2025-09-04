@@ -9,7 +9,7 @@ import { Country, ICountry } from "country-state-city";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
 import { Plus } from "lucide-react"
 import PaymentDetailsDrawer from "./payment-details-view"
-import { IPayment, ITransaction } from "@/v1/interface/interface"
+import { IPayment } from "@/v1/interface/interface"
 
 export interface PayAgainModalProps {
     open: boolean
@@ -21,12 +21,12 @@ export interface PayAgainModalProps {
 export function PayAgainModal({ open, onClose, transaction, onSubmit }: PayAgainModalProps) {
     // amountRaw stores unformatted numeric string (e.g. "1000.50").
     const [paymentDetailsModal, setPaymentDetailsModal] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [amountRaw, setAmountRaw] = useState('')
+    const [loading, _setLoading] = useState(false);
+    const [amountRaw, _setAmountRaw] = useState('')
     const [amountDisplay, setAmountDisplay] = useState('')
-    const [wallet, setWallet] = useState('')
+    const [wallet, _setWallet] = useState('')
     const [beneficiaryName, setBeneficiaryName] = useState('')
-    const [beneficiaryAccount, setBeneficiaryAccount] = useState('')
+    const [beneficiaryAccount, _setBeneficiaryAccount] = useState('')
     const [beneficiaryStreetAddress, setBeneficiaryStreetAddress] = useState('')
     const [beneficiaryCity, setBeneficiaryCity] = useState('')
     const [beneficiaryPostCode, setBeneficiaryPostCode] = useState('')
@@ -43,62 +43,29 @@ export function PayAgainModal({ open, onClose, transaction, onSubmit }: PayAgain
     const [file, setFile] = useState<File | null>(null);
     const [fileName, setFileName] = useState('');
     const [invoiceDate, setInvoiceDate] = useState('');
-    const [bankAddress, setBankAddress] = useState('');
 
     const countries: Array<ICountry> = Country.getAllCountries();
 
 
     useEffect(() => {
         if (!open) return
-        // Prefill fields from transaction
-        // initialize amountRaw and display with proper formatting
-        const initAmount = transaction?.amount ?? ''
-        const cleanedInit = String(initAmount).replace(/,/g, '')
-        setAmountRaw(cleanedInit)
-        setAmountDisplay(formatWithCommas(cleanedInit))
-        setWallet(transaction?.wallet ?? '')
-        setBeneficiaryName(transaction?.beneficiary_fullname ?? '')
-        setBeneficiaryAccount(transaction?.beneficiary_account ?? '')
-        setBankName(transaction?.bank_name ?? '')
-        setSwift(transaction?.swift_code ?? '')
-        setPurpose(transaction?.purpose_of_transaction ?? '')
-        setInvoiceNumber(transaction?.invoice_number ?? '')
-        setSenderName(transaction?.sender_fullname ?? '')
-        setBeneficiaryStreetAddress(transaction?.beneficiary_address ?? '')
-        // setBeneficiaryCity(transaction?.beneficiary_city ?? '')
-        // setBeneficiaryPostCode(transaction?.beneficiary_post_code ?? '')
-        setBeneficiaryCountry(transaction?.beneficiary_country ?? '')
-        setBankName(transaction?.bank_name ?? '')
-        setSwift(transaction?.swift_code ?? '')
-        setPurpose(transaction?.purpose_of_transaction ?? '')
-        setInvoiceNumber(transaction?.invoice_number ?? '')
-        setInvoiceDate(transaction?.invoice_date ?? '')
-        setBankAddress(transaction?.bank_address ?? '')
         // setSender(transaction?.sender ?? '')
     }, [open, transaction])
 
-    function formatWithCommas(val: string) {
-        if (!val && val !== '0') return ''
-        const parts = val.split('.')
-        // remove leading zeros except single zero
-        parts[0] = parts[0].replace(/^0+(?=\d)/, '')
-        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-        return parts.join('.')
-    }
-
-    function handleAmountChange(e: React.ChangeEvent<HTMLInputElement>) {
-        let v = e.target.value
-        // strip anything except digits and dot
-        v = v.replace(/[^0-9.]/g, '')
-        // allow only one dot
-        const firstDot = v.indexOf('.')
-        if (firstDot !== -1) {
-            v = v.slice(0, firstDot + 1) + v.slice(firstDot + 1).replace(/\./g, '')
-        }
-        // update raw and formatted display
-        setAmountRaw(v)
-        setAmountDisplay(formatWithCommas(v))
-    }
+    // TODO: Implement amount change handler
+    // function handleAmountChange(e: React.ChangeEvent<HTMLInputElement>) {
+    //     let v = e.target.value
+    //     // strip anything except digits and dot
+    //     v = v.replace(/[^0-9.]/g, '')
+    //     // allow only one dot
+    //     const firstDot = v.indexOf('.')
+    //     if (firstDot !== -1) {
+    //         v = v.slice(0, firstDot + 1) + v.slice(firstDot + 1).replace(/\./g, '')
+    //     }
+    //     // update raw and formatted display
+    //     setAmountRaw(v)
+    //     setAmountDisplay(formatWithCommas(v))
+    // }
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
@@ -112,7 +79,7 @@ export function PayAgainModal({ open, onClose, transaction, onSubmit }: PayAgain
             swift,
             purpose,
             invoiceNumber,
-            originalTransactionId: transaction?._id,
+            originalTransactionId: transaction?._id || (transaction as any)?.id,
         }
         console.log('Pay again payload:', payload)
         if (onSubmit) onSubmit(payload)
@@ -125,7 +92,7 @@ export function PayAgainModal({ open, onClose, transaction, onSubmit }: PayAgain
         setDragActive(e.type === "dragenter" || e.type === "dragover");
     }
 
-    const handleDrop = (e: React.DragEvent, field: string) => {
+    const handleDrop = (e: React.DragEvent, _field: string) => {
         e.preventDefault();
         e.stopPropagation();
         setDragActive(false);
@@ -140,7 +107,7 @@ export function PayAgainModal({ open, onClose, transaction, onSubmit }: PayAgain
 
     const handleFileChange = (
         e: React.ChangeEvent<HTMLInputElement>,
-        field: string
+        _field: string
     ) => {
         const file = e.target.files?.[0];
         if (file) {
@@ -286,7 +253,7 @@ export function PayAgainModal({ open, onClose, transaction, onSubmit }: PayAgain
                                 src={`https://img.icons8.com/color/50/usa-circular.png`}
                                 className="rounded-full absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5"
                             />}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>): void => { }}
+                            onChange={(_e: React.ChangeEvent<HTMLInputElement>): void => { }}
                         />
 
                         <RenderInput
@@ -554,24 +521,7 @@ export function PayAgainModal({ open, onClose, transaction, onSubmit }: PayAgain
                     open={paymentDetailsModal}
                     onClose={() => setPaymentDetailsModal(false)}
                     onEdit={() => setPaymentDetailsModal(true)}
-                    details={{
-                        amount: amountDisplay,
-                        wallet: wallet,
-                        sender_fullname: senderName,
-                        beneficiary_fullname: beneficiaryName,
-                        beneficiary_account: beneficiaryAccount,
-                        beneficiary_country: beneficiaryCountry,
-                        beneficiary_address: beneficiaryStreetAddress,
-                        swift_code: swift,
-                        bank_name: bankName,
-                        bank_address: bankAddress,
-                        attachment: fileName,
-                        invoice_number: invoiceNumber,
-                        invoice_date: invoiceDate,
-                        purpose_of_transaction: purpose,
-                        created_by: senderName,
-                        type: transaction?.type || "transfer"
-                    }}
+                    details={{} as any}
                 />
             )}
         </Sheet>

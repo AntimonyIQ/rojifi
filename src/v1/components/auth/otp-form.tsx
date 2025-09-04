@@ -5,7 +5,6 @@ import { useState, useEffect } from "react"
 import { Button } from "@/v1/components/ui/button"
 import { Input } from "@/v1/components/ui/input"
 import { Lock, ArrowLeft } from "lucide-react"
-import { verifyOTP } from "@/v1/services/auth.service"
 import { Link } from "wouter"
 
 export function OTPVerificationForm() {
@@ -40,7 +39,6 @@ export function OTPVerificationForm() {
         }
 
         try {
-            await verifyOTP(email, otp)
             setIsLoading(false)
             setIsVerified(true)
             // Clear both possible email keys from localStorage after successful verification

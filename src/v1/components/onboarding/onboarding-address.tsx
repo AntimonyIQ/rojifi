@@ -8,7 +8,6 @@ import { Label } from "@/v1/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/v1/components/ui/select"
 import { OnboardingProgress } from "./onboarding-progress"
 import { OnboardingSidebar } from "./onboarding-sidebar"
-import { updateUser } from "@/v1/services/auth.service"
 import NigeriaStatesCities from "@/v1/lib/data"
 
 interface OnboardingAddressProps {
@@ -38,22 +37,8 @@ export function OnboardingAddress({ data, personalInfo, onUpdate, onNext, onPrev
         setError(null)
 
         try {
-            const payload = {
-                firstname: personalInfo.firstname,
-                lastname: personalInfo.lastname,
-                phone: personalInfo.countryCode + personalInfo.phoneNumber,
-                otherName: personalInfo.otherName || undefined,
-                dateOfBirth: personalInfo.dateOfBirth || undefined,
-                gender: personalInfo.gender || undefined,
-                address_line_one: data.address_line_one,
-                address_line_two: data.address_line_two || undefined,
-                city: data.city,
-                state: data.state,
-                zip_code: data.zip_code || undefined,
-                country: data.country,
-            }
-            await updateUser(payload)
-            onNext()
+            console.log(personalInfo)
+            onNext();
         } catch (err: any) {
             setError(err.message || "Failed to save address")
         } finally {

@@ -8,42 +8,64 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 20 14.3% 4.1%;
-    --muted: 60 4.8% 95.9%;
-    --muted-foreground: 25 5.3% 44.7%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 20 14.3% 4.1%;
+    --foreground: 222.2 84% 4.9%;
+
     --card: 0 0% 100%;
-    --card-foreground: 20 14.3% 4.1%;
-    --border: 20 5.9% 90%;
-    --input: 20 5.9% 90%;
-    --primary: 213 83% 31%; /* #0C4592 */
-    --primary-foreground: 211 100% 99%;
-    --secondary: 60 4.8% 95.9%;
-    --secondary-foreground: 24 9.8% 10%;
-    --accent: 60 4.8% 95.9%;
-    --accent-foreground: 24 9.8% 10%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 60 9.1% 97.8%;
-    --ring: 213 83% 31%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+
     --radius: 0.5rem;
+  }
 
-    /* Chart colors */
-    --chart-1: 213 83% 31%;
-    --chart-2: 221 83% 53%;
-    --chart-3: 142 71% 45%;
-    --chart-4: 262 83% 58%;
-    --chart-5: 26 100% 50%;
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
 
-    /* Sidebar colors */
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 20 14.3% 4.1%;
-    --sidebar-primary: 213 83% 31%;
-    --sidebar-primary-foreground: 211 100% 99%;
-    --sidebar-accent: 213 83% 95%;
-    --sidebar-accent-foreground: 213 83% 31%;
-    --sidebar-border: 20 5.9% 90%;
-    --sidebar-ring: 213 83% 31%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
   }
 }
 
@@ -51,39 +73,72 @@
   * {
     @apply border-border;
   }
-
   body {
-    /* font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, system-ui,
-      sans-serif; */
-    font-family: "Figtree", sans-serif;
-    @apply antialiased bg-gray-50 text-foreground;
+    @apply bg-background text-foreground;
   }
 }
 
-@layer components {
-  .fade-in {
-    @apply transition-opacity duration-300 ease-in-out;
+@keyframes confetti {
+  0% {
+    transform: translateY(0) rotate(0);
+    opacity: 1;
   }
-
-  /* Embla Carousel */
-  .embla {
-    @apply overflow-hidden;
-  }
-
-  .embla__container {
-    @apply flex;
-  }
-
-  .embla__slide {
-    @apply flex-[0_0_auto] min-w-0 relative;
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
   }
 }
 
-.hide-scrollbar::-webkit-scrollbar {
-  display: none;
+.animate-confetti {
+  animation: confetti 5s ease-in-out forwards;
 }
 
-.hide-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+.custom-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+    background-color: rgba(100, 100, 100, 0.3);
+    border-radius: 9999px;
+}
+
+
+.hero-image-container {
+  width: 100%;
+  max-width: 1056px; /* Increased from 960px (960 * 1.1 = 1056) */
+  margin: 0 auto;
+  padding-top: 2rem;
+}
+
+.hero-image {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  max-height: 528px; /* Increased from 480px (480 * 1.1 = 528) */
+}
+
+/* Custom button styles */
+.btn-outline-primary {
+  color: #0c4592 !important;
+  border-color: #0c4592 !important;
+  background-color: white !important;
+}
+
+.btn-outline-primary:hover {
+  background-color: rgba(12, 69, 146, 0.1) !important;
+  color: #0c4592 !important;
+}
+
+.btn-primary-white {
+  color: white !important;
+  background-color: #0c4592 !important;
+}
+
+.btn-primary-white:hover {
+  background-color: #0a3a7a !important;
+  color: white !important;
 }

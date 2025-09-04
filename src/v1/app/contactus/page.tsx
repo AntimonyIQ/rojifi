@@ -1,5 +1,5 @@
 "use client"
-import { ContactForm } from "@/components/auth/contact-form";
+import { ContactForm } from "@/v1/components/auth/contact-form";
 
 export default function ContactPage() {
     return (

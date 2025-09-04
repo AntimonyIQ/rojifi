@@ -1,8 +1,8 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/v1/components/ui/button"
 import { ArrowRight } from "lucide-react"
-import Link from "next/link"
+import { Link } from "wouter"
 
 export function CardsCta() {
   return (

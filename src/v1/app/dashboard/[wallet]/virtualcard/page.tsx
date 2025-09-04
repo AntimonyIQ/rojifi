@@ -1,5 +1,5 @@
-import { DashboardLayout } from "@/components/dashboard/dashboard-layout"
-import VirtualCardView from "@/components/dashboard/virtualcardview"
+import { DashboardLayout } from "@/v1/components/dashboard/dashboard-layout"
+import VirtualCardView from "@/v1/components/dashboard/virtualcardview"
 
 export default function VirtualCardPage() {
     return (

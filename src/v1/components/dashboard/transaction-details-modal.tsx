@@ -1,7 +1,7 @@
 "use client"
 
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/v1/components/ui/sheet"
-import { Check, AlertCircle, Download, MoreVertical, FileText, Repeat, Edit, UserCircle } from "lucide-react"
+import { Download, MoreVertical, FileText, Repeat, Edit, UserCircle } from "lucide-react"
 import { Button } from "../ui/button";
 import {
     DropdownMenu,
@@ -42,7 +42,7 @@ export function TransactionDetailsDrawer({ isOpen, onClose, transaction }: Trans
     }
 
     const handleDownloadReceipt = async () => {
-        const url = transaction?.receipt ?? transaction?.attachment
+        const url = transaction?.receipt ?? transaction?.paymentInvoice
         if (!url) {
             console.log("No receipt available for", transaction?._id)
             onClose()
@@ -120,7 +120,8 @@ export function TransactionDetailsDrawer({ isOpen, onClose, transaction }: Trans
         }
     }
 
-    const getTransactionIcon = () => {
+    // TODO: Implement transaction icon functionality
+    /* const getTransactionIcon = () => {
         if (transaction.status.toLowerCase() === "successful") {
             return (
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
@@ -140,7 +141,7 @@ export function TransactionDetailsDrawer({ isOpen, onClose, transaction }: Trans
                 </div>
             )
         }
-    }
+    } */
 
     const formatCurrency = (amount: string | undefined) => {
         const cleanedAmount = amount?.replace(/,/g, '') ?? "0";
@@ -149,21 +150,6 @@ export function TransactionDetailsDrawer({ isOpen, onClose, transaction }: Trans
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
         })}`;
-    };
-
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        return date.toString() === "Invalid Date"
-            ? "Invalid Date"
-            : date.toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit",
-                hour12: true,
-            });
     };
 
     return (
@@ -249,24 +235,24 @@ export function TransactionDetailsDrawer({ isOpen, onClose, transaction }: Trans
 
                             <div className="flex flex-col justify-start items-start gap-1 pb-3 border-b border-gray-100">
                                 <span className="text-gray-500 uppercase text-xs">Sender:</span>
-                                <span className="text-gray-900 font-medium text-sm">{transaction?.sender_fullname ?? "N/A"}</span>
+                                <span className="text-gray-900 font-medium text-sm">{transaction?.senderName ?? "N/A"}</span>
                             </div>
 
                             <div className="flex flex-col justify-start items-start gap-1 pb-3 border-b border-gray-100">
                                 <span className="text-gray-500 uppercase text-xs">Beneficiary's Account Name:</span>
-                                <span className="text-gray-900 font-medium text-sm">{transaction?.beneficiary_fullname ?? "N/A"}</span>
+                                <span className="text-gray-900 font-medium text-sm">{transaction?.beneficiaryAccountName ?? "N/A"}</span>
                             </div>
 
                             <div className="flex flex-col justify-start items-start gap-1 pb-3 border-b border-gray-100">
                                 <span className="text-gray-500 uppercase text-xs">Beneficiary's Account Number:</span>
-                                <span className="text-gray-900 font-medium text-sm">{transaction?.beneficiary_account ?? "N/A"}</span>
+                                <span className="text-gray-900 font-medium text-sm">{transaction?.beneficiaryAccountNumber ?? "N/A"}</span>
                             </div>
 
                             <div className="flex flex-col justify-start items-start gap-1 pb-3 border-b border-gray-100">
                                 <span className="text-gray-500 uppercase text-xs">Beneficiary's Country:</span>
                                 <div className="flex flex-row items-center justify-start gap-2">
                                     <img src="https://img.icons8.com/color/50/usa-circular.png" alt="" className="w-5 h-5 rounded-full" />
-                                    <span className="text-gray-900 font-medium text-sm">{transaction?.beneficiary_country ?? "N/A"}</span>
+                                    <span className="text-gray-900 font-medium text-sm">{transaction?.beneficiaryCountry ?? "N/A"}</span>
                                 </div>
                             </div>
 
@@ -291,26 +277,26 @@ export function TransactionDetailsDrawer({ isOpen, onClose, transaction }: Trans
 
                             <div className="flex flex-col justify-start items-start gap-1 pb-3 border-b border-gray-100">
                                 <span className="text-gray-500 uppercase text-xs">SWIFT Code / Routing Number:</span>
-                                <span className="text-gray-900 font-medium text-sm">{transaction?.swift_code ?? "N/A"}</span>
+                                <span className="text-gray-900 font-medium text-sm">{transaction?.swiftCode ?? "N/A"}</span>
                             </div>
 
                             <div className="flex flex-col justify-start items-start gap-1 pb-3 border-b border-gray-100">
                                 <span className="text-gray-500 uppercase text-xs">Bank Name:</span>
-                                <span className="text-gray-900 font-medium text-sm">{transaction?.bank_name ?? "N/A"}</span>
+                                <span className="text-gray-900 font-medium text-sm">{transaction?.beneficiaryBankName ?? "N/A"}</span>
                             </div>
 
                             <div className="flex flex-col justify-start items-start gap-1 pb-3 border-b border-gray-100">
                                 <span className="text-gray-500 uppercase text-xs">Bank Address:</span>
-                                <span className="text-gray-900 font-medium text-sm">{transaction?.bank_address ?? "N/A"}</span>
+                                <span className="text-gray-900 font-medium text-sm">{transaction?.beneficiaryBankAddress ?? "N/A"}</span>
                             </div>
 
                             <div className="flex flex-col justify-start items-start gap-1 pb-3 border-b border-gray-100 w-full">
                                 <span className="text-gray-500 uppercase text-xs">Attachment:</span>
                                 <div className="w-full flex flex-row items-center justify-between border-2 border-dashed border-blue-500 rounded-md px-4">
-                                    <span className="text-gray-900 font-medium text-sm max-w-[140px] truncate" title={transaction?.attachment ?? "N/A"}>
-                                        {transaction?.attachment ?? "N/A"}
+                                    <span className="text-gray-900 font-medium text-sm max-w-[140px] truncate" title={transaction?.paymentInvoice ?? "N/A"}>
+                                        {transaction?.paymentInvoice ?? "N/A"}
                                     </span>
-                                    <Button variant="link" onClick={() => openPreview(transaction?.attachment, transaction?.attachment)}>
+                                    <Button variant="link" onClick={() => openPreview(transaction?.paymentInvoice, transaction?.paymentInvoice)}>
                                         View
                                     </Button>
                                 </div>
@@ -318,17 +304,17 @@ export function TransactionDetailsDrawer({ isOpen, onClose, transaction }: Trans
 
                             <div className="flex flex-col justify-start items-start gap-1 pb-3 border-b border-gray-100">
                                 <span className="text-gray-500 uppercase text-xs">Invoice Number:</span>
-                                <span className="text-gray-900 font-medium text-sm">{transaction?.invoice_number ?? "N/A"}</span>
+                                <span className="text-gray-900 font-medium text-sm">{transaction?.paymentInvoiceNumber ?? "N/A"}</span>
                             </div>
 
                             <div className="flex flex-col justify-start items-start gap-1 pb-3 border-b border-gray-100">
                                 <span className="text-gray-500 uppercase text-xs">Invoice Date:</span>
-                                <span className="text-gray-900 font-medium text-sm">{transaction?.invoice_date ?? "N/A"}</span>
+                                <span className="text-gray-900 font-medium text-sm">{transaction?.paymentInvoiceDate ? new Date(transaction.paymentInvoiceDate).toLocaleDateString() : "N/A"}</span>
                             </div>
 
                             <div className="flex flex-col justify-start items-start gap-1 pb-3 border-b border-gray-100">
                                 <span className="text-gray-500 uppercase text-xs">Purpose of Payment:</span>
-                                <span className="text-gray-900 font-medium text-sm">{transaction?.purpose_of_transaction ?? "N/A"}</span>
+                                <span className="text-gray-900 font-medium text-sm">{transaction?.purposeOfPayment ?? "N/A"}</span>
                             </div>
 
                             <div className="flex flex-col justify-start items-start gap-1 pb-3 border-b border-gray-100 w-full">
@@ -339,7 +325,7 @@ export function TransactionDetailsDrawer({ isOpen, onClose, transaction }: Trans
                                 <div className="border-l-[4px] px-3 border-gray-300 ml-2">
                                     <div className="flex flex-col justify-start items-start gap-1">
                                         <span className="text-gray-500 capitalize text-xs">UETR:</span>
-                                        <span className="text-gray-900 font-medium text-sm">{transaction?.tracking_number ?? "N/A"}</span>
+                                        <span className="text-gray-900 font-medium text-sm">{transaction?.reference ?? transaction?.txId ?? "N/A"}</span>
                                     </div>
                                 </div>
                             </div>
@@ -351,24 +337,24 @@ export function TransactionDetailsDrawer({ isOpen, onClose, transaction }: Trans
 
                             <div className="flex flex-col justify-start items-start gap-1 pb-3 border-b border-gray-100">
                                 <span className="text-gray-500 uppercase text-xs">Completed Date:</span>
-                                <span className="text-gray-900 font-medium text-sm">{transaction?.completed_date}</span>
+                                <span className="text-gray-900 font-medium text-sm">{transaction?.updatedAt ? new Date(transaction.updatedAt).toLocaleDateString() : "N/A"}</span>
                             </div>
 
                             <div className="flex flex-col justify-start items-start gap-1 pb-3 border-b border-gray-100">
                                 <span className="text-gray-500 uppercase text-xs">Processed Date:</span>
-                                <span className="text-gray-900 font-medium text-sm">{transaction?.processed_date}</span>
+                                <span className="text-gray-900 font-medium text-sm">{transaction?.updatedAt ? new Date(transaction.updatedAt).toLocaleDateString() : "N/A"}</span>
                             </div>
 
                             <div className="flex flex-col justify-start items-start gap-1 pb-3 border-b border-gray-100">
                                 <span className="text-gray-500 uppercase text-xs">Initiated Date:</span>
-                                <span className="text-gray-900 font-medium text-sm">{transaction?.initiated_date}</span>
+                                <span className="text-gray-900 font-medium text-sm">{transaction?.createdAt ? new Date(transaction.createdAt).toLocaleDateString() : "N/A"}</span>
                             </div>
 
                             <div className="flex flex-col justify-start items-start gap-1 pb-3 border-b border-gray-100">
                                 <span className="text-gray-500 uppercase text-xs">Created By:</span>
                                 <div className="flex items-center gap-1">
                                     <UserCircle size={18} />
-                                    <span className="text-gray-900 font-medium text-sm">{transaction?.created_by}</span>
+                                    <span className="text-gray-900 font-medium text-sm">{transaction?.sender ?? "N/A"}</span>
                                 </div>
                             </div>
 

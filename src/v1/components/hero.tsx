@@ -1,8 +1,7 @@
 
 import { motion } from "framer-motion"
 import { Button } from "@/v1/components/ui/button"
-import "../app/hero-image.css"
-import "../app/button-styles.css"
+import flagbg from "../public/flags-background.png";
 import { Link } from "wouter"
 
 interface HeroProps {
@@ -15,7 +14,7 @@ export function Hero({ isLoggedIn }: HeroProps) {
             {/* Background image */}
             <div className="absolute inset-0 -z-10 flex items-start justify-center overflow-hidden">
                 <div className="hero-image-container">
-                    <img src="/flags-background.png" alt="" className="hero-image" aria-hidden="true" />
+                    <img src={flagbg} alt="" className="hero-image" aria-hidden="true" />
                 </div>
             </div>
 

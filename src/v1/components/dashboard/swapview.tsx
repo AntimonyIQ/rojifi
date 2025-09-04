@@ -120,11 +120,12 @@ export function SwapView() {
         return `${symbol}${converted.toFixed(2)}`;
     };
 
-    const getRate = () => {
-        if (!rates[fromCurrency] || !rates[toCurrency]) return null;
-        const rate = (1 / rates[fromCurrency]) * rates[toCurrency];
-        return rate.toFixed(4);
-    };
+    // TODO: Implement rate functionality
+    // const getRate = () => {
+    //     if (!rates[fromCurrency] || !rates[toCurrency]) return null;
+    //     const rate = (1 / rates[fromCurrency]) * rates[toCurrency];
+    //     return rate.toFixed(4);
+    // };
 
     // New helper that returns the rate for: 1 {toCurrency} ≈ X {fromCurrency}
     const getRateReversed = () => {
@@ -162,13 +163,14 @@ export function SwapView() {
         }
     };
 
-    const activateCurrency = () => {
-        if (pendingCurrency) {
-            pendingCurrency.activated = true; // (in real app, call API here)
-            setShowDialog(false);
-            setPendingCurrency(null);
-        }
-    };
+    // TODO: Implement currency activation
+    // const activateCurrency = () => {
+    //     if (pendingCurrency) {
+    //         pendingCurrency.activated = true; // (in real app, call API here)
+    //         setShowDialog(false);
+    //         setPendingCurrency(null);
+    //     }
+    // };
 
     // Derived flags for enabling/disabling confirm
     const fromBalance = currencies.find((c) => c.currency === fromCurrency)?.balance ?? 0;

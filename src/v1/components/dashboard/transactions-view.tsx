@@ -67,9 +67,9 @@ enum Owners {
 export function TransactionsView() {
     const [hideBalances, setHideBalances] = useState(false);
     const [transactions, setTransactions] = useState<Array<ITransaction>>([]);
-    const [totalItems, setTotalItems] = useState(0);
-    const [totalPages, setTotalPages] = useState(1);
-    const [loading, setLoading] = useState<boolean>(false);
+    const [totalItems] = useState(0); // TODO: Implement pagination
+    const [totalPages] = useState(1); // TODO: Implement pagination
+    const [loading] = useState<boolean>(false); // TODO: Implement loading state
     const sd: SessionData = session.getUserData();
 
     // const walletService = new WalletService();
@@ -78,7 +78,7 @@ export function TransactionsView() {
     const [statusFilter, setStatusFilter] = useState("Successful");
     const [currencyFilter, setCurrencyFilter] = useState("All");
     const itemsPerPage = 10;
-    const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
+    // const [selectedTransaction, setSelectedTransaction] = useState<any>(null); // TODO: Implement transaction selection properly
     const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
 
     const statusTabs = ["Successful", "Processing", "Pending", "Failed"];
@@ -96,8 +96,9 @@ export function TransactionsView() {
         }
     }, [transactions, sd]);
 
-    const handleTransactionClick = (transaction: any) => {
-        const formattedTransaction = {
+    const handleTransactionClick = (_transaction: any) => {
+        // TODO: Implement transaction selection properly
+        /* const formattedTransaction = {
             id: transaction.id,
             reference: transaction.reference ?? "N/A",
             amount: transaction.amount ?? "0",
@@ -109,7 +110,7 @@ export function TransactionsView() {
             currency: transaction.currency ?? { code: "NGN", decimal_place: 2 },
             created_at: transaction.created_at ?? new Date().toISOString(),
         };
-        setSelectedTransaction(formattedTransaction);
+        setSelectedTransaction(formattedTransaction); */
         setIsTransactionModalOpen(true);
     };
 

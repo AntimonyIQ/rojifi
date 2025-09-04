@@ -1,13 +1,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
-import { CardsHero } from "@/components/cards/cards-hero"
-import { CardsCta } from "@/components/cards/cards-cta"
-import { IHandshakeClient, IUser } from "@/interface/interface"
-import { session, SessionData } from "@/session/session"
-import Handshake from "@/hash/handshake"
+import { Header } from "@/v1/components/header"
+import { Footer } from "@/v1/components/footer"
+import { CardsHero } from "@/v1/components/cards/cards-hero"
+import { CardsCta } from "@/v1/components/cards/cards-cta"
+import { IHandshakeClient, IPayment, ISender, IUser } from "@/v1/interface/interface"
+import { session, SessionData } from "@/v1/session/session"
+import Handshake from "@/v1/hash/handshake"
 
 // Custom hook to manage authentication state
 const useAuth = () => {
@@ -29,6 +29,11 @@ const useAuth = () => {
                 deviceid: client.publicKey,
                 isLoggedIn: false,
                 devicename: "Unknown",
+                sender: {} as ISender,
+                draftPayment: {} as IPayment,
+                authorization: "",
+                wallets: [],
+                transactions: []
             };
 
             session.login(sessionData);

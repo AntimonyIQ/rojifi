@@ -1,5 +1,5 @@
-import { DashboardLayout } from "@/components/dashboard/dashboard-layout"
-import { BankStatementView } from "@/components/dashboard/statementview"
+import { DashboardLayout } from "@/v1/components/dashboard/dashboard-layout"
+import { BankStatementView } from "@/v1/components/dashboard/statementview"
 
 export default function BankStatementPage() {
     return (

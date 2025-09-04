@@ -1,5 +1,5 @@
-import { BeneficiaryView } from "@/components/dashboard/beneficiaryview"
-import { DashboardLayout } from "@/components/dashboard/dashboard-layout"
+import { BeneficiaryView } from "@/v1/components/dashboard/beneficiaryview"
+import { DashboardLayout } from "@/v1/components/dashboard/dashboard-layout"
 
 export default function Beneficiaryage() {
     return (

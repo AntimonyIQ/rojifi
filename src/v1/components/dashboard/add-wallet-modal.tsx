@@ -6,45 +6,26 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/v1/components/ui/button"
 import { Loader2, Check } from "lucide-react"
 import { useToast } from "@/v1/components/ui/use-toast"
-import { Wallet, Currency } from "@/v1/types/wallet.type"
-import { WalletService, fetchCurrencies } from "@/v1/services/wallet.service" // Import WalletService and fetchCurrencies
 
 type AddWalletModalProps = {
     isOpen: boolean
     onClose: () => void
-    existingWallets: Wallet[]
+    existingWallets: any[]
     onAddWallet?: (currency: string) => void
 }
 
 export function AddWalletModal({ isOpen, onClose, existingWallets, onAddWallet }: AddWalletModalProps) {
     const [selectedCurrencyId, setSelectedCurrencyId] = useState<string>("")
-    const [currencies, setCurrencies] = useState<Currency[]>([])
+    const [currencies, _setCurrencies] = useState<any[]>([])
     const [error, setError] = useState<string>("")
     const [isLoading, setIsLoading] = useState(false)
     const [isSuccess, setIsSuccess] = useState(false)
-    const [isFetchingCurrencies, setIsFetchingCurrencies] = useState(false)
+    const [isFetchingCurrencies, _setIsFetchingCurrencies] = useState(false)
     const { toast } = useToast()
-    const walletService = new WalletService()
 
     // Fetch currencies when the modal opens
     useEffect(() => {
-        if (isOpen) {
-            setIsFetchingCurrencies(true)
-            fetchCurrencies()
-                .then((fetchedCurrencies) => {
-                    setCurrencies(fetchedCurrencies)
-                    setIsFetchingCurrencies(false)
-                })
-                .catch((err) => {
-                    setError(err.message || "Failed to fetch currencies")
-                    setIsFetchingCurrencies(false)
-                    toast({
-                        title: "Error",
-                        description: err.message || "Failed to fetch currencies",
-                        variant: "destructive",
-                    })
-                })
-        }
+
     }, [isOpen, toast])
 
     // Reset state when modal opens
@@ -103,7 +84,6 @@ export function AddWalletModal({ isOpen, onClose, existingWallets, onAddWallet }
         setIsLoading(true)
 
         try {
-            await walletService.createWallet(selectedCurrencyId)
             setIsLoading(false)
             setIsSuccess(true)
             if (onAddWallet) {

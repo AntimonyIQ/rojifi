@@ -10,7 +10,7 @@ import { Mail, User, Percent, IdCard, Calendar, Building, Mailbox, Map, Plus } f
 import { Logo } from "@/v1/components/logo"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/v1/components/ui/select"
 import { Country, ICountry } from 'country-state-city'
-import { useParams } from "wouter"
+// import { useLocation } from "wouter"
 
 export function AddShareHolderForm() {
     const [dragActive, setDragActive] = useState(false)
@@ -42,8 +42,12 @@ export function AddShareHolderForm() {
         agreeToMarketing: false,
     })
 
-    const { id } = useParams()
+    // const { id } = useParams() // TODO: Implement URL param extraction for wouter
     const countries: Array<ICountry> = Country.getAllCountries()
+
+    // Get id from URL path if needed
+    // const [location] = useLocation()
+    // const id = location.split('/').pop() // Extract id from URL if needed
 
     const handleDrag = (e: React.DragEvent) => {
         e.preventDefault()
@@ -77,7 +81,7 @@ export function AddShareHolderForm() {
         )
     }
 
-    const isChecked = (role: string) => roles.includes(role)
+    // const isChecked = (role: string) => roles.includes(role) // TODO: Implement role checking if needed
 
     const handleInputChange = (field: keyof typeof formData, value: string | boolean) => {
         let sanitizedValue: string | boolean = value

@@ -18,7 +18,7 @@ interface OnboardingDocumentsProps {
     onPrev: () => void
 }
 
-export function OnboardingDocuments({ data, onUpdate, onNext, onPrev }: OnboardingDocumentsProps) {
+export function OnboardingDocuments({ data, onUpdate, onNext }: OnboardingDocumentsProps) {
     const [dragActive, setDragActive] = useState(false)
 
     const handleInputChange = (field: string, value: string) => {

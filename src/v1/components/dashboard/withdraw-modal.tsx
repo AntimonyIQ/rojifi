@@ -8,9 +8,6 @@ import { Input } from "@/v1/components/ui/input";
 import { Label } from "@/v1/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/v1/components/ui/select";
 import { useToast } from "@/v1/components/ui/use-toast";
-import { WalletService } from "@/v1/services/wallet.service";
-import { fetchBankAccounts, addBankAccount, fetchBanks, verifyBankAccount } from "@/v1/services/bank.service";
-import type { BankAccount, Bank } from "@/v1/types/bank.type";
 
 interface WithdrawModalProps {
   isOpen: boolean;
@@ -29,7 +26,6 @@ const currencies = [
 
 export function WithdrawModal({ isOpen, onClose }: WithdrawModalProps) {
   const { toast } = useToast();
-  const walletService = new WalletService();
 
   // State variables
   const [step, setStep] = useState<"withdraw" | "add-account" | "authorize" | "loading" | "success">("withdraw");
@@ -37,43 +33,20 @@ export function WithdrawModal({ isOpen, onClose }: WithdrawModalProps) {
   const [selectedAccount, setSelectedAccount] = useState("");
   const [amount, setAmount] = useState("");
   const [transactionPin, setTransactionPin] = useState("");
-  const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
-  const [banks, setBanks] = useState<Bank[]>([]);
+  const [bankAccounts, _setBankAccounts] = useState([]);
   const [newAccountData, setNewAccountData] = useState({
     selectedBank: "",
     bankCode: "",
     accountNumber: "",
     accountName: "",
   });
-  const [isLoading, setIsLoading] = useState(false);
-  const [ngnBalance, setNgnBalance] = useState("₦0");
-  const [isVerifyingAccount, setIsVerifyingAccount] = useState(false);
+  const [isLoading, _setIsLoading] = useState(false);
+  const [ngnBalance, _setNgnBalance] = useState("₦0");
+  const [isVerifyingAccount, _setIsVerifyingAccount] = useState(false);
 
   // Fetch bank accounts, banks, and NGN wallet balance on component mount
   useEffect(() => {
-    const loadData = async () => {
-      setIsLoading(true);
-      try {
-        const accounts = await fetchBankAccounts();
-        setBankAccounts(accounts);
-        const bankList = await fetchBanks();
-        setBanks(bankList);
-        const wallets = await walletService.getAllWallets();
-        const ngnWallet = wallets.data.find((wallet) => wallet.currency.code === "NGN");
-        setNgnBalance(ngnWallet?.formatted_balance || "₦0");
-      } catch (error: any) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: error.message || "Failed to load data",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    if (isOpen) {
-      loadData();
-    }
+
   }, [isOpen]);
 
   const formatAmount = (value: string) => {
@@ -86,46 +59,12 @@ export function WithdrawModal({ isOpen, onClose }: WithdrawModalProps) {
     setAmount(formatted);
   };
 
-  const handleAccountNumberChange = async (value: string) => {
-    const numericValue = value.replace(/[^0-9]/g, "").slice(0, 10);
-    setNewAccountData((prev) => ({
-      ...prev,
-      accountNumber: numericValue,
-      accountName: numericValue.length < 10 ? "" : prev.accountName, // Reset accountName if incomplete
-    }));
+  const handleAccountNumberChange = async (_value: string) => {
 
-    if (numericValue.length === 10 && newAccountData.bankCode) {
-      setIsVerifyingAccount(true);
-      try {
-        const accountName = await verifyBankAccount(newAccountData.bankCode, numericValue);
-        setNewAccountData((prev) => ({
-          ...prev,
-          accountName,
-        }));
-      } catch (error: any) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: error.message || "Failed to verify account name",
-        });
-        setNewAccountData((prev) => ({
-          ...prev,
-          accountName: "",
-        }));
-      } finally {
-        setIsVerifyingAccount(false);
-      }
-    }
   };
 
-  const handleBankChange = (bankName: string) => {
-    const selectedBank = banks.find((bank) => bank.bank_name === bankName);
-    setNewAccountData((prev) => ({
-      ...prev,
-      selectedBank: bankName,
-      bankCode: selectedBank?.bank_code || "",
-      accountName: "", // Reset accountName when bank changes
-    }));
+  const handleBankChange = (_bankName: string) => {
+
   };
 
   const handleContinue = () => {
@@ -141,35 +80,7 @@ export function WithdrawModal({ isOpen, onClose }: WithdrawModalProps) {
   };
 
   const handleCompleteWithdrawal = async () => {
-    if (transactionPin.length !== 4) {
-      toast({
-        variant: "destructive",
-        title: "Invalid PIN",
-        description: "Please enter a valid 4-digit PIN",
-      });
-      return;
-    }
 
-    setStep("loading");
-    try {
-      const numericAmount = parseFloat(amount.replace(/,/g, ""));
-      await walletService.initiateWithdrawal(numericAmount, transactionPin, selectedAccount);
-      setStep("success");
-      toast({
-        title: "Withdrawal Successful",
-        description: `Your withdrawal of ₦${amount} has been processed`,
-      });
-      setTimeout(() => {
-        handleClose();
-      }, 3000);
-    } catch (error: any) {
-      setStep("authorize");
-      toast({
-        variant: "destructive",
-        title: "Withdrawal Failed",
-        description: error.message || "An error occurred during withdrawal",
-      });
-    }
   };
 
   const handleClose = () => {
@@ -192,50 +103,10 @@ export function WithdrawModal({ isOpen, onClose }: WithdrawModalProps) {
   };
 
   const handleSaveNewAccount = async () => {
-    if (!newAccountData.selectedBank || !newAccountData.accountNumber || !newAccountData.bankCode || !newAccountData.accountName) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Please fill in all required fields and verify the account",
-      });
-      return;
-    }
 
-    setIsLoading(true);
-    try {
-      await addBankAccount({
-        bankName: newAccountData.selectedBank,
-        accountNumber: newAccountData.accountNumber,
-        accountName: newAccountData.accountName,
-        currency: bankAccountCurrency,
-        bankCode: newAccountData.bankCode,
-      });
-      // Fetch updated bank accounts
-      const updatedAccounts = await fetchBankAccounts();
-      setBankAccounts(updatedAccounts);
-      toast({
-        title: "Bank Account Added",
-        description: "Your bank account has been added successfully",
-      });
-      setStep("withdraw");
-      setNewAccountData({
-        selectedBank: "",
-        bankCode: "",
-        accountNumber: "",
-        accountName: "",
-      });
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message || "Failed to add bank account",
-      });
-    } finally {
-      setIsLoading(false);
-    }
   };
 
-  const selectedAccountDetails = bankAccounts.find((acc) => acc.id === selectedAccount);
+  const selectedAccountDetails = "" // bankAccounts.find((acc) => acc.id === selectedAccount);
 
   if (!isOpen) return null;
 
@@ -285,16 +156,7 @@ export function WithdrawModal({ isOpen, onClose }: WithdrawModalProps) {
                       <SelectValue placeholder="Choose bank account" />
                     </SelectTrigger>
                     <SelectContent>
-                      {bankAccounts.map((account) => (
-                        <SelectItem key={account.id} value={account.id}>
-                          <div className="flex flex-col text-left">
-                            <span className="font-medium">{account.accountName}</span>
-                            <span className="text-sm text-gray-500">
-                              {account.bankName} • {account.accountNumber}
-                            </span>
-                          </div>
-                        </SelectItem>
-                      ))}
+
                     </SelectContent>
                   </Select>
                 )}
@@ -369,11 +231,7 @@ export function WithdrawModal({ isOpen, onClose }: WithdrawModalProps) {
                     <SelectValue placeholder="Choose a bank" />
                   </SelectTrigger>
                   <SelectContent>
-                    {banks.map((bank) => (
-                      <SelectItem key={bank.bank_code} value={bank.bank_name}>
-                        {bank.bank_name}
-                      </SelectItem>
-                    ))}
+
                   </SelectContent>
                 </Select>
               </div>
@@ -434,15 +292,15 @@ export function WithdrawModal({ isOpen, onClose }: WithdrawModalProps) {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Account Name:</span>
-                    <span className="font-medium">{selectedAccountDetails.accountName}</span>
+                    <span className="font-medium">ABCD</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Bank:</span>
-                    <span className="font-medium">{selectedAccountDetails.bankName}</span>
+                    <span className="font-medium">ABCD</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Account Number:</span>
-                    <span className="font-medium">{selectedAccountDetails.accountNumber}</span>
+                    <span className="font-medium">ABCD</span>
                   </div>
                 </div>
               </div>

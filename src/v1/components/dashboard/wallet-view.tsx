@@ -1,13 +1,14 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import * as htmlToImage from "html-to-image";
+import { useState } from "react"
+// import { useEffect } from "react" // TODO: Re-enable when implementing wallet fetching
+// import * as htmlToImage from "html-to-image";
 import { Button } from "@/v1/components/ui/button"
-import { ArrowLeftRight, Expand, EyeOff, Plus, Send } from "lucide-react"
-import { Card, CardContent } from "../ui/card"
-import TransactionChart from "./transactionchart"
-import { IUser } from "@/v1/interface/interface";
-import { session, SessionData } from "@/v1/session/session";
+import { ArrowLeftRight, EyeOff, Plus, Send } from "lucide-react"
+// import { Card, CardContent } from "../ui/card"
+// import TransactionChart from "./transactionchart"
+// import { IUser } from "@/v1/interface/interface";
+// import { session, SessionData } from "@/v1/session/session";
 
 enum Currency {
     NGN = "NGN",
@@ -29,10 +30,10 @@ interface IWallet {
 
 export function WalletView() {
     const [hideBalances, setHideBalances] = useState(false)
-    const [user, setUser] = useState<IUser | null>(null)
-    const [isStatisticsModalOpen, setIsStatisticsModalOpen] = useState<boolean>(false);
-    const sd: SessionData = session.getUserData();
-    const [wallets, setWallets] = useState<Array<IWallet>>([
+    // const [user] = useState<IUser | null>(null) // TODO: Implement user functionality
+    // const [isStatisticsModalOpen] = useState<boolean>(false); // TODO: Implement statistics modal
+    // const sd: SessionData = session.getUserData(); // TODO: Implement session data usage
+    const [wallets] = useState<Array<IWallet>>([
         { currency: Currency.NGN, balance: 895_000.00, pending_payment_balance: 895_000.00 },
         { currency: Currency.USD, balance: 895_000.00, pending_payment_balance: 895_000.00 },
         { currency: Currency.EUR, balance: 0, pending_payment_balance: 0 },
@@ -53,69 +54,73 @@ export function WalletView() {
         { name: "GBP", icon: "🇬🇧" },
     ]
 
-    const chartData = [
-        { day: "Sun", value: 60, amount: "$2,500" },
-        { day: "Mon", value: 80, amount: "$3,200" },
-        { day: "Tue", value: 70, amount: "$4,300" },
-        { day: "Wed", value: 45, amount: "$2,000" },
-        { day: "Thu", value: 90, amount: "$5,000" },
-        { day: "Fri", value: 85, amount: "$4,800" },
-        { day: "Sat", value: 75, amount: "$3,900" },
-    ];
+    // TODO: Implement chart data
+    // const chartData = [
+    //     { day: "Sun", value: 60, amount: "$2,500" },
+    //     { day: "Mon", value: 80, amount: "$3,200" },
+    //     { day: "Tue", value: 70, amount: "$4,300" },
+    //     { day: "Wed", value: 45, amount: "$2,000" },
+    //     { day: "Thu", value: 90, amount: "$5,000" },
+    //     { day: "Fri", value: 85, amount: "$4,800" },
+    //     { day: "Sat", value: 75, amount: "$3,900" },
+    // ];
 
-    useEffect(() => {
-        const fetchWallets = async () => {
-            try {
-                setUser(sd.user || null);
-            } catch (error) {
-                console.error("Error fetching wallets:", error)
-            }
-        }
-        fetchWallets()
-    }, [])
+    // TODO: Implement wallet fetching
+    // useEffect(() => {
+    //     const fetchWallets = async () => {
+    //         try {
+    //             // setUser(sd.user || null); // TODO: Implement user setting
+    //         } catch (error) {
+    //             console.error("Error fetching wallets:", error)
+    //         }
+    //     }
+    //     fetchWallets()
+    // }, [])
 
     const activeWallet = wallets.find(w => w.currency === selectedCurrency);
 
-    const handleDownload = async () => {
-        try {
-            const node = document.getElementById("screenshot");
+    // TODO: Implement download functionality
+    // const handleDownload = async () => {
+    //     try {
+    //         const node = document.getElementById("screenshot");
 
-            if (!node) {
-                console.error("Screenshot element not found!");
-                return;
-            }
+    //         if (!node) {
+    //             console.error("Screenshot element not found!");
+    //             return;
+    //         }
 
-            const dataUrl = await htmlToImage.toPng(node, {
-                backgroundColor: "white",
-                pixelRatio: 2 // sharp output
-            });
+    //         const dataUrl = await htmlToImage.toPng(node, {
+    //             backgroundColor: "white",
+    //             pixelRatio: 2 // sharp output
+    //         });
 
-            // Trigger download instead of appending to DOM
-            const link = document.createElement("a");
-            link.download = "transaction-chart.png";
-            link.href = dataUrl;
-            link.click();
+    //         // Trigger download instead of appending to DOM
+    //         const link = document.createElement("a");
+    //         link.download = "transaction-chart.png";
+    //         link.href = dataUrl;
+    //         link.click();
 
-        } catch (err) {
-            console.error("Oops, something went wrong!", err);
-        }
-    };
+    //     } catch (err) {
+    //         console.error("Oops, something went wrong!", err);
+    //     }
+    // };
 
-    const Chart = () => {
-        return (
-            <Card>
-                <CardContent>
-                    <div className="flex items-center justify-between mb-4 pt-4">
-                        <h3 className="text-lg font-medium">Statistics</h3>
-                        <button onClick={() => setIsStatisticsModalOpen(true)} className="text-sm text-gray-500 flex gap-1">
-                            Expand <Expand className="h-4 w-4" />
-                        </button>
-                    </div>
-                    <TransactionChart data={chartData} height={400} />
-                </CardContent>
-            </Card>
-        );
-    }
+    // TODO: Implement chart component
+    // const Chart = () => {
+    //     return (
+    //         <Card>
+    //             <CardContent>
+    //                 <div className="flex items-center justify-between mb-4 pt-4">
+    //                     <h3 className="text-lg font-medium">Statistics</h3>
+    //                     <button onClick={() => setIsStatisticsModalOpen(true)} className="text-sm text-gray-500 flex gap-1">
+    //                         Expand <Expand className="h-4 w-4" />
+    //                     </button>
+    //                 </div>
+    //                 <TransactionChart data={chartData} height={400} />
+    //             </CardContent>
+    //         </Card>
+    //     );
+    // }
 
     return (
         <div className="flex flex-col lg:flex-row gap-6">

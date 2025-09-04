@@ -5,7 +5,6 @@ import { useState } from "react"
 import { Button } from "@/v1/components/ui/button"
 import { Input } from "@/v1/components/ui/input"
 import { Mail, ArrowLeft } from "lucide-react"
-import { requestPasswordReset } from "@/v1/services/auth.service" // Import the auth service function
 import { Link } from "wouter"
 
 export function ForgotPasswordForm() {
@@ -20,7 +19,6 @@ export function ForgotPasswordForm() {
         setError(null)
 
         try {
-            await requestPasswordReset(email)
             setIsLoading(false)
             setIsSubmitted(true)
         } catch (err: any) {

@@ -2,8 +2,6 @@ import { useState, useEffect } from "react"
 import { X, Copy, Check, Info } from "lucide-react"
 import { Button } from "@/v1/components/ui/button"
 import { useToast } from "@/v1/components/ui/use-toast"
-import { fetchVirtualAccounts } from "@/v1/services/bank.service"
-import { BankAccount } from "@/v1/types/bank.type"
 
 interface DepositModalProps {
     isOpen: boolean
@@ -12,33 +10,15 @@ interface DepositModalProps {
 
 export function DepositModal({ isOpen, onClose }: DepositModalProps) {
     const [copiedField, setCopiedField] = useState<string | null>(null)
-    const [virtualAccount, setVirtualAccount] = useState<BankAccount | null>(null)
-    const [loading, setLoading] = useState<boolean>(false)
-    const [error, setError] = useState<string | null>(null)
+    const [virtualAccount, _setVirtualAccount] = useState<any | null>(null)
+    const [loading, _setLoading] = useState<boolean>(false)
+    const [error, _setError] = useState<string | null>(null)
     const { success, error: toastError } = useToast()
 
     // Fetch virtual account when modal opens
     useEffect(() => {
         if (isOpen) {
-            const loadVirtualAccount = async () => {
-                setLoading(true)
-                setError(null)
-                try {
-                    const accounts = await fetchVirtualAccounts()
-                    if (accounts.length > 0) {
-                        setVirtualAccount(accounts[0]) // Use the first account
-                    } else {
-                        setError("No virtual accounts found")
-                    }
-                } catch (err: any) {
-                    const errorMessage = err.message || "Failed to load virtual account"
-                    setError(errorMessage)
-                    toastError("Error", errorMessage)
-                } finally {
-                    setLoading(false)
-                }
-            }
-            loadVirtualAccount()
+
         }
     }, [isOpen])
 

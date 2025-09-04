@@ -6,14 +6,12 @@ import { Button } from "@/v1/components/ui/button"
 import { Input } from "@/v1/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/v1/components/ui/select"
 import { X, ArrowUpDown, AlertCircle, Loader2, CheckCircle } from "lucide-react"
-import { Wallet } from "@/v1/types/wallet.type"
-import { WalletService } from "@/v1/services/wallet.service"
 import { DialogTitle } from "@radix-ui/react-dialog"
 
 interface CurrencyConversionModalProps {
     isOpen: boolean
     onClose: () => void
-    wallets: Wallet[]
+    wallets: any[]
     initialFromCurrency?: string
     initialToCurrency?: string
     initialAmount?: string
@@ -69,15 +67,11 @@ export function CurrencyConversionModal({
     const [exchangeRates, setExchangeRates] = useState<ExchangeRate[]>([])
     const [isLoadingRates, setIsLoadingRates] = useState(false)
 
-    const walletService = new WalletService()
-
     // Fetch exchange rates on mount
     useEffect(() => {
         const fetchExchangeRates = async () => {
             setIsLoadingRates(true)
             try {
-                const response = await walletService.getExchangeRates()
-                setExchangeRates(response.data)
                 setErrorMessage(null)
             } catch (error) {
                 setErrorMessage(error instanceof Error ? error.message : "Failed to fetch exchange rates")
@@ -181,21 +175,6 @@ export function CurrencyConversionModal({
                     return
                 }
 
-                const fees = await walletService.getSwapFees(
-                    fromCurrencyId,
-                    toCurrencyId,
-                    Number.parseFloat(amount)
-                )
-                // Validate API response
-                if (
-                    typeof fees.fee !== 'number' ||
-                    typeof fees.swap_amount !== 'number' ||
-                    typeof fees.rate !== 'string' ||
-                    isNaN(parseFloat(fees.rate))
-                ) {
-                    throw new Error("Invalid fee, swap amount, or rate from API")
-                }
-                setSwapFees(fees)
                 setErrorMessage(null)
             } catch (error) {
                 setSwapFees(null)
@@ -245,12 +224,6 @@ export function CurrencyConversionModal({
                 setModalState("confirm")
                 return
             }
-
-            await walletService.performSwap(
-                Number.parseFloat(amount),
-                fromCurrencyId,
-                toCurrencyId
-            )
             setModalState("success")
             setShowConfetti(true)
 

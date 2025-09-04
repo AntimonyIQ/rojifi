@@ -1,5 +1,5 @@
-import { DashboardLayout } from "@/components/dashboard/dashboard-layout"
-import { TransactionsView } from "@/components/dashboard/transactions-view"
+import { DashboardLayout } from "@/v1/components/dashboard/dashboard-layout"
+import { TransactionsView } from "@/v1/components/dashboard/transactions-view"
 
 export default function TransactionsPage() {
     return (

@@ -3,15 +3,8 @@
 import React from 'react';
 import { Card, CardContent } from "@/v1/components/ui/card";
 import { User, Loader2 } from "lucide-react";
-import { Inter } from "next/font/google";
 import { motion } from "framer-motion";
 import { Link } from 'wouter';
-
-const figtree = Inter({
-    subsets: ["latin"],
-    display: "swap",
-    variable: "--font-figtree",
-});
 
 interface KYCModalProps {
     isOpen: boolean;
@@ -45,7 +38,7 @@ export default function KYCModal({
     if (!isOpen) return null;
 
     return (
-        <div className={`fixed inset-0 bg-gray-600/50 flex items-center justify-center p-4 z-[1000] ${figtree.className}`}>
+        <div className="fixed inset-0 bg-gray-600/50 flex items-center justify-center p-4 z-[1000] font-inter">
             <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}

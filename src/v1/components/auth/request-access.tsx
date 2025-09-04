@@ -63,7 +63,7 @@ export function RequestAccessForm() {
     const [displayVolume, setDisplayVolume] = useState<string>(formatNumber(formData.volume))
     const sd: SessionData = session.getUserData();
 
-    const isValidName = (name: string) => /^[A-Za-z]{2,}$/.test(name);
+    // const isValidName = (name: string) => /^[A-Za-z]{2,}$/.test(name); // TODO: Implement name validation
     const isValidPhone = (phone: string) => /^[0-9]+$/.test(phone);
     const isValidEmail = (email: string) => /\S+@\S+\.\S+/.test(email);
 

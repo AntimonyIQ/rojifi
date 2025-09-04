@@ -346,6 +346,7 @@ export interface ISender {
 }
 
 export interface IPayment {
+    _id: string;
     rojifiId: string;
     sender: string;
     senderWallet: string;
@@ -423,7 +424,6 @@ export interface ILocation {
 }
 
 export interface ITransaction extends IPayment {
-    _id: string;
     from: string;
     to: string;
     fromCurrency: Coin;
@@ -440,7 +440,6 @@ export interface ITransaction extends IPayment {
     location: ILocation;
     createdAt: Date;
     updatedAt: Date;
-    ///////
     txId: string;
     type: TransactionType;
     amount: string;

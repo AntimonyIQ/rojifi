@@ -1,6 +1,6 @@
 "use client";
 
-import { KYBVerificationForm } from "@/components/auth/verify-kyc-kyb-form";
+import { KYBVerificationForm } from "@/v1/components/auth/verify-kyc-kyb-form";
 
 export default function KYCKYBVerificationPage() {
 

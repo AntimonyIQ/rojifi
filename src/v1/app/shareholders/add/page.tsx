@@ -1,5 +1,5 @@
 
-import { AddShareHolderForm } from "@/components/dashboard/add-shareholder";
+import { AddShareHolderForm } from "@/v1/components/dashboard/add-shareholder";
 
 export default async function AddSahreholderPage() {
 

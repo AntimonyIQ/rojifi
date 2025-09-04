@@ -1,5 +1,5 @@
-import { BusinessProfileView } from "@/components/dashboard/businessprofile"
-import { DashboardLayout } from "@/components/dashboard/dashboard-layout"
+import { BusinessProfileView } from "@/v1/components/dashboard/businessprofile"
+import { DashboardLayout } from "@/v1/components/dashboard/dashboard-layout"
 
 export default function BusinessProfilePage() {
     return (

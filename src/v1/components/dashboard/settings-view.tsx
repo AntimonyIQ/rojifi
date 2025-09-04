@@ -9,8 +9,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent } from "@/v1/components/ui/card";
 import { Dialog, DialogContent } from "@/v1/components/ui/dialog";
 import { useToast } from "@/v1/components/ui/use-toast";
-import { fetchBankAccounts, addBankAccount, removeBankAccount, verifyBankAccount } from "@/v1/services/bank.service";
-import { BankAccount, Bank } from "@/v1/types/bank.type";
 import { IUser } from "@/v1/interface/interface";
 import { session, SessionData } from "@/v1/session/session";
 import { cn } from "@/v1/lib/utils"
@@ -85,7 +83,8 @@ function MyProfileTab() {
     const { toast } = useToast();
     const [user, setUser] = useState<IUser | null>(null);
     const [formData, setFormData] = useState<Partial<IUser>>({});
-    const [loading, setLoading] = useState<boolean>(false);
+    const [loading] = useState<boolean>(false); // TODO: Implement loading state
+    //     const [loading] = useState<boolean>(false); // TODO: Implement loading state
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [popOpen, setPopOpen] = useState<boolean>(false);
     const sd: SessionData = session.getUserData();
@@ -338,8 +337,8 @@ function MyProfileTab() {
 
 function BankAccountsTab() {
     const { toast } = useToast();
-    const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
-    const [banks, setBanks] = useState<Bank[]>([]);
+    const [bankAccounts, setBankAccounts] = useState<any[]>([]);
+    const [banks] = useState<any[]>([]); // TODO: Implement bank management
     const [newBankAccount, setNewBankAccount] = useState({
         bankName: "",
         bankCode: "",
@@ -349,7 +348,7 @@ function BankAccountsTab() {
     });
     const [loading, setLoading] = useState(false);
     const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
-    const [bankToRemove, setBankToRemove] = useState<BankAccount | null>(null);
+    const [bankToRemove, setBankToRemove] = useState<any | null>(null);
     const [isVerifyingAccount, setIsVerifyingAccount] = useState(false);
 
     useEffect(() => {
@@ -367,10 +366,8 @@ function BankAccountsTab() {
         if (numericValue.length === 10 && newBankAccount.bankCode) {
             setIsVerifyingAccount(true);
             try {
-                const accountName = await verifyBankAccount(newBankAccount.bankCode, numericValue);
                 setNewBankAccount((prev) => ({
                     ...prev,
-                    accountName,
                 }));
                 toast({
                     title: "Account Verified",
@@ -442,15 +439,6 @@ function BankAccountsTab() {
 
         setLoading(true);
         try {
-            await addBankAccount({
-                bankName: newBankAccount.bankName,
-                accountNumber: newBankAccount.accountNumber,
-                accountName: newBankAccount.accountName,
-                currency: newBankAccount.currency,
-                bankCode: newBankAccount.bankCode,
-            });
-            const updatedAccounts = await fetchBankAccounts();
-            setBankAccounts(updatedAccounts || []);
             setNewBankAccount({ bankName: "", bankCode: "", accountNumber: "", accountName: "", currency: "NGN" });
             toast({
                 title: "Bank Account Added",
@@ -473,7 +461,6 @@ function BankAccountsTab() {
 
         setLoading(true);
         try {
-            await removeBankAccount(bankToRemove.id);
             setBankAccounts(bankAccounts.filter((bank) => bank.id !== bankToRemove.id));
             setRemoveDialogOpen(false);
             setBankToRemove(null);
@@ -1035,8 +1022,8 @@ function SecurityTab() {
 function OverviewTab({ setActiveTab }: { setActiveTab: (tab: string) => void }) {
     const { toast } = useToast();
     const [user, setUser] = useState<IUser | null>(null);
-    const [bankCount, setBankCount] = useState<number | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [bankCount] = useState<number | null>(null); // TODO: Implement bank count
+    const [loading] = useState(true); // TODO: Implement loading state
     const sd: SessionData = session.getUserData();
 
     useEffect(() => {

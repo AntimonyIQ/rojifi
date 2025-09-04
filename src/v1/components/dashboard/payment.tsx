@@ -217,7 +217,8 @@ export class PaymentView extends React.Component<unknown, PaymentViewState> {
         this.setState({ swiftmodal: open });
     };
 
-    private uploadFile = async (file: File): Promise<void> => {
+    // TODO: Implement file upload functionality
+    /* private uploadFile = async (file: File): Promise<void> => {
         const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
         const { formdata } = this.state;
         // reset field error
@@ -269,7 +270,7 @@ export class PaymentView extends React.Component<unknown, PaymentViewState> {
         } finally {
             this.setState({ uploading: false });
         }
-    }
+    } */
 
     private handleInputChange = (
         field: string,
@@ -303,6 +304,7 @@ export class PaymentView extends React.Component<unknown, PaymentViewState> {
                     if (sanitizedValue.length === 8 || sanitizedValue.length === 11) {
                         this.fetchSwiftDetails(sanitizedValue);
                     }
+                    break;
                 case "iban":
                     sanitizedValue = value
                         .replace(/[^A-Za-z0-9]/g, "")
@@ -412,7 +414,8 @@ formdata: {
         }
     };
 
-    private submitTransaction = async (iban: string): Promise<void> => {
+    // TODO: Implement transaction submission
+    /* private submitTransaction = async (iban: string): Promise<void> => {
         try {
             this.setState({ ibanLoading: true });
             Defaults.LOGIN_STATUS();
@@ -443,7 +446,7 @@ formdata: {
         } finally {
             this.setState({ ibanLoading: false });
         }
-    };
+    }; */
 
     private handleDrag = (e: React.DragEvent) => {
         e.preventDefault();
@@ -453,7 +456,7 @@ formdata: {
         });
     };
 
-    private handleDrop = (e: React.DragEvent, field: string) => {
+    private handleDrop = (e: React.DragEvent, _field: string) => {
         e.preventDefault();
         e.stopPropagation();
         this.setState({ dragActive: false });
@@ -466,7 +469,7 @@ formdata: {
 
     private handleFileChange = (
         e: React.ChangeEvent<HTMLInputElement>,
-        field: string
+        _field: string
     ) => {
         const file = e.target.files?.[0];
         if (file) {
@@ -721,7 +724,8 @@ formdata: {
     // RenderPaymentDetails moved to reusable component PaymentDetailsDrawer
 
     render(): React.ReactNode {
-        const { swiftmodal, formdata, loading, paymentDetailsModal, popOpen, wallets, selectedWallet, fileUpload, sender } = this.state;
+        const { swiftmodal, formdata, loading, paymentDetailsModal, popOpen, wallets, selectedWallet } = this.state;
+        // Unused: fileUpload, sender
 
         return (
             <div className="space-y-6 sm:px-[200px] lg:px-[300px]">
