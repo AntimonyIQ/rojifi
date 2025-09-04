@@ -518,45 +518,71 @@ export function DashboardOverview() {
                     </div>
 
                     <div className="w-full md:w-[30%]">
-                        <Card className="w-full md:min-w-md">
-                            <CardContent className="p-6 border rounded-xl space-y-6 w-full">
+                        <Card className="w-full md:min-w-md shadow-lg border-0 bg-gradient-to-br from-white to-gray-50/50">
+                            <CardContent className="p-0 w-full">
                                 {loadingRates ? (
-                                    <div className="m-40"><Loading /></div>
+                                    <div className="flex items-center justify-center py-20">
+                                        <Loading />
+                                    </div>
                                 ) : (
                                     <>
-                                        {/** Swap Title & Rate */}
-                                        <div className="flex flex-col items-center justify-center mb-4 gap-2">
-                                            <h2 className="text-xl font-medium text-gray-900">
-                                                <motion.div
-                                                    animate={{
-                                                        opacity: [1, 0.3, 1], // fade in & out
-                                                    }}
-                                                    transition={{
-                                                        duration: 1,
-                                                        repeat: Infinity,
-                                                        ease: "easeInOut",
-                                                    }}
-                                                    className="inline-block mr-1"
-                                                >
-                                                    <CircleDot
-                                                        className={isLive ? "text-green-500" : "text-red-500"}
-                                                        size={15}
-                                                    />
-                                                </motion.div>
-                                                Live Rates
-                                            </h2>
-                                            {!isLive && (
-                                                <div className="w-full flex flex-col items-start justify-start pt-5 bg-orange-100 border border-orange-500 rounded-lg p-2">
-                                                    <p className="text-sm text-orange-500">Please Note...</p>
-                                                    <p className="text-xs text-orange-500">
-                                                        Trade is currently closed. The rates displayed below are for information purposes and cannot currently be used for trading. Trade hours are between 9am to 6pm Lagos time.
-                                                    </p>
+                                        {/* Header Section */}
+                                        <div className="px-6 py-5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-xl">
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-3">
+                                                    <motion.div
+                                                        animate={{
+                                                            scale: [1, 1.1, 1],
+                                                            opacity: [1, 0.7, 1],
+                                                        }}
+                                                        transition={{
+                                                            duration: 2,
+                                                            repeat: Infinity,
+                                                            ease: "easeInOut",
+                                                        }}
+                                                        className="flex items-center justify-center w-8 h-8 bg-white/20 rounded-full"
+                                                    >
+                                                        <CircleDot
+                                                            className={isLive ? "text-green-300" : "text-red-300"}
+                                                            size={16}
+                                                        />
+                                                    </motion.div>
+                                                    <div>
+                                                        <h2 className="text-lg font-semibold">Live Exchange Rates</h2>
+                                                        <p className="text-xs text-blue-100 opacity-90">Real-time currency conversion</p>
+                                                    </div>
                                                 </div>
+                                                <div className={`px-2 py-1 rounded-full text-xs font-medium ${isLive
+                                                    ? 'bg-green-500/20 text-green-100 border border-green-400/30'
+                                                    : 'bg-red-500/20 text-red-100 border border-red-400/30'
+                                                    }`}>
+                                                    {isLive ? 'LIVE' : 'CLOSED'}
+                                                </div>
+                                            </div>
+
+                                            {!isLive && (
+                                                <motion.div
+                                                    initial={{ opacity: 0, y: 10 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    className="mt-4 p-3 bg-orange-500/20 border border-orange-400/30 rounded-lg backdrop-blur-sm"
+                                                >
+                                                    <div className="flex items-start gap-2">
+                                                        <div className="w-4 h-4 rounded-full bg-orange-400 flex items-center justify-center mt-0.5">
+                                                            <span className="text-white text-xs">!</span>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-xs font-medium text-orange-100">Market Closed</p>
+                                                            <p className="text-xs text-orange-200/80 mt-1">
+                                                                Trading hours: 9:00 AM - 6:00 PM (Lagos Time)
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </motion.div>
                                             )}
                                         </div>
 
-                                        {/* Rate List */}
-                                        <div className="divide-y divide-gray-200 border rounded-lg">
+                                        {/* Rates List */}
+                                        <div className="px-6 py-4 space-y-3 max-h-96 overflow-y-auto">
                                             {wallets.map((base) =>
                                                 wallets
                                                     .filter((target) => target.currency !== base.currency)
@@ -569,28 +595,74 @@ export function DashboardOverview() {
                                                         const rate = (1 / rates[base.currency]) * rates[target.currency];
 
                                                         return (
-                                                            <div
+                                                            <motion.div
                                                                 key={`${base.currency}-${target.currency}`}
-                                                                className="flex items-center justify-between py-3 px-2 hover:bg-gray-50 transition"
+                                                                initial={{ opacity: 0, x: -20 }}
+                                                                animate={{ opacity: 1, x: 0 }}
+                                                                whileHover={{ scale: 1.02, backgroundColor: 'rgba(59, 130, 246, 0.05)' }}
+                                                                className="group p-4 rounded-xl border border-gray-100 hover:border-blue-200 transition-all duration-200 cursor-pointer bg-white/60 backdrop-blur-sm"
                                                             >
-                                                                <div className="flex items-center gap-2 text-gray-700 font-medium">
-                                                                    <span>
-                                                                        <img src={base.icon} alt="" width={18} height={18} />
-                                                                    </span>
-                                                                    <span>{base.currency}</span>
-                                                                    <ChevronRight size={16} className="text-gray-400" />
-                                                                    <span>
-                                                                        <img src={target.icon} alt="" width={18} height={18} />
-                                                                    </span>
-                                                                    <span>{target.currency}</span>
+                                                                <div className="flex items-center justify-between">
+                                                                    <div className="flex items-center gap-3">
+                                                                        <div className="flex items-center gap-2">
+                                                                            <div className="relative">
+                                                                                <img
+                                                                                    src={base.icon}
+                                                                                    alt={base.currency}
+                                                                                    className="w-8 h-8 rounded-full shadow-sm ring-2 ring-white"
+                                                                                />
+                                                                            </div>
+                                                                            <span className="font-semibold text-gray-800 text-sm">{base.currency}</span>
+                                                                        </div>
+
+                                                                        <motion.div
+                                                                            animate={{ x: [0, 3, 0] }}
+                                                                            transition={{ duration: 2, repeat: Infinity }}
+                                                                            className="mx-1"
+                                                                        >
+                                                                            <ChevronRight size={14} className="text-blue-400 group-hover:text-blue-600" />
+                                                                        </motion.div>
+
+                                                                        <div className="flex items-center gap-2">
+                                                                            <div className="relative">
+                                                                                <img
+                                                                                    src={target.icon}
+                                                                                    alt={target.currency}
+                                                                                    className="w-8 h-8 rounded-full shadow-sm ring-2 ring-white"
+                                                                                />
+                                                                            </div>
+                                                                            <span className="font-semibold text-gray-800 text-sm">{target.currency}</span>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div className="text-right">
+                                                                        <div className="text-sm font-bold text-gray-900">
+                                                                            {rate.toFixed(4)}
+                                                                        </div>
+                                                                        <div className="text-xs text-gray-500">
+                                                                            per {base.symbol}
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
-                                                                <span className="text-gray-600 text-sm">
-                                                                    1 {base.symbol} ≈ {rate.toFixed(4)} {target.symbol}
-                                                                </span>
-                                                            </div>
+
+                                                                {/* Rate change indicator (placeholder for now) */}
+                                                                <div className="flex items-center justify-end mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                    <span className="text-xs text-green-600 flex items-center gap-1">
+                                                                        <span className="w-1 h-1 bg-green-500 rounded-full"></span>
+                                                                        Updated now
+                                                                    </span>
+                                                                </div>
+                                                            </motion.div>
                                                         );
                                                     })
                                             )}
+                                        </div>
+
+                                        {/* Footer */}
+                                        <div className="px-6 py-3 bg-gray-50/50 border-t rounded-b-xl">
+                                            <p className="text-xs text-gray-500 text-center">
+                                                Rates update every 30 seconds • Last updated: {new Date().toLocaleTimeString()}
+                                            </p>
                                         </div>
                                     </>
                                 )}
