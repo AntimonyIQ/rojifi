@@ -31,6 +31,26 @@ import {
 import { Status } from "@/v1/enums/enums"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/v1/components/ui/dialog"
 import { Link } from "wouter"
+import GlobeWrapper from "../globe"
+import { Carousel, ICarouselData } from "../carousel"
+
+const carouselItems: ICarouselData[] = [
+    {
+        id: 1,
+        title: "Secure & Fast",
+        desc: "Experience lightning-fast transactions with military-grade encryption.",
+    },
+    {
+        id: 2,
+        title: "Global Access",
+        desc: "Use your wallet anywhere in the world with real-time support.",
+    },
+    {
+        id: 3,
+        title: "Smart Tools",
+        desc: "Swap, gift, and withdraw with built-in AI-assisted features.",
+    },
+];
 
 export function RequestAccessForm() {
     const [isLoading, setIsLoading] = useState(false)
@@ -220,425 +240,442 @@ export function RequestAccessForm() {
     }
 
     return (
-        <div className="w-full max-w-md bg-white rounded-lg shadow-sm p-8">
-            {/* Success Modal using Dialog */}
-            <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
-                <DialogContent className="max-w-sm md:max-w-lg">
-                    <DialogHeader>
-                        <DialogTitle className="text-center">Request Submitted</DialogTitle>
-                        <DialogDescription className="text-center text-gray-600 font-medium">Thank you for your request! You will be notified once approved by the Rojifi team.</DialogDescription>
-                    </DialogHeader>
-                    <DialogFooter className="flex justify-center gap-1">
-                        <Button variant="outline" size="md" onClick={() => setShowSuccessModal(false)}>
-                            Cancel
-                        </Button>
-                        <Button size="md" onClick={() => { setShowSuccessModal(false); window.location.href = "/"; }} className="text-white">
-                            <ArrowUpRight size={16} />
-                            Back to Homepage
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-            {/* Header */}
-            <div className="flex items-center justify-between mb-8">
-                <Link href="/" className="flex items-center space-x-2">
-                    <Logo className="h-8 w-auto" />
-                </Link>
-                <Link href="/" className="text-gray-400 hover:text-gray-600">
-                    <X className="h-6 w-6" />
-                </Link>
-            </div>
-
-            {/* Form Content */}
-            <div className="text-center mb-8">
-                <h1 className="text-2xl font-bold text-gray-900 mb-2">Request Access to Rojifi Business</h1>
-                <p className="text-gray-600">Let's start with your personal credentials</p>
-            </div>
-
-            <form className="space-y-6" onSubmit={handleSubmit}>
-                {error && (
-                    <p className="text-red-500 text-sm text-center">{error}</p>
-                )}
-
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <Label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
-                            First name <span className="text-red-500">*</span>
-                        </Label>
-                        <div className="relative">
-                            <Input
-                                id="firstName"
-                                name="firstName"
-                                type="text"
-                                autoComplete="given-name"
-                                required
-                                className="pl-10 h-12"
-                                placeholder="First name"
-                                value={formData.firstName}
-                                onChange={(e) => handleInputChange("firstName", e.target.value)}
-                            />
-                            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                        </div>
-                    </div>
-
-                    <div>
-                        <Label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
-                            Last name
-                        </Label>
-                        <div className="relative">
-                            <Input
-                                id="lastName"
-                                name="lastName"
-                                type="text"
-                                autoComplete="family-name"
-                                className="pl-10 h-12"
-                                placeholder="Last name"
-                                value={formData.lastName}
-                                onChange={(e) => handleInputChange("lastName", e.target.value)}
-                            />
-                            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                        </div>
-                    </div>
-                </div>
-
-                <div>
-                    <Label htmlFor="middleName" className="block text-sm font-medium text-gray-700 mb-2">
-                        Other Name <span className="text-red-500">*</span>
-                    </Label>
-                    <div className="relative">
-                        <Input
-                            id="middleName"
-                            name="middleName"
-                            type="text"
-                            autoComplete="family-name"
-                            className="pl-10 h-12"
-                            placeholder="Other"
-                            value={formData.middleName}
-                            onChange={(e) => handleInputChange("middleName", e.target.value)}
-                        />
-                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                    </div>
-                </div>
-
-                <div>
-                    <Label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                        Email address <span className="text-red-500">*</span>
-                    </Label>
-                    <div className="relative">
-                        <Input
-                            id="email"
-                            name="email"
-                            type="email"
-                            autoComplete="email"
-                            required
-                            className="pl-10 h-12"
-                            placeholder="Enter your email"
-                            value={formData.email}
-                            onChange={(e) => handleInputChange("email", e.target.value)}
-                        />
-                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                    </div>
-                </div>
-
-                <div>
-                    <Label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-2">
-                        Phone Number <span className="text-red-500">*</span>
-                    </Label>
-                    <div className="flex gap-2">
-                        <Popover open={popOpen} onOpenChange={() => setPopOpen(!popOpen)}>
-                            <PopoverTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    role="combobox"
-                                    size="md"
-                                    aria-expanded={popOpen}
-                                    className="w-28 justify-between"
-                                >
-                                    <img src={`https://flagcdn.com/w320/${uniqueCountries.find((country) => country.phonecode === formData.countryCode)?.iso2.toLowerCase()}.png`} alt="" width={18} height={18} />
-                                    {formData.countryCode
-                                        ? uniqueCountries.find((country) => country.phonecode === formData.countryCode)?.phonecode
-                                        : "Select country..."}
-                                    <ChevronsUpDownIcon className="ml-1 h-4 w-4 shrink-0 opacity-50" />
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-60 p-0">
-                                <Command>
-                                    <CommandInput placeholder="Search framework..." />
-                                    <CommandList>
-                                        <CommandEmpty>No country found.</CommandEmpty>
-                                        <CommandGroup>
-                                            {uniqueCountries.map((country) => (
-                                                <CommandItem
-                                                    key={country.name}
-                                                    value={country.phonecode}
-                                                    onSelect={(currentValue) => {
-                                                        handleInputChange("countryCode", currentValue)
-                                                    }}
-                                                >
-                                                    <CheckIcon
-                                                        className={cn(
-                                                            "mr-2 h-4 w-4",
-                                                            formData.countryCode === country.phonecode ? "opacity-100" : "opacity-0"
-                                                        )}
-                                                    />
-                                                    <img src={`https://flagcdn.com/w320/${country.iso2.toLowerCase()}.png`} alt="" width={18} height={18} />
-                                                    +{country.phonecode} {country.name}
-                                                </CommandItem>
-                                            ))}
-                                        </CommandGroup>
-                                    </CommandList>
-                                </Command>
-                            </PopoverContent>
-                        </Popover>
-                        <Input
-                            className="flex-1"
-                            value={formData.phoneNumber}
-                            onChange={(e) => handleInputChange("phoneNumber", e.target.value)}
-                            placeholder="Enter Phone Number"
-                            required
-                            id="phoneNumber"
-                            name="phoneNumber"
-                            type="text"
-                            autoComplete="work tel"
-                        />
-                    </div>
-                </div>
-
-                <div>
-                    <Label htmlFor="businessName" className="block text-sm font-medium text-gray-700 mb-2">
-                        Name of your Business <span className="text-red-500">*</span>
-                    </Label>
-                    <div className="relative">
-                        <Input
-                            id="businessName"
-                            name="businessName"
-                            type="text"
-                            autoComplete="work name"
-                            required
-                            className="pl-10 h-12"
-                            placeholder="Enter your business name"
-                            value={formData.businessName}
-                            onChange={(e) => handleInputChange("businessName", e.target.value)}
-                        />
-                        <Briefcase className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                    </div>
-                </div>
-
-                <div>
-                    <Label htmlFor="volume" className="block text-sm font-medium text-gray-700 mb-2">
-                        Volume Processed Weekly <span className="text-red-500">*</span>
-                    </Label>
-                    <div className="relative">
-                        <Input
-                            id="volume"
-                            name="volume"
-                            type="text"
-                            autoComplete="transaction-amount"
-                            required
-                            className="pl-10 h-12"
-                            placeholder="Enter volume processed weekly"
-                            value={displayVolume}
-                            onChange={(e) => handleInputChange("volume", e.target.value)}
-                        />
-                        <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                    </div>
-                </div>
-
-                <div>
-                    <Label className="block text-sm font-medium text-gray-700 mb-2">
-                        Location
-                    </Label>
-                </div>
-
-                <div>
-                    <Label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">
-                        Address <span className="text-red-500">*</span>
-                    </Label>
-                    <div className="relative">
-                        <Input
-                            id="address"
-                            name="address"
-                            type="text"
-                            autoComplete="address-level1"
-                            required
-                            className="pl-10 h-12"
-                            placeholder="Enter your address"
-                            value={formData.address}
-                            onChange={(e) => handleInputChange("address", e.target.value)}
-                        />
-                        <Map className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <Label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-2">
-                            City <span className="text-red-500">*</span>
-                        </Label>
-                        <div className="relative">
-                            <Input
-                                id="city"
-                                name="city"
-                                type="text"
-                                autoComplete="city"
-                                required
-                                className="pl-10 h-12"
-                                placeholder="Enter your city"
-                                value={formData.city}
-                                onChange={(e) => handleInputChange("city", e.target.value)}
-                            />
-                            <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                        </div>
-                    </div>
-
-                    <div>
-                        <Label htmlFor="postal" className="block text-sm font-medium text-gray-700 mb-2">
-                            Postal Code <span className="text-red-500">*</span>
-                        </Label>
-                        <div className="relative">
-                            <Input
-                                id="postal"
-                                name="postal"
-                                type="text"
-                                autoComplete="postal-code"
-                                className="pl-10 h-12"
-                                placeholder="Enter your postal code"
-                                value={formData.postal}
-                                required
-                                onChange={(e) => handleInputChange("postal", e.target.value)}
-                            />
-                            <Mailbox className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                        </div>
-                    </div>
-                </div>
-
-                <div>
-                    <Label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-2">
-                        State <span className="text-red-500">*</span>
-                    </Label>
-                    <div className="relative">
-                        <Input
-                            id="state"
-                            name="state"
-                            type="text"
-                            autoComplete="postal-code"
-                            className="pl-10 h-12"
-                            placeholder="Enter your state"
-                            value={formData.state}
-                            required
-                            onChange={(e) => handleInputChange("state", e.target.value)}
-                        />
-                        <MapPinHouse className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                    </div>
-                </div>
-
-                <div>
-                    <Label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-2">
-                        Country <span className="text-red-500">*</span>
-                    </Label>
-                    <div className="flex gap-2">
-                        <Popover open={countryPopover} onOpenChange={() => setCountryPopover(!countryPopover)}>
-                            <PopoverTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    role="combobox"
-                                    size="md"
-                                    aria-expanded={countryPopover}
-                                    className="w-full justify-between"
-                                >
-                                    <div className="flex flex-row items-center gap-2">
-                                        <img src={`https://flagcdn.com/w320/${uniqueCountries.find((country) => country.name === formData.country)?.iso2.toLowerCase()}.png`} alt="" width={18} height={18} />
-                                        {formData.country
-                                            ? uniqueCountries.find((country) => country.name === formData.country)?.name
-                                            : "Select country..."}
-                                    </div>
-                                    <ChevronsUpDownIcon className="ml-1 h-4 w-4 shrink-0 opacity-50" />
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-full p-0">
-                                <Command>
-                                    <CommandInput placeholder="Search framework..." />
-                                    <CommandList>
-                                        <CommandEmpty>No country found.</CommandEmpty>
-                                        <CommandGroup>
-                                            {uniqueCountries.map((country) => (
-                                                <CommandItem
-                                                    key={country.name}
-                                                    value={country.name}
-                                                    onSelect={(currentValue) => {
-                                                        handleInputChange("country", currentValue)
-                                                    }}
-                                                >
-                                                    <CheckIcon
-                                                        className={cn(
-                                                            "mr-2 h-4 w-4",
-                                                            formData.country === country.name ? "opacity-100" : "opacity-0"
-                                                        )}
-                                                    />
-                                                    <img src={`https://flagcdn.com/w320/${country.iso2.toLowerCase()}.png`} alt="" width={18} height={18} />
-                                                    {country.name}
-                                                </CommandItem>
-                                            ))}
-                                        </CommandGroup>
-                                    </CommandList>
-                                </Command>
-                            </PopoverContent>
-                        </Popover>
-                    </div>
-                </div>
-
-                <div>
-                    <Label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
-                        Tell us more about your business <span className="text-red-500">*</span>
-                    </Label>
-                    <div className="relative flex flex-row !items-start !justify-start">
-                        <Textarea
-                            id="message"
-                            name="message"
-                            autoComplete="message"
-                            required
-                            className="pl-10 h-12"
-                            placeholder="Enter your message"
-                            value={formData.message}
-                            onChange={(e) => handleInputChange("message", e.target.value)}
-                        />
-                        <MessageSquare className="absolute left-3 top-1/2 transform -translate-y-8 h-5 w-5 text-gray-400" />
-                    </div>
-                </div>
-
-                <div className="space-y-4">
-                    <div className="flex items-center space-x-2">
-                        <Checkbox
-                            id="agreeToTerms"
-                            checked={formData.agreeToTerms}
-                            onCheckedChange={(checked) => handleInputChange("agreeToTerms", checked)}
-                        />
-                        <Label htmlFor="agreeToTerms" className="text-sm text-gray-600">
-                            I agree to Rojifi's{" "}
-                            <Link href="/privacy" className="text-primary hover:text-primary/80">
-                                Privacy Policy
-                            </Link>{" "}
-                            and{" "}
-                            <Link href="#" className="text-primary hover:text-primary/80">
-                                Terms and Conditions
+        <div className="fixed top-0 bottom-0 left-0 right-0">
+            <div className="w-full h-full flex flex-row items-start justify-between">
+                <div className="w-full md:w-[40%] h-full overflow-y-auto custom-scroll px-4 py-6">
+                    <div className="p-4 max-w-md mx-auto">
+                        {/* Success Modal using Dialog */}
+                        <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
+                            <DialogContent className="max-w-sm md:max-w-lg">
+                                <DialogHeader>
+                                    <DialogTitle className="text-center">Request Submitted</DialogTitle>
+                                    <DialogDescription className="text-center text-gray-600 font-medium">Thank you for your request! You will be notified once approved by the Rojifi team.</DialogDescription>
+                                </DialogHeader>
+                                <DialogFooter className="flex justify-center gap-1">
+                                    <Button variant="outline" size="md" onClick={() => setShowSuccessModal(false)}>
+                                        Cancel
+                                    </Button>
+                                    <Button size="md" onClick={() => { setShowSuccessModal(false); window.location.href = "/"; }} className="text-white">
+                                        <ArrowUpRight size={16} />
+                                        Back to Homepage
+                                    </Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
+                        {/* Header */}
+                        <div className="flex items-center justify-between mb-8">
+                            <Link href="/" className="flex items-center space-x-2">
+                                <Logo className="h-8 w-auto" />
                             </Link>
-                        </Label>
+                            <Link href="/" className="text-gray-400 hover:text-gray-600">
+                                <X className="h-6 w-6" />
+                            </Link>
+                        </div>
+
+                        {/* Form Content */}
+                        <div className="text-center mb-8">
+                            <h1 className="text-2xl font-bold text-gray-900 mb-2">Request Access to Rojifi Business</h1>
+                            <p className="text-gray-600">Let's start with your personal credentials</p>
+                        </div>
+
+                        <form className="space-y-6" onSubmit={handleSubmit}>
+                            {error && (
+                                <p className="text-red-500 text-sm text-center">{error}</p>
+                            )}
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <Label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
+                                        First name <span className="text-red-500">*</span>
+                                    </Label>
+                                    <div className="relative">
+                                        <Input
+                                            id="firstName"
+                                            name="firstName"
+                                            type="text"
+                                            autoComplete="given-name"
+                                            required
+                                            className="pl-10 h-12"
+                                            placeholder="First name"
+                                            value={formData.firstName}
+                                            onChange={(e) => handleInputChange("firstName", e.target.value)}
+                                        />
+                                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <Label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
+                                        Last name
+                                    </Label>
+                                    <div className="relative">
+                                        <Input
+                                            id="lastName"
+                                            name="lastName"
+                                            type="text"
+                                            autoComplete="family-name"
+                                            className="pl-10 h-12"
+                                            placeholder="Last name"
+                                            value={formData.lastName}
+                                            onChange={(e) => handleInputChange("lastName", e.target.value)}
+                                        />
+                                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <Label htmlFor="middleName" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Other Name <span className="text-red-500">*</span>
+                                </Label>
+                                <div className="relative">
+                                    <Input
+                                        id="middleName"
+                                        name="middleName"
+                                        type="text"
+                                        autoComplete="family-name"
+                                        className="pl-10 h-12"
+                                        placeholder="Other"
+                                        value={formData.middleName}
+                                        onChange={(e) => handleInputChange("middleName", e.target.value)}
+                                    />
+                                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                </div>
+                            </div>
+
+                            <div>
+                                <Label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Email address <span className="text-red-500">*</span>
+                                </Label>
+                                <div className="relative">
+                                    <Input
+                                        id="email"
+                                        name="email"
+                                        type="email"
+                                        autoComplete="email"
+                                        required
+                                        className="pl-10 h-12"
+                                        placeholder="Enter your email"
+                                        value={formData.email}
+                                        onChange={(e) => handleInputChange("email", e.target.value)}
+                                    />
+                                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                </div>
+                            </div>
+
+                            <div>
+                                <Label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Phone Number <span className="text-red-500">*</span>
+                                </Label>
+                                <div className="flex gap-2">
+                                    <Popover open={popOpen} onOpenChange={() => setPopOpen(!popOpen)}>
+                                        <PopoverTrigger asChild>
+                                            <Button
+                                                variant="outline"
+                                                role="combobox"
+                                                size="md"
+                                                aria-expanded={popOpen}
+                                                className="w-28 justify-between"
+                                            >
+                                                <img src={`https://flagcdn.com/w320/${uniqueCountries.find((country) => country.phonecode === formData.countryCode)?.iso2.toLowerCase()}.png`} alt="" width={18} height={18} />
+                                                {formData.countryCode
+                                                    ? uniqueCountries.find((country) => country.phonecode === formData.countryCode)?.phonecode
+                                                    : "Select country..."}
+                                                <ChevronsUpDownIcon className="ml-1 h-4 w-4 shrink-0 opacity-50" />
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-60 p-0">
+                                            <Command>
+                                                <CommandInput placeholder="Search framework..." />
+                                                <CommandList>
+                                                    <CommandEmpty>No country found.</CommandEmpty>
+                                                    <CommandGroup>
+                                                        {uniqueCountries.map((country) => (
+                                                            <CommandItem
+                                                                key={country.name}
+                                                                value={country.phonecode}
+                                                                onSelect={(currentValue) => {
+                                                                    handleInputChange("countryCode", currentValue)
+                                                                }}
+                                                            >
+                                                                <CheckIcon
+                                                                    className={cn(
+                                                                        "mr-2 h-4 w-4",
+                                                                        formData.countryCode === country.phonecode ? "opacity-100" : "opacity-0"
+                                                                    )}
+                                                                />
+                                                                <img src={`https://flagcdn.com/w320/${country.iso2.toLowerCase()}.png`} alt="" width={18} height={18} />
+                                                                +{country.phonecode} {country.name}
+                                                            </CommandItem>
+                                                        ))}
+                                                    </CommandGroup>
+                                                </CommandList>
+                                            </Command>
+                                        </PopoverContent>
+                                    </Popover>
+                                    <Input
+                                        className="flex-1"
+                                        value={formData.phoneNumber}
+                                        onChange={(e) => handleInputChange("phoneNumber", e.target.value)}
+                                        placeholder="Enter Phone Number"
+                                        required
+                                        id="phoneNumber"
+                                        name="phoneNumber"
+                                        type="text"
+                                        autoComplete="work tel"
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <Label htmlFor="businessName" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Name of your Business <span className="text-red-500">*</span>
+                                </Label>
+                                <div className="relative">
+                                    <Input
+                                        id="businessName"
+                                        name="businessName"
+                                        type="text"
+                                        autoComplete="work name"
+                                        required
+                                        className="pl-10 h-12"
+                                        placeholder="Enter your business name"
+                                        value={formData.businessName}
+                                        onChange={(e) => handleInputChange("businessName", e.target.value)}
+                                    />
+                                    <Briefcase className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                </div>
+                            </div>
+
+                            <div>
+                                <Label htmlFor="volume" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Volume Processed Weekly <span className="text-red-500">*</span>
+                                </Label>
+                                <div className="relative">
+                                    <Input
+                                        id="volume"
+                                        name="volume"
+                                        type="text"
+                                        autoComplete="transaction-amount"
+                                        required
+                                        className="pl-10 h-12"
+                                        placeholder="Enter volume processed weekly"
+                                        value={displayVolume}
+                                        onChange={(e) => handleInputChange("volume", e.target.value)}
+                                    />
+                                    <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                </div>
+                            </div>
+
+                            <div>
+                                <Label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Location
+                                </Label>
+                            </div>
+
+                            <div>
+                                <Label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Address <span className="text-red-500">*</span>
+                                </Label>
+                                <div className="relative">
+                                    <Input
+                                        id="address"
+                                        name="address"
+                                        type="text"
+                                        autoComplete="address-level1"
+                                        required
+                                        className="pl-10 h-12"
+                                        placeholder="Enter your address"
+                                        value={formData.address}
+                                        onChange={(e) => handleInputChange("address", e.target.value)}
+                                    />
+                                    <Map className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <Label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-2">
+                                        City <span className="text-red-500">*</span>
+                                    </Label>
+                                    <div className="relative">
+                                        <Input
+                                            id="city"
+                                            name="city"
+                                            type="text"
+                                            autoComplete="city"
+                                            required
+                                            className="pl-10 h-12"
+                                            placeholder="Enter your city"
+                                            value={formData.city}
+                                            onChange={(e) => handleInputChange("city", e.target.value)}
+                                        />
+                                        <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <Label htmlFor="postal" className="block text-sm font-medium text-gray-700 mb-2">
+                                        Postal Code <span className="text-red-500">*</span>
+                                    </Label>
+                                    <div className="relative">
+                                        <Input
+                                            id="postal"
+                                            name="postal"
+                                            type="text"
+                                            autoComplete="postal-code"
+                                            className="pl-10 h-12"
+                                            placeholder="Enter your postal code"
+                                            value={formData.postal}
+                                            required
+                                            onChange={(e) => handleInputChange("postal", e.target.value)}
+                                        />
+                                        <Mailbox className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <Label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-2">
+                                    State <span className="text-red-500">*</span>
+                                </Label>
+                                <div className="relative">
+                                    <Input
+                                        id="state"
+                                        name="state"
+                                        type="text"
+                                        autoComplete="postal-code"
+                                        className="pl-10 h-12"
+                                        placeholder="Enter your state"
+                                        value={formData.state}
+                                        required
+                                        onChange={(e) => handleInputChange("state", e.target.value)}
+                                    />
+                                    <MapPinHouse className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                </div>
+                            </div>
+
+                            <div>
+                                <Label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Country <span className="text-red-500">*</span>
+                                </Label>
+                                <div className="flex gap-2">
+                                    <Popover open={countryPopover} onOpenChange={() => setCountryPopover(!countryPopover)}>
+                                        <PopoverTrigger asChild>
+                                            <Button
+                                                variant="outline"
+                                                role="combobox"
+                                                size="md"
+                                                aria-expanded={countryPopover}
+                                                className="w-full justify-between"
+                                            >
+                                                <div className="flex flex-row items-center gap-2">
+                                                    <img src={`https://flagcdn.com/w320/${uniqueCountries.find((country) => country.name === formData.country)?.iso2.toLowerCase()}.png`} alt="" width={18} height={18} />
+                                                    {formData.country
+                                                        ? uniqueCountries.find((country) => country.name === formData.country)?.name
+                                                        : "Select country..."}
+                                                </div>
+                                                <ChevronsUpDownIcon className="ml-1 h-4 w-4 shrink-0 opacity-50" />
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-full p-0">
+                                            <Command>
+                                                <CommandInput placeholder="Search framework..." />
+                                                <CommandList>
+                                                    <CommandEmpty>No country found.</CommandEmpty>
+                                                    <CommandGroup>
+                                                        {uniqueCountries.map((country) => (
+                                                            <CommandItem
+                                                                key={country.name}
+                                                                value={country.name}
+                                                                onSelect={(currentValue) => {
+                                                                    handleInputChange("country", currentValue)
+                                                                }}
+                                                            >
+                                                                <CheckIcon
+                                                                    className={cn(
+                                                                        "mr-2 h-4 w-4",
+                                                                        formData.country === country.name ? "opacity-100" : "opacity-0"
+                                                                    )}
+                                                                />
+                                                                <img src={`https://flagcdn.com/w320/${country.iso2.toLowerCase()}.png`} alt="" width={18} height={18} />
+                                                                {country.name}
+                                                            </CommandItem>
+                                                        ))}
+                                                    </CommandGroup>
+                                                </CommandList>
+                                            </Command>
+                                        </PopoverContent>
+                                    </Popover>
+                                </div>
+                            </div>
+
+                            <div>
+                                <Label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Tell us more about your business <span className="text-red-500">*</span>
+                                </Label>
+                                <div className="relative flex flex-row !items-start !justify-start">
+                                    <Textarea
+                                        id="message"
+                                        name="message"
+                                        autoComplete="message"
+                                        required
+                                        className="pl-10 h-12"
+                                        placeholder="Enter your message"
+                                        value={formData.message}
+                                        onChange={(e) => handleInputChange("message", e.target.value)}
+                                    />
+                                    <MessageSquare className="absolute left-3 top-1/2 transform -translate-y-8 h-5 w-5 text-gray-400" />
+                                </div>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div className="flex items-center space-x-2">
+                                    <Checkbox
+                                        id="agreeToTerms"
+                                        checked={formData.agreeToTerms}
+                                        onCheckedChange={(checked) => handleInputChange("agreeToTerms", checked)}
+                                    />
+                                    <Label htmlFor="agreeToTerms" className="text-sm text-gray-600">
+                                        I agree to Rojifi's{" "}
+                                        <Link href="/privacy" className="text-primary hover:text-primary/80">
+                                            Privacy Policy
+                                        </Link>{" "}
+                                        and{" "}
+                                        <Link href="#" className="text-primary hover:text-primary/80">
+                                            Terms and Conditions
+                                        </Link>
+                                    </Label>
+                                </div>
+                            </div>
+
+                            <div className="space-y-4">
+                                <Button type="submit" className="w-full h-12 bg-primary hover:bg-primary/90 text-white" disabled={isLoading}>
+                                    {isLoading ? "Sending Request..." : "Submit"}
+                                </Button>
+                            </div>
+
+                            <div className="text-center text-sm text-gray-600">
+                                Have an account?{" "}
+                                <Link href="/login" className="text-primary hover:text-primary/80 font-medium">
+                                    Sign in
+                                </Link>
+                            </div>
+                        </form>
                     </div>
                 </div>
-
-                <div className="space-y-4">
-                    <Button type="submit" className="w-full h-12 bg-primary hover:bg-primary/90 text-white" disabled={isLoading}>
-                        {isLoading ? "Sending Request..." : "Submit"}
-                    </Button>
+                <div className="w-[60%] hidden md:block h-full px-10 py-1 bg-primary relative">
+                    <div className="mt-12">
+                        <Carousel data={carouselItems} interval={4000} />
+                    </div>
+                    <div className="absolute bottom-5 left-5 px-5 right-0 flex justify-start items-center mt-6 text-white text-lg z-10">
+                        &copy; {new Date().getFullYear()} Rojifi. All rights reserved.
+                    </div>
+                    <div className="absolute -bottom-40 -right-40 flex justify-center items-center mt-6">
+                        <GlobeWrapper />
+                    </div>
                 </div>
-
-                <div className="text-center text-sm text-gray-600">
-                    Have an account?{" "}
-                    <Link href="/login" className="text-primary hover:text-primary/80 font-medium">
-                        Sign in
-                    </Link>
-                </div>
-            </form>
+            </div>
         </div>
     )
 }

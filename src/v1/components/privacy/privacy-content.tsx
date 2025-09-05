@@ -394,13 +394,11 @@ export function PrivacyContent() {
                         </p>
                         <div className="bg-gray-50 p-4 rounded-lg">
                             <p className="font-medium">Rojifi Privacy Team</p>
-                            <p>Email: privacy@rojifi.com</p>
-                            <p>Phone: +234(0) 701-2345-678</p>
-                            <p>Address: [Rojifi Business Address]</p>
+                            <p>Email: legal@rojifi.com</p>
                         </div>
                         <p className="text-gray-700">
                             For data protection inquiries in specific jurisdictions, please contact our Data Protection Officer at
-                            dpo@rojifi.com.
+                            legal@rojifi.com.
                         </p>
                     </div>
                 </section>

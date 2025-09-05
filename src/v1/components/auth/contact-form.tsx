@@ -6,7 +6,15 @@ import { Button } from "@/v1/components/ui/button"
 import { Input } from "@/v1/components/ui/input"
 import { Label } from "@/v1/components/ui/label"
 import { Checkbox } from "@/v1/components/ui/checkbox"
-import { Briefcase, CheckIcon, ChevronsUpDownIcon, Mail, MessageSquare, User, X } from "lucide-react"
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/v1/components/ui/dialog"
+import { Briefcase, CheckIcon, ChevronsUpDownIcon, Mail, MessageSquare, User, X, ArrowUpRight } from "lucide-react"
 import { Logo } from "@/v1/components/logo"
 import { Textarea } from "../ui/textarea"
 import Defaults from "@/v1/defaults/defaults"
@@ -28,11 +36,14 @@ import {
     PopoverTrigger,
 } from "@/v1/components/ui/popover"
 import { cn } from "@/v1/lib/utils"
+import { Header } from "../header"
+import { Footer } from "../footer"
 
 export function ContactForm() {
     const [popOpen, setPopOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",
@@ -180,6 +191,7 @@ export function ContactForm() {
             if (data.status === "error") throw new Error(data.message || data.error);
             if (data.status === "success") {
                 toast.success("Message sent successfully. We'll get back to you soon.");
+                setShowSuccessModal(true);
             }
         } catch (err: any) {
             setError(err.message || "Failed to send message. Please try again.");
@@ -190,226 +202,261 @@ export function ContactForm() {
     }
 
     return (
-        <div className="w-full max-w-md bg-white rounded-lg shadow-sm p-8">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-8">
-                <Link href="/" className="flex items-center space-x-2">
-                    <Logo className="h-8 w-auto" />
-                </Link>
-                <Link href="/" className="text-gray-400 hover:text-gray-600">
-                    <X className="h-6 w-6" />
-                </Link>
-            </div>
-
-            {/* Form Content */}
-            <div className="text-center mb-8">
-                <h1 className="text-2xl font-bold text-gray-900 mb-2">Contact Us</h1>
-                <p className="text-gray-600">Let's connect. Fill out the form and our team will respond as soon as possible.</p>
-            </div>
-
-            <form className="space-y-6" onSubmit={handleSubmit}>
-                {error && (
-                    <p className="text-red-500 text-sm text-center">{error}</p>
-                )}
-
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <Label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
-                            First name <span className="text-red-500">*</span>
-                        </Label>
-                        <div className="relative">
-                            <Input
-                                id="firstName"
-                                name="firstName"
-                                type="text"
-                                autoComplete="given-name"
-                                required
-                                className="pl-10 h-12"
-                                placeholder="First name"
-                                value={formData.firstName}
-                                onChange={(e) => handleInputChange("firstName", e.target.value)}
-                            />
-                            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                        </div>
-                    </div>
-
-                    <div>
-                        <Label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
-                            Last name
-                        </Label>
-                        <div className="relative">
-                            <Input
-                                id="lastName"
-                                name="lastName"
-                                type="text"
-                                autoComplete="family-name"
-                                className="pl-10 h-12"
-                                placeholder="Last name"
-                                value={formData.lastName}
-                                onChange={(e) => handleInputChange("lastName", e.target.value)}
-                            />
-                            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                        </div>
-                    </div>
-                </div>
-
-                <div>
-                    <Label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                        Email address <span className="text-red-500">*</span>
-                    </Label>
-                    <div className="relative">
-                        <Input
-                            id="email"
-                            name="email"
-                            type="email"
-                            autoComplete="work email"
-                            required
-                            className="pl-10 h-12"
-                            placeholder="Enter your email"
-                            value={formData.email}
-                            onChange={(e) => handleInputChange("email", e.target.value)}
-                        />
-                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                    </div>
-                </div>
-
-                <div>
-                    <Label htmlFor="businessName" className="block text-sm font-medium text-gray-700 mb-2">
-                        Name of your Business <span className="text-red-500">*</span>
-                    </Label>
-                    <div className="relative">
-                        <Input
-                            id="businessName"
-                            name="businessName"
-                            type="text"
-                            autoComplete="work name"
-                            required
-                            className="pl-10 h-12"
-                            placeholder="Enter your business name"
-                            value={formData.businessName}
-                            onChange={(e) => handleInputChange("businessName", e.target.value)}
-                        />
-                        <Briefcase className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                    </div>
-                </div>
-
-                <div>
-                    <Label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-2">
-                        Phone Number <span className="text-red-500">*</span>
-                    </Label>
-                    <div className="flex gap-2">
-                        <Popover open={popOpen} onOpenChange={() => setPopOpen(!popOpen)}>
-                            <PopoverTrigger asChild>
+        <div className="w-full">
+            <Header isLoggedIn={false} user={null} />
+            <div className="p-4 py-10 max-w-md mx-auto">
+                <div className="w-full max-w-md bg-white rounded-lg shadow-sm p-8">
+                    {/* Success Modal using Dialog */}
+                    <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
+                        <DialogContent className="max-w-sm md:max-w-lg">
+                            <DialogHeader>
+                                <DialogTitle className="text-center">Message Sent Successfully</DialogTitle>
+                                <DialogDescription className="text-center text-gray-600 font-medium">
+                                    Thank you for contacting us! We'll get back to you soon.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <DialogFooter className="flex justify-center gap-2">
                                 <Button
                                     variant="outline"
-                                    role="combobox"
                                     size="md"
-                                    aria-expanded={popOpen}
-                                    className="w-28 justify-between"
+                                    onClick={() => setShowSuccessModal(false)}
                                 >
-                                    <img src={`https://flagcdn.com/w320/${uniqueCountries.find((country) => country.phonecode === formData.countryCode)?.iso2.toLowerCase()}.png`} alt="" width={18} height={18} />
-                                    {formData.countryCode
-                                        ? uniqueCountries.find((country) => country.phonecode === formData.countryCode)?.phonecode
-                                        : "Select country..."}
-                                    <ChevronsUpDownIcon className="ml-1 h-4 w-4 shrink-0 opacity-50" />
+                                    Send Another
                                 </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-60 p-0">
-                                <Command>
-                                    <CommandInput placeholder="Search framework..." />
-                                    <CommandList>
-                                        <CommandEmpty>No country found.</CommandEmpty>
-                                        <CommandGroup>
-                                            {uniqueCountries.map((country) => (
-                                                <CommandItem
-                                                    key={country.name}
-                                                    value={country.phonecode}
-                                                    onSelect={(currentValue) => {
-                                                        handleInputChange("countryCode", currentValue)
-                                                        setPopOpen(false)
-                                                    }}
-                                                >
-                                                    <CheckIcon
-                                                        className={cn(
-                                                            "mr-2 h-4 w-4",
-                                                            formData.countryCode === country.phonecode ? "opacity-100" : "opacity-0"
-                                                        )}
-                                                    />
-                                                    <img src={`https://flagcdn.com/w320/${country.iso2.toLowerCase()}.png`} alt="" width={18} height={18} />
-                                                    +{country.phonecode} {country.name}
-                                                </CommandItem>
-                                            ))}
-                                        </CommandGroup>
-                                    </CommandList>
-                                </Command>
-                            </PopoverContent>
-                        </Popover>
-                        <Input
-                            className="flex-1"
-                            value={formData.phoneNumber}
-                            onChange={(e) => handleInputChange("phoneNumber", e.target.value)}
-                            placeholder="Enter Phone Number"
-                            required
-                            id="phoneNumber"
-                            name="phoneNumber"
-                            type="text"
-                            autoComplete="work tel"
-                        />
-                    </div>
-                </div>
+                                <Button
+                                    size="md"
+                                    onClick={() => { setShowSuccessModal(false); window.location.href = "/"; }}
+                                    className="text-white"
+                                >
+                                    <ArrowUpRight size={16} className="mr-1" />
+                                    Go to Homepage
+                                </Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
 
-                <div>
-                    <Label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
-                        Your Message <span className="text-red-500">*</span>
-                    </Label>
-                    <div className="relative flex flex-row !items-start !justify-start">
-                        <Textarea
-                            id="message"
-                            name="message"
-                            autoComplete="message"
-                            required
-                            className="pl-10 h-12"
-                            placeholder="Start typing..."
-                            value={formData.message}
-                            onChange={(e) => handleInputChange("message", e.target.value)}
-                        />
-                        <MessageSquare className="absolute left-3 top-1/2 transform -translate-y-8 h-5 w-5 text-gray-400" />
+                    {/* Header */}
+                    <div className="flex items-center justify-between mb-8">
+                        <Link href="/" className="flex items-center space-x-2">
+                            <Logo className="h-8 w-auto" />
+                        </Link>
+                        <Link href="/" className="text-gray-400 hover:text-gray-600">
+                            <X className="h-6 w-6" />
+                        </Link>
                     </div>
-                </div>
 
-                <div className="space-y-4">
-                    <div className="flex items-center space-x-2">
-                        <Checkbox
-                            id="agreeToTerms"
-                            checked={formData.agreeToTerms}
-                            onCheckedChange={(checked) => handleInputChange("agreeToTerms", checked)}
-                        />
-                        <Label htmlFor="agreeToTerms" className="text-sm text-gray-600">
-                            I agree to Rojifi's{" "}
-                            <Link href="/privacy" className="text-primary hover:text-primary/80">
-                                Privacy Policy
-                            </Link>{" "}
-                            and{" "}
-                            <Link href="#" className="text-primary hover:text-primary/80">
-                                Terms and Conditions
+                    {/* Form Content */}
+                    <div className="text-center mb-8">
+                        <h1 className="text-2xl font-bold text-gray-900 mb-2">Contact Us</h1>
+                        <p className="text-gray-600">Let's connect. Fill out the form and our team will respond as soon as possible.</p>
+                    </div>
+
+                    <form className="space-y-6" onSubmit={handleSubmit}>
+                        {error && (
+                            <p className="text-red-500 text-sm text-center">{error}</p>
+                        )}
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <Label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
+                                    First name <span className="text-red-500">*</span>
+                                </Label>
+                                <div className="relative">
+                                    <Input
+                                        id="firstName"
+                                        name="firstName"
+                                        type="text"
+                                        autoComplete="given-name"
+                                        required
+                                        className="pl-10 h-12"
+                                        placeholder="First name"
+                                        value={formData.firstName}
+                                        onChange={(e) => handleInputChange("firstName", e.target.value)}
+                                    />
+                                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                </div>
+                            </div>
+
+                            <div>
+                                <Label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Last name
+                                </Label>
+                                <div className="relative">
+                                    <Input
+                                        id="lastName"
+                                        name="lastName"
+                                        type="text"
+                                        autoComplete="family-name"
+                                        className="pl-10 h-12"
+                                        placeholder="Last name"
+                                        value={formData.lastName}
+                                        onChange={(e) => handleInputChange("lastName", e.target.value)}
+                                    />
+                                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <Label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                                Email address <span className="text-red-500">*</span>
+                            </Label>
+                            <div className="relative">
+                                <Input
+                                    id="email"
+                                    name="email"
+                                    type="email"
+                                    autoComplete="work email"
+                                    required
+                                    className="pl-10 h-12"
+                                    placeholder="Enter your email"
+                                    value={formData.email}
+                                    onChange={(e) => handleInputChange("email", e.target.value)}
+                                />
+                                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                            </div>
+                        </div>
+
+                        <div>
+                            <Label htmlFor="businessName" className="block text-sm font-medium text-gray-700 mb-2">
+                                Name of your Business <span className="text-red-500">*</span>
+                            </Label>
+                            <div className="relative">
+                                <Input
+                                    id="businessName"
+                                    name="businessName"
+                                    type="text"
+                                    autoComplete="work name"
+                                    required
+                                    className="pl-10 h-12"
+                                    placeholder="Enter your business name"
+                                    value={formData.businessName}
+                                    onChange={(e) => handleInputChange("businessName", e.target.value)}
+                                />
+                                <Briefcase className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                            </div>
+                        </div>
+
+                        <div>
+                            <Label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-2">
+                                Phone Number <span className="text-red-500">*</span>
+                            </Label>
+                            <div className="flex gap-2">
+                                <Popover open={popOpen} onOpenChange={() => setPopOpen(!popOpen)}>
+                                    <PopoverTrigger asChild>
+                                        <Button
+                                            variant="outline"
+                                            role="combobox"
+                                            size="md"
+                                            aria-expanded={popOpen}
+                                            className="w-28 justify-between"
+                                        >
+                                            <img src={`https://flagcdn.com/w320/${uniqueCountries.find((country) => country.phonecode === formData.countryCode)?.iso2.toLowerCase()}.png`} alt="" width={18} height={18} />
+                                            {formData.countryCode
+                                                ? uniqueCountries.find((country) => country.phonecode === formData.countryCode)?.phonecode
+                                                : "Select country..."}
+                                            <ChevronsUpDownIcon className="ml-1 h-4 w-4 shrink-0 opacity-50" />
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-60 p-0">
+                                        <Command>
+                                            <CommandInput placeholder="Search framework..." />
+                                            <CommandList>
+                                                <CommandEmpty>No country found.</CommandEmpty>
+                                                <CommandGroup>
+                                                    {uniqueCountries.map((country) => (
+                                                        <CommandItem
+                                                            key={country.name}
+                                                            value={country.phonecode}
+                                                            onSelect={(currentValue) => {
+                                                                handleInputChange("countryCode", currentValue)
+                                                                setPopOpen(false)
+                                                            }}
+                                                        >
+                                                            <CheckIcon
+                                                                className={cn(
+                                                                    "mr-2 h-4 w-4",
+                                                                    formData.countryCode === country.phonecode ? "opacity-100" : "opacity-0"
+                                                                )}
+                                                            />
+                                                            <img src={`https://flagcdn.com/w320/${country.iso2.toLowerCase()}.png`} alt="" width={18} height={18} />
+                                                            +{country.phonecode} {country.name}
+                                                        </CommandItem>
+                                                    ))}
+                                                </CommandGroup>
+                                            </CommandList>
+                                        </Command>
+                                    </PopoverContent>
+                                </Popover>
+                                <Input
+                                    className="flex-1"
+                                    value={formData.phoneNumber}
+                                    onChange={(e) => handleInputChange("phoneNumber", e.target.value)}
+                                    placeholder="Enter Phone Number"
+                                    required
+                                    id="phoneNumber"
+                                    name="phoneNumber"
+                                    type="text"
+                                    autoComplete="work tel"
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <Label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
+                                Your Message <span className="text-red-500">*</span>
+                            </Label>
+                            <div className="relative flex flex-row !items-start !justify-start">
+                                <Textarea
+                                    id="message"
+                                    name="message"
+                                    autoComplete="message"
+                                    required
+                                    className="pl-10 h-12"
+                                    placeholder="Start typing..."
+                                    value={formData.message}
+                                    onChange={(e) => handleInputChange("message", e.target.value)}
+                                />
+                                <MessageSquare className="absolute left-3 top-1/2 transform -translate-y-8 h-5 w-5 text-gray-400" />
+                            </div>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div className="flex items-center space-x-2">
+                                <Checkbox
+                                    id="agreeToTerms"
+                                    checked={formData.agreeToTerms}
+                                    onCheckedChange={(checked) => handleInputChange("agreeToTerms", checked)}
+                                />
+                                <Label htmlFor="agreeToTerms" className="text-sm text-gray-600">
+                                    I agree to Rojifi's{" "}
+                                    <Link href="/privacy" className="text-primary hover:text-primary/80">
+                                        Privacy Policy
+                                    </Link>{" "}
+                                    and{" "}
+                                    <Link href="#" className="text-primary hover:text-primary/80">
+                                        Terms and Conditions
+                                    </Link>
+                                </Label>
+                            </div>
+                        </div>
+
+                        <div className="space-y-4">
+                            <Button type="submit" className="w-full h-12 bg-primary hover:bg-primary/90 text-white" disabled={isLoading}>
+                                {isLoading ? "Sending..." : "Submit"}
+                            </Button>
+                        </div>
+
+                        <div className="text-center text-sm text-gray-600">
+                            Have an account?{" "}
+                            <Link href="/login" className="text-primary hover:text-primary/80 font-medium">
+                                Sign in
                             </Link>
-                        </Label>
-                    </div>
+                        </div>
+                    </form>
                 </div>
-
-                <div className="space-y-4">
-                    <Button type="submit" className="w-full h-12 bg-primary hover:bg-primary/90 text-white" disabled={isLoading}>
-                        {isLoading ? "Sending..." : "Submit"}
-                    </Button>
-                </div>
-
-                <div className="text-center text-sm text-gray-600">
-                    Have an account?{" "}
-                    <Link href="/login" className="text-primary hover:text-primary/80 font-medium">
-                        Sign in
-                    </Link>
-                </div>
-            </form>
+            </div>
+            <Footer />
         </div>
     )
 }
