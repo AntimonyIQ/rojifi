@@ -83,26 +83,6 @@ interface IIBan {
     };
 }
 
-interface PaymentViewState {
-    swiftmodal: boolean;
-    loading: boolean;
-    dragActive: boolean;
-    focused: boolean;
-    formdata: IPayment | null;
-    ibanLoading: boolean;
-    ibanDetails: IIBan | null;
-    paymentDetailsModal: boolean;
-    popOpen: boolean;
-    wallets: Array<IWallet>;
-    selectedWallet: IWallet | null;
-    sender: ISender | null;
-    fileUpload: File | null;
-    uploadError: string;
-    uploading: boolean;
-    swiftDetails: ISwiftDetails | null;
-    paymentLoading: boolean;
-}
-
 interface ISwiftDetails {
     bank_name: string;
     city: string;
@@ -285,13 +265,13 @@ export const PaymentView: React.FC = () => {
     const [dragActive, setDragActive] = useState(false);
     const [focused, setFocused] = useState(false);
     const [formdata, setFormdata] = useState<IPayment | null>(null);
-    const [ibanLoading, setIbanLoading] = useState(false);
-    const [ibanDetails, setIbanDetails] = useState<IIBan | null>(null);
+    const [_ibanLoading, setIbanLoading] = useState(false);
+    const [_ibanDetails, setIbanDetails] = useState<IIBan | null>(null);
     const [paymentDetailsModal, setPaymentDetailsModal] = useState(false);
     const [popOpen, setPopOpen] = useState(false);
     const [wallets, setWallets] = useState<Array<IWallet>>([]);
     const [selectedWallet, setSelectedWallet] = useState<IWallet | null>(null);
-    const [sender, setSender] = useState<ISender | null>(null);
+    const [_sender, setSender] = useState<ISender | null>(null);
     const [fileUpload, setFileUpload] = useState<File | null>(null);
     const [uploadError, setUploadError] = useState("");
     const [uploading, setUploading] = useState(false);

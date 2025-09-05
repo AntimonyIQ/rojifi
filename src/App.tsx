@@ -37,6 +37,7 @@ import VerifyEmailPage from "./v1/app/verify-email/page";
 import React from "react";
 import SignupPage from "./v1/app/signup/[id]/page";
 import KYCKYBVerificationPage from "./v1/app/signup/[id]/verification/page";
+import InvitationPage from "./v1/app/invitation/[id]/page";
 // ...existing code...
 
 function AppRoute({
@@ -74,6 +75,7 @@ function App() {
         { path: "/verify-email", element: <VerifyEmailPage /> },
         { path: "/signup/:id/verification", element: <KYCKYBVerificationPage /> },
         { path: "/signup/:id", element: <SignupPage /> },
+        { path: "/invitation/:id", element: <InvitationPage /> },
     ];
 
     return (
