@@ -1,8 +1,9 @@
 
 import { useEffect, useState } from "react"
 import { Button } from "../ui/button"
-import { UserCircle } from "lucide-react"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/v1/components/ui/sheet"
+import { UserCircle, FileText, User, Building, CreditCard } from "lucide-react"
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/v1/components/ui/sheet"
+import { Card, CardContent } from "@/v1/components/ui/card"
 import FilePreviewModal from "./file-preview-modal"
 import { IPayment, IUser } from "@/v1/interface/interface"
 import { session, SessionData } from "@/v1/session/session"
@@ -48,127 +49,233 @@ export default function PaymentDetailsDrawer({ open, onClose, onEdit, details }:
         setPreviewOpen(true)
     }
 
+    const DetailRow = ({ label, value, icon }: { label: string; value: string | React.ReactNode; icon?: React.ReactNode }) => (
+        <div className="flex justify-between items-start py-3 border-b border-gray-100 last:border-b-0">
+            <div className="flex items-center gap-2">
+                {icon}
+                <span className="text-sm text-gray-600 font-medium">{label}</span>
+            </div>
+            <div className="text-sm text-gray-900 font-semibold text-right max-w-[60%]">
+                {value}
+            </div>
+        </div>
+    )
+
     return (
         <Sheet open={open} onOpenChange={(v) => { if (!v) onClose() }}>
-            <SheetContent side="right" className="w-full sm:max-w-full p-0">
-                <div className="p-5 h-full flex flex-col">
-                    <SheetHeader className="mb-2 flex items-start justify-between w-full p-0">
-                        <SheetTitle className="text-lg font-semibold">Payment Summary</SheetTitle>
-                    </SheetHeader>
-
-                    <p className="text-sm text-slate-500 mb-4">Please review the payment details below before submitting your request.</p>
-                    <div className="mt-0 px-80 flex flex-col items-start gap-2 w-full overflow-y-auto">
-                        <div className="flex flex-col justify-start items-start gap-1 pb-3 border-b border-gray-100 w-full">
-                            <span className="text-gray-500 uppercase text-xs">Transaction Amount</span>
-                            <span className="text-gray-900 font-medium text-lg">{formatCurrency(details.beneficiaryAmount) ?? "N/A"} {details.senderCurrency}</span>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4 w-full">
-                            <div className="flex flex-col justify-start items-start gap-1 pb-3 border-b border-gray-100">
-                                <span className="text-gray-500 uppercase text-xs">wallet</span>
-                                <div className="flex flex-row items-center justify-start gap-2">
-                                    <img src="https://img.icons8.com/color/50/usa-circular.png" alt="" className="w-5 h-5 rounded-full" />
-                                    <span className="text-gray-900 font-medium text-sm">{details.senderCurrency}</span>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-col justify-start items-start gap-1 pb-3 border-b border-gray-100">
-                                <span className="text-gray-500 uppercase text-xs">USD BALANCE</span>
-                                <span className="text-gray-900 font-medium text-sm">{formatCurrency(details.beneficiaryAmount)} {details.senderCurrency}</span>
-                            </div>
-                        </div>
-
-                        <div className="flex flex-col justify-start items-start gap-1 pb-3 border-b border-gray-100">
-                            <span className="text-gray-500 uppercase text-xs">Sender:</span>
-                            <span className="text-gray-900 font-medium text-sm">{user?.fullName}</span>
-                        </div>
-
-                        <div className="flex flex-col justify-start items-start gap-1 pb-3 border-b border-gray-100">
-                            <span className="text-gray-500 uppercase text-xs">Beneficiary's Account Name:</span>
-                            <span className="text-gray-900 font-medium text-sm">{details.beneficiaryAccountName}</span>
-                        </div>
-
-                        <div className="flex flex-col justify-start items-start gap-1 pb-3 border-b border-gray-100">
-                            <span className="text-gray-500 uppercase text-xs">Beneficiary's Account Number:</span>
-                            <span className="text-gray-900 font-medium text-sm">{details.beneficiaryAccountNumber}</span>
-                        </div>
-
-                        <div className="flex flex-col justify-start items-start gap-1 pb-3 border-b border-gray-100">
-                            <span className="text-gray-500 uppercase text-xs">Beneficiary's Country:</span>
-                            <div className="flex flex-row items-center justify-start gap-2">
-                                <img src="https://img.icons8.com/color/50/usa-circular.png" alt="" className="w-5 h-5 rounded-full" />
-                                <span className="text-gray-900 font-medium text-sm">{details.beneficiaryCountry}</span>
-                            </div>
-                        </div>
-
-                        <div className="flex flex-col justify-start items-start gap-1 pb-3 border-b border-gray-100">
-                            <span className="text-gray-500 uppercase text-xs">Beneficiary's Address:</span>
-                            <span className="text-gray-900 font-medium text-sm">{details.beneficiaryAddress}</span>
-                        </div>
-
-                        <div className="flex flex-col justify-start items-start gap-1 pb-3 border-b border-gray-100">
-                            <span className="text-gray-500 uppercase text-xs">SWIFT Code / Routing Number:</span>
-                            <span className="text-gray-900 font-medium text-sm">{details.swiftCode}</span>
-                        </div>
-
-                        <div className="flex flex-col justify-start items-start gap-1 pb-3 border-b border-gray-100">
-                            <span className="text-gray-500 uppercase text-xs">Bank Name:</span>
-                            <span className="text-gray-900 font-medium text-sm">{details.beneficiaryBankName}</span>
-                        </div>
-
-                        <div className="flex flex-col justify-start items-start gap-1 pb-3 border-b border-gray-100">
-                            <span className="text-gray-500 uppercase text-xs">Bank Address:</span>
-                            <span className="text-gray-900 font-medium text-sm">{details.beneficiaryBankAddress}</span>
-                        </div>
-
-                        <div className="flex flex-col justify-start items-start gap-1 pb-3 border-b border-gray-100 w-full">
-                            <span className="text-gray-500 uppercase text-xs">Attachment:</span>
-                            <div className="w-full flex flex-row items-center justify-between border-2 border-dashed border-blue-500 rounded-md px-4">
-                                <span className="text-gray-900 font-medium text-sm max-w-[140px] truncate" title={details.paymentInvoice}>
-                                    {details.paymentInvoice}
-                                </span>
-                                <Button variant="link" onClick={() => openPreview(details.paymentInvoice, details.paymentInvoice)}>
-                                    View
-                                </Button>
-                            </div>
-                        </div>
-
-                        <div className="flex flex-col justify-start items-start gap-1 pb-3 border-b border-gray-100">
-                            <span className="text-gray-500 uppercase text-xs">Invoice Number:</span>
-                            <span className="text-gray-900 font-medium text-sm">{details?.paymentInvoiceNumber ?? "N/A"}</span>
-                        </div>
-
-                        <div className="flex flex-col justify-start items-start gap-1 pb-3 border-b border-gray-100">
-                            <span className="text-gray-500 uppercase text-xs">Invoice Date:</span>
-                            <span className="text-gray-900 font-medium text-sm">{details?.paymentInvoiceDate.toDateString() ?? "N/A"}</span>
-                        </div>
-
-                        <div className="flex flex-col justify-start items-start gap-1 pb-3 border-b border-gray-100">
-                            <span className="text-gray-500 uppercase text-xs">Purpose of Payment:</span>
-                            <span className="text-gray-900 font-medium text-sm">{details?.purposeOfPayment ?? "N/A"}</span>
-                        </div>
-
-                        <div className="flex flex-col justify-start items-start gap-1 pb-3 border-b border-gray-100">
-                            <span className="text-gray-500 uppercase text-xs">Created By:</span>
-                            <div className="flex items-center gap-1">
-                                <UserCircle size={18} />
-                                <span className="text-gray-900 font-medium text-sm">{details?.createdAt.toDateString() ?? "N/A"}</span>
-                            </div>
-                        </div>
-
-
+            <SheetContent side="right" className="w-full sm:max-w-2xl p-0 bg-gray-50">
+                <div className="h-full flex flex-col">
+                    {/* Header */}
+                    <div className="bg-white border-b p-6">
+                        <SheetHeader className="space-y-2">
+                            <SheetTitle className="text-xl font-semibold text-gray-900">Payment Summary</SheetTitle>
+                            <p className="text-sm text-gray-600">Review your payment details before submission</p>
+                        </SheetHeader>
                     </div>
 
-                    <SheetFooter className="mt-4 bg-white p-4 sticky bottom-0 left-0 right-0 border-t">
-                        <div className="w-full flex items-center justify-end gap-2">
-                            <Button variant="outline" onClick={() => onEdit && onEdit()}>Edit</Button>
-                            <Button onClick={onClose} className="text-white">Confirm</Button>
+                    {/* Content */}
+                    <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                        {/* Transaction Amount Card */}
+                        <Card className="border-0 shadow-sm">
+                            <CardContent className="p-6">
+                                <div className="text-center">
+                                    <div className="text-xs uppercase tracking-wide text-gray-500 mb-2">Transaction Amount</div>
+                                    <div className="text-3xl font-bold text-gray-900">
+                                        {formatCurrency(details.beneficiaryAmount)} {details.senderCurrency}
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Wallet & Balance Info */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <Card className="border-0 shadow-sm">
+                                <CardContent className="p-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                            <CreditCard className="h-4 w-4 text-blue-600" />
+                                        </div>
+                                        <div>
+                                            <div className="text-xs text-gray-500 uppercase tracking-wide">Wallet</div>
+                                            <div className="font-semibold text-gray-900">{details.senderCurrency}</div>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                            <Card className="border-0 shadow-sm">
+                                <CardContent className="p-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                            <Building className="h-4 w-4 text-green-600" />
+                                        </div>
+                                        <div>
+                                            <div className="text-xs text-gray-500 uppercase tracking-wide">Balance</div>
+                                            <div className="font-semibold text-gray-900">{formatCurrency(details.beneficiaryAmount)}</div>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
                         </div>
-                    </SheetFooter>
+
+                        {/* Sender Information */}
+                        <Card className="border-0 shadow-sm">
+                            <CardContent className="p-6">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                    <User className="h-5 w-5 text-blue-600" />
+                                    Sender Information
+                                </h3>
+                                <DetailRow
+                                    label="Full Name"
+                                    value={user?.fullName || "N/A"}
+                                />
+                            </CardContent>
+                        </Card>
+
+                        {/* Beneficiary Information */}
+                        <Card className="border-0 shadow-sm">
+                            <CardContent className="p-6">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                    <User className="h-5 w-5 text-green-600" />
+                                    Beneficiary Information
+                                </h3>
+                                <div className="space-y-1">
+                                    <DetailRow
+                                        label="Account Name"
+                                        value={details.beneficiaryAccountName || "N/A"}
+                                    />
+                                    <DetailRow
+                                        label="Account Number"
+                                        value={details.beneficiaryAccountNumber || "N/A"}
+                                    />
+                                    <DetailRow
+                                        label="Country"
+                                        value={
+                                            <div className="flex items-center gap-2">
+                                                <img src="https://img.icons8.com/color/50/usa-circular.png" alt="" className="w-4 h-4 rounded-full" />
+                                                <span>{details.beneficiaryCountry || "N/A"}</span>
+                                            </div>
+                                        }
+                                    />
+                                    <DetailRow
+                                        label="Address"
+                                        value={details.beneficiaryAddress || "N/A"}
+                                    />
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Bank Information */}
+                        <Card className="border-0 shadow-sm">
+                            <CardContent className="p-6">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                    <Building className="h-5 w-5 text-purple-600" />
+                                    Bank Information
+                                </h3>
+                                <div className="space-y-1">
+                                    <DetailRow
+                                        label="Bank Name"
+                                        value={details.beneficiaryBankName || "N/A"}
+                                    />
+                                    <DetailRow
+                                        label="Bank Address"
+                                        value={details.beneficiaryBankAddress || "N/A"}
+                                    />
+                                    <DetailRow
+                                        label="SWIFT/Routing Code"
+                                        value={details.swiftCode || "N/A"}
+                                    />
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Payment Details */}
+                        <Card className="border-0 shadow-sm">
+                            <CardContent className="p-6">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                    <FileText className="h-5 w-5 text-orange-600" />
+                                    Payment Details
+                                </h3>
+                                <div className="space-y-1">
+                                    <DetailRow
+                                        label="Purpose of Payment"
+                                        value={details?.purposeOfPayment || "N/A"}
+                                    />
+                                    <DetailRow
+                                        label="Invoice Number"
+                                        value={details?.paymentInvoiceNumber || "N/A"}
+                                    />
+                                    <DetailRow
+                                        label="Invoice Date"
+                                        value={String(details?.paymentInvoiceDate) || "N/A"}
+                                    />
+                                    {details.paymentInvoice && (
+                                        <DetailRow
+                                            label="Attachment"
+                                            value={
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-blue-600 truncate max-w-32">
+                                                        {details.paymentInvoice.split('/').pop()}
+                                                    </span>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => openPreview(details.paymentInvoice, details.paymentInvoice)}
+                                                        className="h-6 px-2 text-xs"
+                                                    >
+                                                        View
+                                                    </Button>
+                                                </div>
+                                            }
+                                        />
+                                    )}
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Creation Info */}
+                        <Card className="border-0 shadow-sm">
+                            <CardContent className="p-6">
+                                <DetailRow
+                                    label="Created"
+                                    value={
+                                        <div className="flex items-center gap-2">
+                                            <UserCircle className="h-4 w-4 text-gray-500" />
+                                            <span>{String(details?.createdAt) || "N/A"}</span>
+                                        </div>
+                                    }
+                                />
+                            </CardContent>
+                        </Card>
+                    </div>
+
+                    {/* Footer */}
+                    <div className="bg-white border-t p-6">
+                        <div className="flex flex-col sm:flex-row gap-3 justify-end">
+                            <Button
+                                variant="outline"
+                                onClick={() => onEdit && onEdit()}
+                                className="sm:w-auto w-full"
+                            >
+                                Edit Payment
+                            </Button>
+                            <Button
+                                onClick={onClose}
+                                className="bg-blue-600 hover:bg-blue-700 text-white sm:w-auto w-full"
+                            >
+                                Submit Payment
+                            </Button>
+                        </div>
+                    </div>
                 </div>
             </SheetContent>
 
-            <FilePreviewModal open={previewOpen} onClose={() => setPreviewOpen(false)} fileUrl={previewUrl ?? undefined} fileName={previewName ?? undefined} />
+            <FilePreviewModal
+                open={previewOpen}
+                onClose={() => setPreviewOpen(false)}
+                fileUrl={previewUrl ?? undefined}
+                fileName={previewName ?? undefined}
+            />
         </Sheet>
     )
 }

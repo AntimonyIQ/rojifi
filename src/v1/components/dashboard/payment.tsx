@@ -217,12 +217,9 @@ export class PaymentView extends React.Component<unknown, PaymentViewState> {
         this.setState({ swiftmodal: open });
     };
 
-    // TODO: Implement file upload functionality
-    /* private uploadFile = async (file: File): Promise<void> => {
+    private uploadFile = async (file: File): Promise<void> => {
         const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
         const { formdata } = this.state;
-        // reset field error
-        // setFieldErrors(prev => ({ ...prev, [fieldKey]: null }));
 
         if (!file) return;
 
@@ -232,7 +229,7 @@ export class PaymentView extends React.Component<unknown, PaymentViewState> {
         }
 
         try {
-            this.setState({ uploadError: "" });
+            this.setState({ uploadError: "", uploading: true });
 
             const form = new FormData();
             form.append('file', file);
@@ -248,6 +245,7 @@ export class PaymentView extends React.Component<unknown, PaymentViewState> {
                     ...headers,
                     'x-rojifi-handshake': this.sd.client?.publicKey || '',
                     'x-rojifi-deviceid': this.sd.deviceid || '',
+                    Authorization: `Bearer ${this.sd.authorization}`,
                 },
                 body: form,
             });
@@ -257,12 +255,13 @@ export class PaymentView extends React.Component<unknown, PaymentViewState> {
             if (data.status === Status.SUCCESS) {
                 if (!data.handshake) throw new Error('Unable to process upload response right now, please try again.');
                 const parseData: { url: string } = Defaults.PARSE_DATA(data.data, this.sd.client.privateKey, data.handshake);
-                // keep formData file as-is (already set)
+
                 this.setState({
                     formdata: {
                         ...formdata,
                         paymentInvoice: parseData.url
                     } as IPayment,
+                    fileUpload: file
                 })
             }
         } catch (err: any) {
@@ -270,7 +269,7 @@ export class PaymentView extends React.Component<unknown, PaymentViewState> {
         } finally {
             this.setState({ uploading: false });
         }
-    } */
+    }
 
     private handleInputChange = (
         field: string,
@@ -662,6 +661,96 @@ formdata: {
         return validator ? validator(value) : true;
     };
 
+    private validateForm = (): { isValid: boolean; errors: string[] } => {
+        const { formdata } = this.state;
+        const errors: string[] = [];
+
+        if (!formdata) {
+            errors.push("Form data is missing");
+            return { isValid: false, errors };
+        }
+
+        // Required fields for all payments
+        const requiredFields = [
+            { key: 'beneficiaryAccountName', label: 'Beneficiary Name' },
+            { key: 'beneficiaryAmount', label: 'Beneficiary Amount' },
+            { key: 'beneficiaryCountry', label: 'Beneficiary Country' },
+            { key: 'beneficiaryBankName', label: 'Bank Name' },
+            { key: 'purposeOfPayment', label: 'Purpose of Payment' },
+            { key: 'paymentInvoiceNumber', label: 'Invoice Number' },
+        ];
+
+        // Check required fields
+        for (const field of requiredFields) {
+            const value = formdata[field.key as keyof IPayment];
+            if (!value || (typeof value === 'string' && value.trim() === '')) {
+                errors.push(`${field.label} is required`);
+            }
+        }
+
+        // Validate amount format
+        if (formdata.beneficiaryAmount && !this.validators.beneficiary_amount(formdata.beneficiaryAmount)) {
+            errors.push("Beneficiary amount must be a valid number with up to 2 decimal places");
+        }
+
+        // Validate invoice number format
+        if (formdata.paymentInvoiceNumber && !this.validators.invoice_id(formdata.paymentInvoiceNumber)) {
+            errors.push("Invoice number format is invalid");
+        }
+
+        // Country-specific validations
+        if (this.ibanlist.includes(formdata.beneficiaryCountry || "")) {
+            if (!formdata.beneficiaryIban || formdata.beneficiaryIban.trim() === '') {
+                errors.push("IBAN is required for this country");
+            } else if (!this.validators.iban(formdata.beneficiaryIban)) {
+                errors.push("IBAN format is invalid");
+            }
+        } else {
+            if (!formdata.beneficiaryAccountNumber || formdata.beneficiaryAccountNumber.trim() === '') {
+                errors.push("Account number is required");
+            }
+        }
+
+        // Specific country validations
+        if (formdata.beneficiaryCountryCode === "IN" && (!formdata.beneficiaryIFSC || formdata.beneficiaryIFSC.trim() === '')) {
+            errors.push("IFSC Code is required for India");
+        }
+
+        if (["US", "PR", "AS", "GU", "MP", "VI"].includes(formdata.beneficiaryCountryCode || "") &&
+            (!formdata.beneficiaryAbaRoutingNumber || formdata.beneficiaryAbaRoutingNumber.trim() === '')) {
+            errors.push("ABA/Routing number is required for US payments");
+        }
+
+        // Address validation for certain countries
+        if (["CA", "US", "GB", "AU"].includes(formdata.beneficiaryCountryCode || "")) {
+            if (!formdata.beneficiaryAddress || formdata.beneficiaryAddress.trim() === '') {
+                errors.push("Beneficiary address is required");
+            }
+            if (!formdata.beneficiaryCity || formdata.beneficiaryCity.trim() === '') {
+                errors.push("Beneficiary city is required");
+            }
+        }
+
+        return { isValid: errors.length === 0, errors };
+    };
+
+    private handleShowPaymentDetails = (): void => {
+        const validation = this.validateForm();
+
+        if (!validation.isValid) {
+            // Show validation errors in a better way
+            this.setState({
+                uploadError: `Please fix the following:\n• ${validation.errors.join('\n• ')}`
+            });
+
+            // Scroll to top to show errors
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
+
+        this.setState({ paymentDetailsModal: true });
+    };
+
     private RenderInput = (props: {
         fieldKey: string;
         label: string;
@@ -741,7 +830,30 @@ formdata: {
                     </div>
                 </div>
 
-                {/* Currency Selection */}
+                {/* Validation Errors Display */}
+                {this.state.uploadError && this.state.uploadError.includes('Please fix the following:') && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                        <div className="flex items-start gap-3">
+                            <div className="flex-shrink-0">
+                                <X className="w-5 h-5 text-red-500" />
+                            </div>
+                            <div className="flex-1">
+                                <h4 className="text-sm font-medium text-red-800 mb-2">
+                                    Form Validation Errors
+                                </h4>
+                                <div className="text-sm text-red-700 whitespace-pre-line">
+                                    {this.state.uploadError.replace('Please fix the following:\\n', '')}
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => this.setState({ uploadError: '' })}
+                                className="flex-shrink-0 text-red-400 hover:text-red-600"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+                        </div>
+                    </div>
+                )}                {/* Currency Selection */}
                 <div>
                     <Label
                         htmlFor="currency"
@@ -1061,7 +1173,7 @@ formdata: {
                             />
                         )}
 
-                        <div className="grid grid-cols-2 gap-4 w-full">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
                             <this.RenderInput
                                 fieldKey="beneficiaryAddress"
                                 label="Beneficiary Address"
@@ -1085,7 +1197,7 @@ formdata: {
                             />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4 w-full">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
                             <this.RenderInput
                                 fieldKey="beneficiaryPostalCode"
                                 label="Beneficiary Post code"
@@ -1226,18 +1338,18 @@ formdata: {
                             required={true}
                         />
 
-                        <div className="w-full flex flex-row items-center justify-between gap-2">
+                        <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-3">
                             <Link
                                 href="/dashboard/NGN"
-                                className="text-primary hover:underline border-[2px] border-primary rounded-md px-4 py-2 inline-block text-center w-full"
+                                className="text-primary hover:underline border-[2px] border-primary rounded-md px-4 py-2 inline-block text-center w-full sm:w-auto min-w-[120px]"
                             >
                                 Cancel
                             </Link>
                             <Button
-                                className="text-white w-full"
+                                className="text-white w-full sm:w-auto min-w-[160px]"
                                 variant="default"
                                 size="lg"
-                                onClick={(): void => this.setState({ paymentDetailsModal: true })}
+                                onClick={this.handleShowPaymentDetails}
                             >
                                 Create Payment
                             </Button>
