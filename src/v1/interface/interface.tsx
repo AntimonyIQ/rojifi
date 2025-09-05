@@ -65,6 +65,8 @@ export interface ICopyright {
 }
 
 export interface IWallet {
+    _id: string;
+    rojifiId: string;
     currency: Fiat | Coin;
     userId: string;
     type: WalletType;
@@ -348,8 +350,8 @@ export interface ISender {
 export interface IPayment {
     _id: string;
     rojifiId: string;
-    sender: string;
-    senderWallet: string;
+    sender: string | ISender;
+    senderWallet: string | IWallet;
     senderName: string;
     senderCurrency: Fiat;
     status: TransactionStatus;
@@ -428,7 +430,7 @@ export interface ITransaction extends IPayment {
     to: string;
     fromCurrency: Coin;
     toCurrency: Coin;
-    userId: string;
+    userId: string | IUser;
     swapToAmount: number;
     hash: string;
     sendHash: string;
@@ -450,4 +452,14 @@ export interface ITransaction extends IPayment {
         amount: string;
         currency: string;
     }[];
+    issue: {
+        customerhide: boolean;
+        staff: Array<string>;
+        description: string;
+        adjustedDescriptionForAllStaff: boolean;
+        adjustedDescriptionForCustomer: string;
+        status: "open" | "in_progress" | "resolved";
+        createdAt: Date;
+        updatedAt: Date;
+    }
 }

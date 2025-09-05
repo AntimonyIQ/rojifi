@@ -120,31 +120,9 @@ export function TransactionDetailsDrawer({ isOpen, onClose, transaction }: Trans
         }
     }
 
-    // TODO: Implement transaction icon functionality
-    /* const getTransactionIcon = () => {
-        if (transaction.status.toLowerCase() === "successful") {
-            return (
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                    <Check className="w-8 h-8 text-green-600" />
-                </div>
-            )
-        } else if (transaction.status.toLowerCase() === "failed") {
-            return (
-                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
-                    <AlertCircle className="w-8 h-8 text-red-600" />
-                </div>
-            )
-        } else {
-            return (
-                <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-4">
-                    <AlertCircle className="w-8 h-8 text-yellow-600" />
-                </div>
-            )
-        }
-    } */
-
-    const formatCurrency = (amount: string | undefined) => {
-        const cleanedAmount = amount?.replace(/,/g, '') ?? "0";
+    const formatCurrency = (amount: string | number | undefined) => {
+        const amountStr = String(amount ?? "0");
+        const cleanedAmount = amountStr.replace(/,/g, '');
         const numAmount = Number.parseFloat(cleanedAmount);
         return `${numAmount.toLocaleString("en-US", {
             minimumFractionDigits: 2,
@@ -354,7 +332,11 @@ export function TransactionDetailsDrawer({ isOpen, onClose, transaction }: Trans
                                 <span className="text-gray-500 uppercase text-xs">Created By:</span>
                                 <div className="flex items-center gap-1">
                                     <UserCircle size={18} />
-                                    <span className="text-gray-900 font-medium text-sm">{transaction?.sender ?? "N/A"}</span>
+                                    <span className="text-gray-900 font-medium text-sm">
+                                        {transaction?.userId && typeof transaction.userId === "object" && "fullName" in transaction.userId
+                                            ? (transaction.userId as any).fullName
+                                            : "N/A"}
+                                    </span>
                                 </div>
                             </div>
 

@@ -17,7 +17,7 @@ export interface PaymentDetailsProps {
     open: boolean
     onClose: () => void
     onEdit?: () => void
-    details: IPayment
+    details: IPayment & { balance: number }
 }
 
 export default function PaymentDetailsDrawer({ open, onClose, onEdit, details }: PaymentDetailsProps) {
@@ -111,7 +111,7 @@ export default function PaymentDetailsDrawer({ open, onClose, onEdit, details }:
                                         </div>
                                         <div>
                                             <div className="text-xs text-gray-500 uppercase tracking-wide">Balance</div>
-                                            <div className="font-semibold text-gray-900">{formatCurrency(details.beneficiaryAmount)}</div>
+                                            <div className="font-semibold text-gray-900">{formatCurrency(String(details.balance))}</div>
                                         </div>
                                     </div>
                                 </CardContent>
@@ -241,7 +241,7 @@ export default function PaymentDetailsDrawer({ open, onClose, onEdit, details }:
                                     value={
                                         <div className="flex items-center gap-2">
                                             <UserCircle className="h-4 w-4 text-gray-500" />
-                                            <span>{String(details?.createdAt) || "N/A"}</span>
+                                            <span>{sd.user.fullName || "N/A"}</span>
                                         </div>
                                     }
                                 />

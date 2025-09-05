@@ -1,16 +1,30 @@
-
-"use client";
-
 import { useEffect, useState } from "react";
 import { Button } from "@/v1/components/ui/button";
 import { Card, CardContent } from "@/v1/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/v1/components/ui/select";
-import { EyeOff } from "lucide-react";
+import { Badge } from "@/v1/components/ui/badge";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/v1/components/ui/table";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/v1/components/ui/dropdown-menu";
+import { EyeOff, ArrowUpRight, ArrowDownLeft, MoreHorizontal, Calendar, Repeat, Wallet, Search, X, Filter } from "lucide-react";
 import { TransactionDetailsDrawer } from "./transaction-details-modal";
 import Loading from "../loading";
-import EmptyTransaction from "../emptytx";
-import { ITransaction } from "@/v1/interface/interface";
+import { IPagination, IResponse, ITransaction } from "@/v1/interface/interface";
+import { Status, TransactionType } from "@/v1/enums/enums";
 import { session, SessionData } from "@/v1/session/session";
+import Defaults from "@/v1/defaults/defaults";
+import { Input } from "@/v1/components/ui/input";
 
 interface ICurrency {
     name: string;
@@ -23,67 +37,33 @@ enum Owners {
     TEAM = "Teammates"
 }
 
-/*
-        {
-            id: "txn_987654",
-            reference: "REF-20240612-CHASE",
-            amount: "1500.00",
-            type: "credit",
-            status: "processing",
-            created_at: new Date().toISOString(),
-            completed_date: new Date().toISOString(), // new Date().toLocaleDateString("en-GB"),
-            reference_beneficiary: "REF-20240612-CHASE",
-            wallet: "USD",
-            sender_fullname: "Cecilia & Jacin Enterprise",
-            beneficiary_fullname: "Foshan City Chihu Furniture Co., LTD",
-            beneficiary_account: "1234567890",
-            beneficiary_country: "USA",
-            beneficiary_address: "270 Park Ave, New York, NY 10017",
-            beneficiary_email: "support@chase.com",
-            beneficiary_phone: "+1 800-935-9935",
-            swift_code: "CHASUS33",
-            bank_name: "JPMORGAN CHASE BANK, N.A., NEW YORK BRANCH (ORGANIZED UNDER THE LAWS OF THE STATE OF NEW YORK WITH LIMITED LIABILITY)",
-            bank_address: "270 Park Ave, New York, NY 10017",
-            attachment: "https://cdn.pixabay.com/photo/2025/08/04/14/58/tools-9754352_1280.jpg",
-            invoice_number: "INV-20240612-001",
-            invoice_date: new Date().toLocaleDateString("en-GB"),
-            purpose_of_transaction: "Payment for services",
-            tracking_number: "TRK-20240612-CHASE",
-            processed_date: new Date().toISOString(),
-            initiated_date: new Date().toISOString(),
-            created_by: "John Doe",
-            receipt: "https://bitcoin.org/bitcoin.pdf",
-            mt103: "https://bitcoin.org/bitcoin.pdf",
-            fees: [
-                {
-                    amount: "10.00",
-                    currency: "USD"
-                }
-            ]
-        }
-*/
-
-
 export function TransactionsView() {
     const [hideBalances, setHideBalances] = useState(false);
     const [transactions, setTransactions] = useState<Array<ITransaction>>([]);
-    const [totalItems] = useState(0); // TODO: Implement pagination
-    const [totalPages] = useState(1); // TODO: Implement pagination
-    const [loading] = useState<boolean>(false); // TODO: Implement loading state
+    const [loading, setLoading] = useState<boolean>(false);
+    const [pagination, setPagination] = useState<IPagination>({
+        total: 0,
+        totalPages: 0,
+        page: 1,
+        limit: 10,
+    });
     const sd: SessionData = session.getUserData();
 
-    // const walletService = new WalletService();
-
-    const [currentPage, setCurrentPage] = useState(1);
     const [statusFilter, setStatusFilter] = useState("Successful");
     const [currencyFilter, setCurrencyFilter] = useState("All");
-    const itemsPerPage = 10;
-    // const [selectedTransaction, setSelectedTransaction] = useState<any>(null); // TODO: Implement transaction selection properly
+    const [ownerFilter, setOwnerFilter] = useState("Everyone");
     const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
+
+    // New filter states
+    const [searchQuery, setSearchQuery] = useState("");
+    const [startDate, setStartDate] = useState("");
+    const [endDate, setEndDate] = useState("");
+    const [activeFiltersCount, setActiveFiltersCount] = useState(0);
 
     const statusTabs = ["Successful", "Processing", "Pending", "Failed"];
     const owners = Object.values(Owners);
     const currencies: Array<ICurrency> = [
+        { name: "All", icon: "https://img.icons8.com/color/50/worldwide-location.png" },
         { name: "NGN", icon: "https://img.icons8.com/color/50/nigeria-circular.png" },
         { name: "USD", icon: "https://img.icons8.com/color/50/usa-circular.png" },
         { name: "EUR", icon: "https://img.icons8.com/fluency/48/euro-pound-exchange.png" },
@@ -92,30 +72,83 @@ export function TransactionsView() {
 
     useEffect(() => {
         if (sd) {
-            setTransactions(sd.transactions);
+            fetchTransactions();
         }
-    }, [transactions, sd]);
+    }, [statusFilter, currencyFilter, searchQuery, startDate, endDate, pagination.page, sd]);
 
-    const handleTransactionClick = (_transaction: any) => {
-        // TODO: Implement transaction selection properly
-        /* const formattedTransaction = {
-            id: transaction.id,
-            reference: transaction.reference ?? "N/A",
-            amount: transaction.amount ?? "0",
-            merchant_fee: transaction.merchant_fee ?? "0",
-            net_amount: transaction.net_amount ?? "0",
-            description: transaction.description ?? "No description",
-            type: transaction.type ?? "unknown",
-            status: transaction.status ?? "unknown",
-            currency: transaction.currency ?? { code: "NGN", decimal_place: 2 },
-            created_at: transaction.created_at ?? new Date().toISOString(),
-        };
-        setSelectedTransaction(formattedTransaction); */
-        setIsTransactionModalOpen(true);
+    // Update active filters count
+    useEffect(() => {
+        let count = 0;
+        if (statusFilter !== "Successful") count++;
+        if (currencyFilter !== "All") count++;
+        if (searchQuery.trim()) count++;
+        if (startDate) count++;
+        if (endDate) count++;
+        setActiveFiltersCount(count);
+    }, [statusFilter, currencyFilter, searchQuery, startDate, endDate]);
+
+    const fetchTransactions = async () => {
+        try {
+            setLoading(true)
+
+            Defaults.LOGIN_STATUS();
+
+            // Build query parameters
+            const params = new URLSearchParams({
+                page: pagination.page.toString(),
+                limit: pagination.limit.toString(),
+                includePagination: "true"
+            });
+
+            // Add filters
+            if (statusFilter !== "Successful") {
+                params.append("status", statusFilter.toLowerCase());
+            }
+            if (currencyFilter !== "All") {
+                params.append("wallet", currencyFilter);
+            }
+            if (searchQuery.trim()) {
+                params.append("search", searchQuery.trim());
+            }
+            if (startDate) {
+                params.append("startDate", startDate);
+            }
+            if (endDate) {
+                params.append("endDate", endDate);
+            }
+
+            const url: string = `${Defaults.API_BASE_URL}/transaction/?${params.toString()}`;
+
+            const res = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    ...Defaults.HEADERS,
+                    "Content-Type": "application/json",
+                    'x-rojifi-handshake': sd.client.publicKey,
+                    'x-rojifi-deviceid': sd.deviceid,
+                    Authorization: `Bearer ${sd.authorization}`,
+                },
+            });
+            const data: IResponse = await res.json();
+            if (data.status === Status.ERROR) throw new Error(data.message || data.error);
+            if (data.status === Status.SUCCESS) {
+                if (!data.handshake) throw new Error('Unable to process transaction response right now, please try again.');
+                const parseData: Array<ITransaction> = Defaults.PARSE_DATA(data.data, sd.client.privateKey, data.handshake);
+                setTransactions(parseData);
+                if (data.pagination) {
+                    setPagination(data.pagination);
+                }
+            }
+        } catch (error) {
+            console.error("Error fetching transactions:", error);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+    const handleTransactionClick = (_transaction: any) => {
+        setIsTransactionModalOpen(true);
+    };
 
     return (
         <div className="space-y-6">
@@ -142,6 +175,11 @@ export function TransactionsView() {
             <div className="space-y-4">
                 <div className="flex items-center justify-between">
                     <h2 className="text-xl font-medium text-gray-900">All Transactions</h2>
+                    {transactions.length > 0 && (
+                        <Button variant="outline" size="sm">
+                            Export Transactions
+                        </Button>
+                    )}
                 </div>
 
                 {/* Status Tabs and Currency Filter */}
@@ -154,7 +192,7 @@ export function TransactionsView() {
                                     key={status}
                                     onClick={() => {
                                         setStatusFilter(status);
-                                        setCurrentPage(1); // Reset to first page when filter changes
+                                        setPagination((prev) => ({ ...prev, page: 1 }));
                                     }}
                                     className={`px-3 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap ${statusFilter === status
                                         ? "bg-white text-primary shadow-sm"
@@ -175,7 +213,7 @@ export function TransactionsView() {
                                 value={currencyFilter}
                                 onValueChange={(value) => {
                                     setCurrencyFilter(value);
-                                    setCurrentPage(1);
+                                    setPagination((prev) => ({ ...prev, page: 1 }));
                                 }}
                             >
                                 <SelectTrigger className="w-32">
@@ -194,14 +232,14 @@ export function TransactionsView() {
                             </Select>
                         </div>
 
-                        {/* Currency Filter */}
+                        {/* Made By Filter */}
                         <div className="flex items-center gap-2 w-full lg:w-auto">
                             <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Made By:</label>
                             <Select
-                                value={currencyFilter}
+                                value={ownerFilter}
                                 onValueChange={(value) => {
-                                    setCurrencyFilter(value);
-                                    setCurrentPage(1);
+                                    setOwnerFilter(value);
+                                    setPagination((prev) => ({ ...prev, page: 1 }));
                                 }}
                             >
                                 <SelectTrigger className="w-32">
@@ -218,86 +256,239 @@ export function TransactionsView() {
 
                 </div>
 
+                {/* Search and Advanced Filters */}
+                <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center">
+                    {/* Search Input */}
+                    <div className="relative flex-1 lg:max-w-md">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                        <Input
+                            placeholder="Search transactions by reference, name, bank..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="pl-10 pr-4"
+                        />
+                        {searchQuery && (
+                            <button
+                                onClick={() => setSearchQuery("")}
+                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                            >
+                                <X className="h-4 w-4" />
+                            </button>
+                        )}
+                    </div>
+
+                    {/* Date Range Filters */}
+                    <div className="flex flex-col sm:flex-row gap-2">
+                        <div className="flex items-center gap-2">
+                            <label className="text-sm font-medium text-gray-700 whitespace-nowrap">From:</label>
+                            <Input
+                                type="date"
+                                value={startDate}
+                                onChange={(e) => setStartDate(e.target.value)}
+                                className="w-auto"
+                            />
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <label className="text-sm font-medium text-gray-700 whitespace-nowrap">To:</label>
+                            <Input
+                                type="date"
+                                value={endDate}
+                                onChange={(e) => setEndDate(e.target.value)}
+                                className="w-auto"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Clear Filters Button */}
+                    {activeFiltersCount > 0 && (
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                                setStatusFilter("Successful");
+                                setCurrencyFilter("All");
+                                setSearchQuery("");
+                                setStartDate("");
+                                setEndDate("");
+                                setPagination((prev) => ({ ...prev, page: 1 }));
+                            }}
+                            className="flex items-center gap-2 whitespace-nowrap"
+                        >
+                            <Filter className="h-4 w-4" />
+                            Clear Filters ({activeFiltersCount})
+                        </Button>
+                    )}
+                </div>
+
                 {/* Transaction loading */}
                 {loading && <div className="py-40"><Loading /></div>}
 
                 {/* Empty Transaction */}
                 {!loading && transactions.length === 0 &&
-                    <div className="py-20"><EmptyTransaction statusFilter={statusFilter} onClick={(): void => { }} /></div>
+                    <Card className="w-full">
+                        <CardContent className="p-0 w-full">
+                            <div className="py-20 text-center">
+                                <div className="flex flex-col items-center gap-2">
+                                    <Wallet className="h-8 w-8 text-gray-400" />
+                                    <p className="text-sm text-gray-600">No {statusFilter.toLowerCase()} transactions found</p>
+                                    <p className="text-xs text-gray-500">Your transaction history will appear here</p>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
                 }
 
                 {/* Transactions Table */}
                 {!loading && transactions.length > 0 &&
                     <Card>
                         <CardContent className="p-0">
-                            <div className="overflow-x-auto">
-                                <table className="w-full">
-                                    <thead className="border-b border-gray-200 bg-gray-50">
-                                        <tr>
-                                            <th className="text-left py-3 px-6 text-sm font-medium text-gray-700">Amount</th>
-                                            <th className="text-left py-3 px-6 text-sm font-medium text-gray-700">Beneficiary</th>
-                                            <th className="text-left py-3 px-6 text-sm font-medium text-gray-700">Date</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {transactions.map((transaction) => (
-                                            <tr
-                                                key={transaction._id}
-                                                className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
-                                                onClick={() => handleTransactionClick(transaction)}
-                                            >
-                                                <td className="py-4 px-6 text-sm text-gray-900 font-medium">
-                                                    {hideBalances
-                                                        ? "••••••••"
-                                                        : `${parseFloat(transaction.amount || "0").toLocaleString("en-US", {
-                                                            minimumFractionDigits: 2,
-                                                            maximumFractionDigits: 2,
-                                                        })}`}
-                                                </td>
-                                                <td className="py-4 px-6 text-sm text-gray-600 whitespace-nowrap">{transaction.beneficiaryAccountName}</td>
-                                                <td className="py-4 px-6 text-sm text-gray-600 whitespace-nowrap">{transaction.createdAt.toString()}</td>
-                                                {/*
-                                                <td className="py-4 px-6">
-                                                    <span
-                                                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${transaction.status.toLowerCase() === "successful"
-                                                            ? "bg-green-100 text-green-800"
-                                                            : transaction.status.toLowerCase() === "pending"
-                                                                ? "bg-yellow-100 text-yellow-800"
-                                                                : "bg-red-100 text-red-800"
-                                                            }`}
-                                                    >
-                                                        {transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)}
+                            <Table>
+                                <TableHeader>
+                                    <TableRow className="bg-gray-50/50">
+                                        <TableHead className="w-[100px] pl-6">Type</TableHead>
+                                        <TableHead>Details</TableHead>
+                                        <TableHead>Amount</TableHead>
+                                        <TableHead>Status</TableHead>
+                                        <TableHead>Date</TableHead>
+                                        <TableHead className="w-[50px] pr-6">Actions</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {transactions.map((transaction) => (
+                                        <TableRow
+                                            key={transaction._id}
+                                            className="hover:bg-gray-50/50 cursor-pointer transition-colors"
+                                            onClick={() => handleTransactionClick(transaction)}
+                                        >
+                                            <TableCell className="pl-6">
+                                                <div className="flex items-center gap-2">
+                                                    <div className={`p-2 rounded-full ${transaction.type === TransactionType.TRANSFER || transaction.type === TransactionType.WITHDRAWAL
+                                                        ? 'bg-red-100 text-red-600'
+                                                        : transaction.type === TransactionType.DEPOSIT
+                                                            ? 'bg-green-100 text-green-600'
+                                                            : 'bg-blue-100 text-blue-600'
+                                                        }`}>
+                                                        {transaction.type === TransactionType.TRANSFER || transaction.type === TransactionType.WITHDRAWAL ? (
+                                                            <ArrowUpRight className="h-3 w-3" />
+                                                        ) : transaction.type === TransactionType.DEPOSIT ? (
+                                                            <ArrowDownLeft className="h-3 w-3" />
+                                                        ) : (
+                                                            <Repeat className="h-3 w-3" />
+                                                        )}
+                                                    </div>
+                                                    <span className="text-xs font-medium capitalize">
+                                                        {transaction.type || 'Payment'}
                                                     </span>
-                                                </td>
-                                                */}
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex flex-col">
+                                                    <span className="font-medium text-sm">
+                                                        {transaction.beneficiaryAccountName || transaction.to || 'Payment Transfer'}
+                                                    </span>
+                                                    {transaction.beneficiaryCountry && (
+                                                        <span className="text-xs text-gray-500">
+                                                            {transaction.beneficiaryCountry}
+                                                        </span>
+                                                    )}
+                                                    {transaction.purposeOfPayment && (
+                                                        <span className="text-xs text-gray-500 truncate max-w-[200px]">
+                                                            {transaction.purposeOfPayment}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex flex-col">
+                                                    <span className="font-semibold text-sm">
+                                                        {hideBalances ? (
+                                                            "••••••••"
+                                                        ) : (
+                                                            `$${Number(transaction.beneficiaryAmount || transaction.amount || 0).toLocaleString("en-US", {
+                                                                minimumFractionDigits: 2,
+                                                                maximumFractionDigits: 2,
+                                                            })}`
+                                                        )}
+                                                    </span>
+                                                    <span className="text-xs text-gray-500">
+                                                        {transaction.senderCurrency || transaction.wallet || 'USD'}
+                                                    </span>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Badge
+                                                    variant={
+                                                        transaction.status.toLowerCase() === "successful" || transaction.status.toLowerCase() === "completed"
+                                                            ? "default"
+                                                            : transaction.status.toLowerCase() === "pending" || transaction.status.toLowerCase() === "processing"
+                                                                ? "secondary"
+                                                                : "destructive"
+                                                    }
+                                                    className={`text-xs ${transaction.status.toLowerCase() === "successful" || transaction.status.toLowerCase() === "completed"
+                                                        ? "bg-green-100 text-green-800 hover:bg-green-100"
+                                                        : transaction.status.toLowerCase() === "pending" || transaction.status.toLowerCase() === "processing"
+                                                            ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-100"
+                                                            : "bg-red-100 text-red-800 hover:bg-red-100"
+                                                        }`}
+                                                >
+                                                    {transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex items-center gap-1 text-xs text-gray-600">
+                                                    <Calendar className="h-3 w-3" />
+                                                    {transaction.createdAt ? new Date(transaction.createdAt).toLocaleDateString() : ''}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="pr-6">
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button variant="ghost" className="h-8 w-8 p-0">
+                                                            <MoreHorizontal className="h-4 w-4" />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end">
+                                                        <DropdownMenuItem>
+                                                            View Details
+                                                        </DropdownMenuItem>
+                                                        {transaction.receipt && (
+                                                            <DropdownMenuItem>
+                                                                Download Receipt
+                                                            </DropdownMenuItem>
+                                                        )}
+                                                        <DropdownMenuItem>
+                                                            Track Payment
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
 
                             {/* Pagination */}
                             <div className="flex flex-col sm:flex-row items-center justify-between px-6 py-4 border-t border-gray-200 gap-4">
                                 <div className="text-sm text-gray-700">
-                                    Showing {startIndex + 1} to {endIndex} of {totalItems} entries
+                                    Showing {((pagination.page - 1) * pagination.limit) + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} entries
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                                        disabled={currentPage === 1}
+                                        onClick={() => setPagination((prev) => ({ ...prev, page: Math.max(prev.page - 1, 1) }))}
+                                        disabled={pagination.page === 1}
                                     >
                                         Previous
                                     </Button>
                                     <span className="text-sm text-gray-700 px-2">
-                                        Page {currentPage} of {totalPages}
+                                        Page {pagination.page} of {pagination.totalPages}
                                     </span>
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                                        disabled={currentPage === totalPages}
+                                        onClick={() => setPagination((prev) => ({ ...prev, page: Math.min(prev.page + 1, pagination.totalPages) }))}
+                                        disabled={pagination.page === pagination.totalPages}
                                     >
                                         Next
                                     </Button>

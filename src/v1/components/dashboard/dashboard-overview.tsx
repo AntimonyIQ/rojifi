@@ -3,8 +3,23 @@
 import { useState, useEffect } from "react"
 import * as htmlToImage from "html-to-image";
 import { Button } from "@/v1/components/ui/button"
-import { ChevronRight, CircleDot, Download, Expand, EyeOff, Plus, Repeat, Send, Wallet } from "lucide-react"
+import { ChevronRight, CircleDot, Download, Expand, EyeOff, Plus, Repeat, Send, Wallet, ArrowUpRight, ArrowDownLeft, MoreHorizontal, Calendar } from "lucide-react"
 import { Card, CardContent } from "../ui/card"
+import { Badge } from "@/v1/components/ui/badge"
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/v1/components/ui/table"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/v1/components/ui/dropdown-menu"
 import TransactionChart from "./transactionchart"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog"
 import Loading from "../loading";
@@ -12,7 +27,7 @@ import { session, SessionData } from "@/v1/session/session";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { IResponse, ITransaction, IUser, IWallet } from "@/v1/interface/interface";
-import { Fiat, Status } from "@/v1/enums/enums";
+import { Fiat, Status, TransactionType } from "@/v1/enums/enums";
 import Defaults from "@/v1/defaults/defaults";
 import { ILoginFormProps } from "../auth/login-form";
 import { usePathname } from "wouter/use-browser-location";
@@ -426,91 +441,181 @@ export function DashboardOverview() {
                                 </div>
 
                                 <div className="mt-5">
-                                    <h2 className="text-lg font-medium capitalize">Wallet history</h2>
+                                    <h2 className="text-lg font-medium capitalize">Recent Transactions</h2>
                                 </div>
 
                                 {/* Transactions Table */}
                                 <Card className="w-full">
                                     <CardContent className="p-0 w-full">
-                                        <div className="overflow-x-auto w-full">
-                                            <table className="w-full">
-                                                <thead className="border-b border-gray-200 bg-gray-50">
-                                                    <tr>
-                                                        {/*
-                                                            <th className="text-left py-3 px-6 text-sm font-medium text-gray-700">Amount</th>
-                                                            <th className="text-left py-3 px-6 text-sm font-medium text-gray-700">Beneficiary</th>
-                                                            <th className="text-left py-3 px-6 text-sm font-medium text-gray-700">Date</th>
-                                                            */}
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {transactions.length === 0 && (
-                                                        <tr>
-                                                            <td colSpan={3} className="py-20 px-6 text-sm text-gray-600 text-center">
-                                                                No transactions found.
-                                                            </td>
-                                                        </tr>
-                                                    )}
-                                                    {transactions.length > 0 && transactions.slice(0, 4).map((transaction) => (
-                                                        <tr
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow className="bg-gray-50/50">
+                                                    <TableHead className="w-[100px] pl-6">Type</TableHead>
+                                                    <TableHead>Details</TableHead>
+                                                    <TableHead>Amount</TableHead>
+                                                    <TableHead>Status</TableHead>
+                                                    <TableHead>Date</TableHead>
+                                                    <TableHead className="w-[50px] pr-6">Actions</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {transactions.length === 0 ? (
+                                                    <TableRow>
+                                                        <TableCell colSpan={6} className="py-20 text-center">
+                                                            <div className="flex flex-col items-center gap-2">
+                                                                <Wallet className="h-8 w-8 text-gray-400" />
+                                                                <p className="text-sm text-gray-600">No transactions found</p>
+                                                                <p className="text-xs text-gray-500">Your recent transactions will appear here</p>
+                                                            </div>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ) : (
+                                                    transactions.slice(0, 4).map((transaction) => (
+                                                        <TableRow
                                                             key={transaction._id}
-                                                            className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
-                                                            onClick={() => { }}
+                                                            className="hover:bg-gray-50/50 cursor-pointer transition-colors"
+                                                            onClick={() => {
+                                                                // Handle transaction details view
+                                                                console.log('View transaction:', transaction._id);
+                                                            }}
                                                         >
-                                                            <td className="py-4 px-6 text-sm text-gray-900 font-medium">
-                                                                {hideBalances
-                                                                    ? "••••••••"
-                                                                    : `${Number(transaction.amount).toLocaleString("en-US", {
-                                                                        minimumFractionDigits: 2,
-                                                                        maximumFractionDigits: 2,
-                                                                    })}`}
-                                                            </td>
-                                                            <td className="py-4 px-6 text-sm text-gray-600 whitespace-nowrap">{transaction.createdAt.toDateString()}</td>
-                                                            <td className="py-4 px-6">
-                                                                <span
-                                                                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${transaction.status.toLowerCase() === "successful"
-                                                                        ? "bg-green-100 text-green-800"
-                                                                        : transaction.status.toLowerCase() === "pending"
-                                                                            ? "bg-yellow-100 text-yellow-800"
-                                                                            : "bg-red-100 text-red-800"
+                                                            <TableCell className="pl-6">
+                                                                <div className="flex items-center gap-2">
+                                                                    <div className={`p-2 rounded-full ${transaction.type === TransactionType.TRANSFER || transaction.type === TransactionType.WITHDRAWAL
+                                                                            ? 'bg-red-100 text-red-600'
+                                                                            : transaction.type === TransactionType.DEPOSIT
+                                                                                ? 'bg-green-100 text-green-600'
+                                                                                : 'bg-blue-100 text-blue-600'
+                                                                        }`}>
+                                                                        {transaction.type === TransactionType.TRANSFER || transaction.type === TransactionType.WITHDRAWAL ? (
+                                                                            <ArrowUpRight className="h-3 w-3" />
+                                                                        ) : transaction.type === TransactionType.DEPOSIT ? (
+                                                                            <ArrowDownLeft className="h-3 w-3" />
+                                                                        ) : (
+                                                                            <Repeat className="h-3 w-3" />
+                                                                        )}
+                                                                    </div>
+                                                                    <span className="text-xs font-medium capitalize">
+                                                                        {transaction.type || 'Payment'}
+                                                                    </span>
+                                                                </div>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <div className="flex flex-col">
+                                                                    <span className="font-medium text-sm">
+                                                                        {transaction.beneficiaryAccountName || transaction.to || 'Payment Transfer'}
+                                                                    </span>
+                                                                    {transaction.beneficiaryCountry && (
+                                                                        <span className="text-xs text-gray-500">
+                                                                            {transaction.beneficiaryCountry}
+                                                                        </span>
+                                                                    )}
+                                                                    {transaction.purposeOfPayment && (
+                                                                        <span className="text-xs text-gray-500 truncate max-w-[200px]">
+                                                                            {transaction.purposeOfPayment}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <div className="flex flex-col">
+                                                                    <span className="font-semibold text-sm">
+                                                                        {hideBalances ? (
+                                                                            "••••••••"
+                                                                        ) : (
+                                                                            `${activeWallet?.symbol || '$'}${Number(transaction.beneficiaryAmount || transaction.amount || 0).toLocaleString("en-US", {
+                                                                                minimumFractionDigits: 2,
+                                                                                maximumFractionDigits: 2,
+                                                                            })}`
+                                                                        )}
+                                                                    </span>
+                                                                    <span className="text-xs text-gray-500">
+                                                                        {transaction.senderCurrency || transaction.wallet || selectedCurrency}
+                                                                    </span>
+                                                                </div>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <Badge
+                                                                    variant={
+                                                                        transaction.status.toLowerCase() === "successful" || transaction.status.toLowerCase() === "completed"
+                                                                            ? "default"
+                                                                            : transaction.status.toLowerCase() === "pending"
+                                                                                ? "secondary"
+                                                                                : "destructive"
+                                                                    }
+                                                                    className={`text-xs ${transaction.status.toLowerCase() === "successful" || transaction.status.toLowerCase() === "completed"
+                                                                            ? "bg-green-100 text-green-800 hover:bg-green-100"
+                                                                            : transaction.status.toLowerCase() === "pending"
+                                                                                ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-100"
+                                                                                : "bg-red-100 text-red-800 hover:bg-red-100"
                                                                         }`}
                                                                 >
                                                                     {transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)}
-                                                                </span>
-                                                            </td>
-                                                        </tr>
-                                                    ))}
-                                                </tbody>
-                                            </table>
-                                        </div>
+                                                                </Badge>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <div className="flex items-center gap-1 text-xs text-gray-600">
+                                                                    <Calendar className="h-3 w-3" />
+                                                                    {transaction.createdAt ? new Date(transaction.createdAt).toLocaleDateString() : ''}
+                                                                </div>
+                                                            </TableCell>
+                                                            <TableCell className="pr-6">
+                                                                <DropdownMenu>
+                                                                    <DropdownMenuTrigger asChild>
+                                                                        <Button variant="ghost" className="h-8 w-8 p-0">
+                                                                            <MoreHorizontal className="h-4 w-4" />
+                                                                        </Button>
+                                                                    </DropdownMenuTrigger>
+                                                                    <DropdownMenuContent align="end">
+                                                                        <DropdownMenuItem>
+                                                                            View Details
+                                                                        </DropdownMenuItem>
+                                                                        {transaction.receipt && (
+                                                                            <DropdownMenuItem>
+                                                                                Download Receipt
+                                                                            </DropdownMenuItem>
+                                                                        )}
+                                                                        <DropdownMenuItem>
+                                                                            Track Payment
+                                                                        </DropdownMenuItem>
+                                                                    </DropdownMenuContent>
+                                                                </DropdownMenu>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ))
+                                                )}
+                                            </TableBody>
+                                        </Table>
 
                                         {/* Pagination */}
-                                        <div className="flex flex-col sm:flex-row items-center justify-between px-6 py-4 border-t border-gray-200 gap-4">
-                                            <div className="text-sm text-gray-700">
-                                                Showing {startIndex + 1} to {endIndex} of {totalItems} entries
+                                        {transactions.length > 0 && (
+                                            <div className="flex flex-col sm:flex-row items-center justify-between px-6 py-4 border-t border-gray-200 gap-4">
+                                                <div className="text-sm text-gray-700">
+                                                    Showing {startIndex + 1} to {endIndex} of {totalItems} entries
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                                                        disabled={currentPage === 1}
+                                                    >
+                                                        Previous
+                                                    </Button>
+                                                    <span className="text-sm text-gray-700 px-2">
+                                                        Page {currentPage} of {totalPages}
+                                                    </span>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                                                        disabled={currentPage === totalPages}
+                                                    >
+                                                        Next
+                                                    </Button>
+                                                </div>
                                             </div>
-                                            <div className="flex items-center gap-2">
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                                                    disabled={currentPage === 1}
-                                                >
-                                                    Previous
-                                                </Button>
-                                                <span className="text-sm text-gray-700 px-2">
-                                                    Page {currentPage} of {totalPages}
-                                                </span>
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                                                    disabled={currentPage === totalPages}
-                                                >
-                                                    Next
-                                                </Button>
-                                            </div>
-                                        </div>
+                                        )}
                                     </CardContent>
                                 </Card>
                             </>
