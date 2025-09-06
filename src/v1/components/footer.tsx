@@ -10,7 +10,7 @@ export function Footer() {
                         <a href="/" className="flex items-center space-x-2">
                             <Logo className="h-10 w-auto" color="white" />
                         </a>
-                        <p className="mt-4 text-sm text-gray-400">Breaking Barriers in Cross-Border Transactions</p>
+                        <p className="mt-4 text-sm text-gray-400">Global Transactions Made Simple for Local Businesses</p>
                         <div className="mt-6 flex gap-4">
                             <a
                                 href="https://www.instagram.com/rojifi_"

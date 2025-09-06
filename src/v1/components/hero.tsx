@@ -27,7 +27,7 @@ export function Hero({ isLoggedIn }: HeroProps) {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5 }}
                     >
-                        Breaking Barriers in Cross-Border Transactions
+                        Global Transactions Made Simple for Local Businesses
                     </motion.h1>
                     <motion.p
                         className="mt-6 text-lg text-muted-foreground md:text-xl"

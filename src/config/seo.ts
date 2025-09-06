@@ -1,6 +1,6 @@
 export const seoConfig = {
     homepage: {
-        title: "Digital Finance Platform",
+        title: "Global Transactions Made Simple for Local Businesses",
         description: "Rojifi is a modern digital finance platform providing secure, fast, and reliable financial services. Join thousands of users managing their finances with confidence.",
         keywords: "rojifi, digital finance, financial platform, secure banking, online finance, financial services",
         canonical: "/",
