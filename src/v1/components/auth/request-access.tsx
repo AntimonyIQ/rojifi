@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/v1/components/ui/button"
 import { Input } from "@/v1/components/ui/input"
 import { Label } from "@/v1/components/ui/label"
@@ -53,6 +53,7 @@ export function RequestAccessForm() {
         countryCode: "234",
         selectedCountryCode: "Nigeria", // Track specific country for phone code
         businessName: "",
+        businessWebsite: "",
         address: "",
         city: "",
         postal: "",
@@ -64,11 +65,114 @@ export function RequestAccessForm() {
     // Display value for the volume input (with commas). formData.volume stores raw digits only.
     const formatNumber = (val: string) => (val ? val.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : val)
     const [displayVolume, setDisplayVolume] = useState<string>(formatNumber(formData.volume))
+    const [locationData, setLocationData] = useState<any>(null)
+    const [deviceInfo, setDeviceInfo] = useState<any>(null)
     const sd: SessionData = session.getUserData();
 
     // const isValidName = (name: string) => /^[A-Za-z]{2,}$/.test(name); // TODO: Implement name validation
     const isValidPhone = (phone: string) => /^[0-9]+$/.test(phone);
     const isValidEmail = (email: string) => /\S+@\S+\.\S+/.test(email);
+
+    useEffect(() => {
+        getLocation();
+        getDeviceInfo();
+    }, []);
+
+    const getDeviceInfo = () => {
+        const userAgent = navigator.userAgent;
+        const platform = navigator.platform;
+        const language = navigator.language;
+        const cookieEnabled = navigator.cookieEnabled;
+        const onLine = navigator.onLine;
+        const screen = window.screen;
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+        // Detect browser
+        let browserName = "Unknown";
+        let browserVersion = "Unknown";
+
+        if (userAgent.indexOf("Chrome") > -1) {
+            browserName = "Chrome";
+            browserVersion = userAgent.match(/Chrome\/([0-9.]+)/)?.[1] || "Unknown";
+        } else if (userAgent.indexOf("Firefox") > -1) {
+            browserName = "Firefox";
+            browserVersion = userAgent.match(/Firefox\/([0-9.]+)/)?.[1] || "Unknown";
+        } else if (userAgent.indexOf("Safari") > -1) {
+            browserName = "Safari";
+            browserVersion = userAgent.match(/Safari\/([0-9.]+)/)?.[1] || "Unknown";
+        } else if (userAgent.indexOf("Edge") > -1) {
+            browserName = "Edge";
+            browserVersion = userAgent.match(/Edge\/([0-9.]+)/)?.[1] || "Unknown";
+        }
+
+        // Detect OS
+        let osName = "Unknown";
+        if (userAgent.indexOf("Windows") > -1) osName = "Windows";
+        else if (userAgent.indexOf("Mac") > -1) osName = "macOS";
+        else if (userAgent.indexOf("Linux") > -1) osName = "Linux";
+        else if (userAgent.indexOf("Android") > -1) osName = "Android";
+        else if (userAgent.indexOf("iOS") > -1) osName = "iOS";
+
+        // Detect device type
+        let deviceType = "Desktop";
+        if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)) {
+            deviceType = "Mobile";
+        } else if (/iPad/i.test(userAgent)) {
+            deviceType = "Tablet";
+        }
+
+        const info = {
+            browser: {
+                name: browserName,
+                version: browserVersion,
+                userAgent: userAgent,
+                language: language,
+                cookieEnabled: cookieEnabled,
+                onLine: onLine
+            },
+            device: {
+                type: deviceType,
+                platform: platform,
+                screen: {
+                    width: screen.width,
+                    height: screen.height,
+                    colorDepth: screen.colorDepth,
+                    pixelDepth: screen.pixelDepth
+                }
+            },
+            system: {
+                os: osName,
+                timezone: timezone,
+                timestamp: new Date().toISOString()
+            }
+        };
+
+        setDeviceInfo(info);
+    };
+
+    const getLocation = async () => {
+        try {
+            const res = await fetch('https://ipapi.co/json/', {
+                headers: { "Accept": "application/json" }
+            });
+            if (!res.ok) throw new Error('Network response was not ok');
+            const data = await res.json();
+
+            if (data) {
+                setLocationData(data);
+            }
+        } catch (error: any) {
+            console.error('Unable to fetch location from IP!', error);
+            // Fallback location data
+            setLocationData({
+                ip: "Unknown",
+                city: "Unknown",
+                region: "Unknown",
+                country_name: "Unknown",
+                error: error?.message || "Location fetch failed"
+            });
+        }
+    }
 
     const handleInputChange = (field: string, value: string | boolean) => {
         let sanitizedValue = value;
@@ -114,6 +218,11 @@ export function RequestAccessForm() {
                     sanitizedValue = value.replace(/[^a-zA-Z0-9\s\-_,.]/g, "");
                     break;
 
+                case "businessWebsite":
+                    // Allow URL characters: letters, numbers, dots, slashes, hyphens, underscores, colons
+                    sanitizedValue = value.replace(/[^a-zA-Z0-9\.\-_/:]/g, "").toLowerCase();
+                    break;
+
                 case "address":
                     sanitizedValue = value.replace(/[^a-zA-Z0-9\s\-_,.]/g, "");
                     break;
@@ -137,7 +246,7 @@ export function RequestAccessForm() {
         setError(null)
 
         if (!formData.agreeToTerms) {
-            setError("You must agree to the Terms and Conditions")
+            setError("You must agree to the Terms and Conditions to proceed")
             return
         }
 
@@ -181,6 +290,7 @@ export function RequestAccessForm() {
                     lastname: formData.lastName,
                     middlename: formData.middleName,
                     businessName: formData.businessName,
+                    businessWebsite: formData.businessWebsite,
                     phoneCode: formData.countryCode,
                     agreement: formData.agreeToTerms,
                     agreeToMarketing: formData.agreeToMarketing,
@@ -194,7 +304,14 @@ export function RequestAccessForm() {
                     weeklyVolume: Number(formData.volume || 0),
                     metadata: {
                         agreeToMarketing: formData.agreeToMarketing,
-                        businessWebsite: "",
+                        location: locationData,
+                        device: deviceInfo,
+                        submission: {
+                            timestamp: new Date().toISOString(),
+                            userAgent: navigator.userAgent,
+                            referrer: document.referrer || "Direct",
+                            url: window.location.href
+                        }
                     }
                 }),
             });
@@ -420,6 +537,22 @@ export function RequestAccessForm() {
                             </div>
 
                             <div>
+                                <Label htmlFor="businessWebsite" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Business Website <span className="text-gray-400">(Optional)</span>
+                                </Label>
+                                <div>
+                                    <Input
+                                        id="businessWebsite"
+                                        name="businessWebsite"
+                                        type="url"
+                                        autoComplete="url"
+                                        className="h-12"
+                                        placeholder="https://example.com"
+                                        value={formData.businessWebsite}
+                                        onChange={(e) => handleInputChange("businessWebsite", e.target.value)}
+                                    />
+                                </div>
+                            </div>                            <div>
                                 <Label htmlFor="volume" className="block text-sm font-medium text-gray-700 mb-2">
                                     Volume Processed Weekly <span className="text-red-500">*</span>
                                 </Label>
@@ -605,6 +738,7 @@ export function RequestAccessForm() {
                                         id="agreeToTerms"
                                         checked={formData.agreeToTerms}
                                         onCheckedChange={(checked) => handleInputChange("agreeToTerms", checked)}
+                                        required
                                     />
                                     <Label htmlFor="agreeToTerms" className="text-sm text-gray-600">
                                         I agree to Rojifi's{" "}
@@ -614,13 +748,16 @@ export function RequestAccessForm() {
                                         and{" "}
                                         <Link href="#" className="text-primary hover:text-primary/80">
                                             Terms and Conditions
-                                        </Link>
+                                        </Link>{" "}
+                                        <span className="text-red-500">*</span>
                                     </Label>
                                 </div>
-                            </div>
-
-                            <div className="space-y-4">
-                                <Button type="submit" className="w-full h-12 bg-primary hover:bg-primary/90 text-white" disabled={isLoading}>
+                            </div>                            <div className="space-y-4">
+                                <Button
+                                    type="submit"
+                                    className="w-full h-12 bg-primary hover:bg-primary/90 text-white"
+                                    disabled={isLoading || !formData.agreeToTerms}
+                                >
                                     {isLoading ? "Sending Request..." : "Submit"}
                                 </Button>
                             </div>
