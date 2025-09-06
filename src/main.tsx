@@ -7,10 +7,13 @@ import "./index.css";
 // import { Toaster } from "@/v1/components/ui/toaster";
 import { TooltipProvider } from "@/v1/components/ui/tooltip";
 import { Toaster } from 'sonner'
+import { HelmetProvider } from 'react-helmet-async';
 
 createRoot(document.getElementById("root")!).render(
-    <TooltipProvider>
-        <App />
-        <Toaster richColors />
-    </TooltipProvider>
+    <HelmetProvider>
+        <TooltipProvider>
+            <App />
+            <Toaster richColors />
+        </TooltipProvider>
+    </HelmetProvider>
 );

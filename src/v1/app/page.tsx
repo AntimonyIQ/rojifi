@@ -15,6 +15,7 @@ import CookieConsent from "@/v1/components/cookies";
 import { ThemeProvider } from '@/v1/components/theme-provider';
 import { Toaster } from 'sonner';
 import { Analytics } from '@vercel/analytics/react';
+import { useSEO } from '@/hooks/useSEO';
 
 // Custom hook to manage authentication state
 const useAuth = () => {
@@ -55,6 +56,7 @@ export default function Home() {
 
     return (
         <>
+            {useSEO({ page: 'homepage' })}
             <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} forcedTheme="light">
                 <main className="flex min-h-screen flex-col">
                     <Header isLoggedIn={isLoggedIn} user={user} />

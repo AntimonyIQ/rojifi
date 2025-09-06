@@ -7,6 +7,7 @@ import { HelpHero } from "@/v1/components/help/help-hero"
 import { HelpContactOptions } from "@/v1/components/help/help-contact-options"
 import { IUser } from "@/v1/interface/interface"
 import { session, SessionData } from "@/v1/session/session"
+import { useSEO } from '@/hooks/useSEO';
 
 // Custom hook to manage authentication state
 const useAuth = () => {
@@ -29,11 +30,14 @@ export default function HelpPage() {
 
     const { isLoggedIn, user } = useAuth()
     return (
-        <main className="flex min-h-screen flex-col">
-            <Header isLoggedIn={isLoggedIn} user={user} />
-            <HelpHero />
-            <HelpContactOptions />
-            <Footer />
-        </main>
+        <>
+            {useSEO({ page: 'help' })}
+            <main className="flex min-h-screen flex-col">
+                <Header isLoggedIn={isLoggedIn} user={user} />
+                <HelpHero />
+                <HelpContactOptions />
+                <Footer />
+            </main>
+        </>
     )
 }

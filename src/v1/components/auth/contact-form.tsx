@@ -413,7 +413,7 @@ export function ContactForm() {
                                     autoComplete="message"
                                     required
                                     className="pl-10 h-12"
-                                    placeholder="Start typing..."
+                                    placeholder="Message"
                                     value={formData.message}
                                     onChange={(e) => handleInputChange("message", e.target.value)}
                                 />

@@ -9,6 +9,7 @@ import { MultiCurrencyPerks } from "@/v1/components/multicurrency/multicurrency-
 import { MultiCurrencyCta } from "@/v1/components/multicurrency/multicurrency-cta"
 import { IUser } from "@/v1/interface/interface"
 import { session, SessionData } from "@/v1/session/session"
+import { useSEO } from '@/hooks/useSEO';
 
 // Custom hook to manage authentication state
 const useAuth = () => {
@@ -30,13 +31,16 @@ export default function MultiCurrencyPage() {
 
     const { isLoggedIn, user } = useAuth()
     return (
-        <main className="flex min-h-screen flex-col">
-            <Header isLoggedIn={isLoggedIn} user={user} />
-            <MultiCurrencyHero />
-            <MultiCurrencyFeatures />
-            <MultiCurrencyPerks />
-            <MultiCurrencyCta />
-            <Footer />
-        </main>
+        <>
+            {useSEO({ page: 'multicurrency' })}
+            <main className="flex min-h-screen flex-col">
+                <Header isLoggedIn={isLoggedIn} user={user} />
+                <MultiCurrencyHero />
+                <MultiCurrencyFeatures />
+                <MultiCurrencyPerks />
+                <MultiCurrencyCta />
+                <Footer />
+            </main>
+        </>
     )
 }

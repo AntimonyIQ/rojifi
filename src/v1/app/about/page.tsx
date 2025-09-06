@@ -11,6 +11,7 @@ import { AboutCta } from "@/v1/components/about/about-cta"
 import { session, SessionData } from "@/v1/session/session"
 import Handshake from "@/v1/hash/handshake"
 import { IHandshakeClient, IPayment, ISender, IUser } from "@/v1/interface/interface"
+import { useSEO } from '@/hooks/useSEO';
 
 // Custom hook to manage authentication state
 const useAuth = () => {
@@ -51,14 +52,17 @@ export default function AboutPage() {
     const { isLoggedIn, user } = useAuth()
 
     return (
-        <main className="flex min-h-screen flex-col">
-            <Header isLoggedIn={isLoggedIn} user={user} />
-            <AboutHero />
-            <AboutValues />
-            <AboutVision />
-            <AboutMission />
-            <AboutCta />
-            <Footer />
-        </main>
+        <>
+            {useSEO({ page: 'about' })}
+            <main className="flex min-h-screen flex-col">
+                <Header isLoggedIn={isLoggedIn} user={user} />
+                <AboutHero />
+                <AboutValues />
+                <AboutVision />
+                <AboutMission />
+                <AboutCta />
+                <Footer />
+            </main>
+        </>
     )
 }

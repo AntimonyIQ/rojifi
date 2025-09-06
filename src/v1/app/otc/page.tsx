@@ -11,6 +11,7 @@ import { OtcCta } from "@/v1/components/otc/otc-cta"
 import { IHandshakeClient, IPayment, ISender, IUser } from "@/v1/interface/interface"
 import { session, SessionData } from "@/v1/session/session"
 import Handshake from "@/v1/hash/handshake"
+import { useSEO } from '@/hooks/useSEO';
 
 // Custom hook to manage authentication state
 const useAuth = () => {
@@ -51,14 +52,17 @@ export default function OtcPage() {
     const { isLoggedIn, user } = useAuth()
 
     return (
-        <main className="flex min-h-screen flex-col">
-            <Header isLoggedIn={isLoggedIn} user={user} />
-            <OtcHero />
-            <OtcFeatures />
-            <OtcStats />
-            <OtcPerks />
-            <OtcCta />
-            <Footer />
-        </main>
+        <>
+            {useSEO({ page: 'otc' })}
+            <main className="flex min-h-screen flex-col">
+                <Header isLoggedIn={isLoggedIn} user={user} />
+                <OtcHero />
+                <OtcFeatures />
+                <OtcStats />
+                <OtcPerks />
+                <OtcCta />
+                <Footer />
+            </main>
+        </>
     )
 }
