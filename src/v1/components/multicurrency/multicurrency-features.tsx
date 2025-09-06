@@ -4,6 +4,7 @@ import { motion } from "framer-motion"
 import { Button } from "@/v1/components/ui/button"
 import { ArrowRight, Wallet, RefreshCw, Globe } from "lucide-react"
 import { Link } from "wouter"
+import business_man from "../../public/business-man.png"
 
 export function MultiCurrencyFeatures() {
     return (
@@ -284,7 +285,7 @@ export function MultiCurrencyFeatures() {
                         transition={{ duration: 0.5, delay: 0.2 }}
                     >
                         <img
-                            src="/business-man.png"
+                            src={business_man}
                             alt="Business person using laptop"
                             width={600}
                             height={400}
