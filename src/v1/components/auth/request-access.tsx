@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { Button } from "@/v1/components/ui/button"
 import { Input } from "@/v1/components/ui/input"
 import { Label } from "@/v1/components/ui/label"
@@ -40,6 +40,8 @@ export function RequestAccessForm() {
     const [showSuccessModal, setShowSuccessModal] = useState(false)
     const [popOpen, setPopOpen] = useState(false)
     const [countryPopover, setCountryPopover] = useState(false)
+    const [isWebsiteValid, setIsWebsiteValid] = useState(true)
+    const formRef = useRef<HTMLDivElement>(null)
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",
@@ -72,11 +74,27 @@ export function RequestAccessForm() {
     // const isValidName = (name: string) => /^[A-Za-z]{2,}$/.test(name); // TODO: Implement name validation
     const isValidPhone = (phone: string) => /^[0-9]+$/.test(phone);
     const isValidEmail = (email: string) => /\S+@\S+\.\S+/.test(email);
+    const isValidWebsite = (website: string) => {
+        if (!website.trim()) return true; // Empty is valid since it's optional
+        // Basic URL validation - checks for domain pattern
+        const urlPattern = /^(https?:\/\/)?(www\.)?[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)*(\.[a-zA-Z]{2,})(\/.*)?$/;
+        return urlPattern.test(website);
+    };
 
     useEffect(() => {
         getLocation();
         getDeviceInfo();
     }, []);
+
+    // Scroll to top when error occurs
+    useEffect(() => {
+        if (error && formRef.current) {
+            formRef.current.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    }, [error]);
 
     const getDeviceInfo = () => {
         const userAgent = navigator.userAgent;
@@ -219,8 +237,9 @@ export function RequestAccessForm() {
                     break;
 
                 case "businessWebsite":
-                    // Allow URL characters: letters, numbers, dots, slashes, hyphens, underscores, colons
-                    sanitizedValue = value.replace(/[^a-zA-Z0-9\.\-_/:]/g, "").toLowerCase();
+                    // Allow URL characters: letters, numbers, dots, slashes, hyphens, underscores, colons, question marks, equals, ampersands, hash, percent
+                    // This supports: https://www.example.com, http://example.com, www.example.com, example.com/path/to/page?query=value#section
+                    sanitizedValue = value.replace(/[^a-zA-Z0-9\.\-_/:?=&%#]/g, "").toLowerCase();
                     break;
 
                 case "address":
@@ -237,6 +256,10 @@ export function RequestAccessForm() {
         // If the volume field changed, also update the formatted display value.
         if (field === "volume") {
             setDisplayVolume(formatNumber(String(sanitizedValue)));
+        }
+        // Validate website in real-time
+        if (field === "businessWebsite") {
+            setIsWebsiteValid(isValidWebsite(String(sanitizedValue)));
         }
         setError(null);
     };
@@ -332,7 +355,7 @@ export function RequestAccessForm() {
         <div className="fixed top-0 bottom-0 left-0 right-0">
             <div className="w-full h-full flex flex-row items-start justify-between">
                 <div className="w-full md:w-[40%] h-full overflow-y-auto custom-scroll px-4 py-6">
-                    <div className="p-4 max-w-md mx-auto">
+                    <div className="p-4 max-w-md mx-auto" ref={formRef}>
                         {/* Success Modal using Dialog */}
                         <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
                             <DialogContent className="max-w-sm md:max-w-lg">
@@ -544,15 +567,25 @@ export function RequestAccessForm() {
                                     <Input
                                         id="businessWebsite"
                                         name="businessWebsite"
-                                        type="url"
+                                        type="text"
                                         autoComplete="url"
-                                        className="h-12"
-                                        placeholder="https://example.com"
+                                        className={cn(
+                                            "h-12",
+                                            formData.businessWebsite && !isWebsiteValid
+                                                ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                                                : ""
+                                        )}
+                                        placeholder="www.example.com"
                                         value={formData.businessWebsite}
                                         onChange={(e) => handleInputChange("businessWebsite", e.target.value)}
                                     />
+                                    {formData.businessWebsite && !isWebsiteValid && (
+                                        <p className="text-red-500 text-xs mt-1">Please enter a valid website URL</p>
+                                    )}
                                 </div>
-                            </div>                            <div>
+                            </div>
+
+                            <div>
                                 <Label htmlFor="volume" className="block text-sm font-medium text-gray-700 mb-2">
                                     Volume Processed Weekly <span className="text-red-500">*</span>
                                 </Label>
