@@ -449,9 +449,9 @@ export function ContactForm() {
 
                         <div className="text-center text-sm text-gray-600">
                             Have an account?{" "}
-                            <Link href="/login" className="text-primary hover:text-primary/80 font-medium">
+                            <a href="/login" className="text-primary hover:text-primary/80 font-medium">
                                 Sign in
-                            </Link>
+                            </a>
                         </div>
                     </form>
                 </div>

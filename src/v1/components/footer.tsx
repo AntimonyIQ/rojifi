@@ -1,6 +1,5 @@
 import { Instagram, Linkedin, Twitter } from "lucide-react"
 import { Logo } from "@/v1/components/logo"
-import { Link } from "wouter"
 
 export function Footer() {
     return (
@@ -8,108 +7,82 @@ export function Footer() {
             <div className="container py-12 md:py-16">
                 <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
                     <div>
-                        <Link href="/" className="flex items-center space-x-2">
+                        <a href="/" className="flex items-center space-x-2">
                             <Logo className="h-10 w-auto" color="white" />
-                        </Link>
+                        </a>
                         <p className="mt-4 text-sm text-gray-400">Breaking Barriers in Cross-Border Transactions</p>
                         <div className="mt-6 flex gap-4">
-                            <Link
+                            <a
                                 href="https://www.instagram.com/rojifi_"
                                 className="rounded-full bg-gray-800 p-2 text-gray-300 transition-colors hover:bg-gray-700 hover:text-white"
                                 aria-label="Instagram"
+                                target="_blank"
+                                rel="noopener noreferrer"
                             >
                                 <Instagram className="h-5 w-5" />
-                            </Link>
-                            {/**
-               * TODO: Add Facebook link
-               * <Link
-                href="#"
-                className="rounded-full bg-gray-800 p-2 text-gray-300 transition-colors hover:bg-gray-700 hover:text-white"
-                aria-label="Facebook"
-              >
-                <Facebook className="h-5 w-5" />
-              </Link>
-               */}
-                            <Link
+                            </a>
+                            <a
                                 href="https://x.com/rojifi_"
                                 className="rounded-full bg-gray-800 p-2 text-gray-300 transition-colors hover:bg-gray-700 hover:text-white"
                                 aria-label="Twitter"
+                                target="_blank"
+                                rel="noopener noreferrer"
                             >
                                 <Twitter className="h-5 w-5" />
-                            </Link>
-                            <Link
+                            </a>
+                            <a
                                 href="https://www.linkedin.com/company/rojifi"
                                 className="rounded-full bg-gray-800 p-2 text-gray-300 transition-colors hover:bg-gray-700 hover:text-white"
                                 aria-label="LinkedIn"
+                                target="_blank"
+                                rel="noopener noreferrer"
                             >
                                 <Linkedin className="h-5 w-5" />
-                            </Link>
+                            </a>
                         </div>
                     </div>
                     <div>
                         <h3 className="mb-4 text-lg font-medium">Products</h3>
                         <ul className="space-y-2 text-sm text-gray-400">
                             <li>
-                                <Link href="/multicurrency" className="hover:text-white">
+                                <a href="/multicurrency" className="hover:text-white">
                                     Multi-currency Wallet
-                                </Link>
+                                </a>
                             </li>
-                            {/* <li>
-                <Link href="#" className="hover:text-white">
-                  Web Platform
-                </Link>
-              </li> */}
                             <li>
-                                <Link href="/otc" className="hover:text-white">
+                                <a href="/otc" className="hover:text-white">
                                     24/7 OTC Desk
-                                </Link>
+                                </a>
                             </li>
                             <li>
-                                <Link href="/cards" className="hover:text-white">
+                                <a href="/cards" className="hover:text-white">
                                     Virtual Expense Cards
-                                </Link>
+                                </a>
                             </li>
                         </ul>
                     </div>
-                    {/*
-          <div>
-            <h3 className="mb-4 text-lg font-medium">Use Cases</h3>
-            <ul className="space-y-2 text-sm text-gray-400">
-              <li>
-                <Link href="#" className="hover:text-white">
-                  Financial Services
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="hover:text-white">
-                  Import/Export
-                </Link>
-              </li>
-            </ul>
-          </div>
-          */}
                     <div>
                         <h3 className="mb-4 text-lg font-medium">Company</h3>
                         <ul className="space-y-2 text-sm text-gray-400">
                             <li>
-                                <Link href="/about" className="hover:text-white">
+                                <a href="/about" className="hover:text-white">
                                     About
-                                </Link>
+                                </a>
                             </li>
                             <li>
-                                <Link href="#faq" className="hover:text-white">
+                                <a href="#faq" className="hover:text-white">
                                     FAQs
-                                </Link>
+                                </a>
                             </li>
                             <li>
-                                <Link href="/contactus" className="hover:text-white">
+                                <a href="/contactus" className="hover:text-white">
                                     Contact
-                                </Link>
+                                </a>
                             </li>
                             <li>
-                                <Link href="/help" className="hover:text-white">
+                                <a href="/help" className="hover:text-white">
                                     Support
-                                </Link>
+                                </a>
                             </li>
                         </ul>
                     </div>
@@ -121,15 +94,15 @@ export function Footer() {
                     <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
                         <p>Copyright © 2025 Rojifi</p>
                         <div className="flex gap-4">
-                            <Link href="#" className="hover:text-white">
+                            <a href="#" className="hover:text-white">
                                 Security
-                            </Link>
-                            <Link href="/privacy" className="hover:text-white">
+                            </a>
+                            <a href="/privacy" className="hover:text-white">
                                 Privacy Policy
-                            </Link>
-                            <Link href="#" className="hover:text-white">
+                            </a>
+                            <a href="#" className="hover:text-white">
                                 Terms of Use
-                            </Link>
+                            </a>
                         </div>
                     </div>
                 </div>
