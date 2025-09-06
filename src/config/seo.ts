@@ -77,6 +77,12 @@ export const seoConfig = {
         keywords: "verify email, email verification, account security, email confirmation",
         canonical: "/verify-email",
     },
+    faq: {
+        title: "Frequently Asked Questions",
+        description: "Find answers to common questions about Rojifi's digital finance platform, services, security, and account management.",
+        keywords: "FAQ, help, support, questions, answers, rojifi help, frequently asked questions",
+        canonical: "/faq",
+    },
 } as const;
 
 export type SEOPageKey = keyof typeof seoConfig;

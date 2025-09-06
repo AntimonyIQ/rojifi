@@ -38,6 +38,7 @@ import React from "react";
 import SignupPage from "./v1/app/signup/[id]/page";
 import KYCKYBVerificationPage from "./v1/app/signup/[id]/verification/page";
 import InvitationPage from "./v1/app/invitation/[id]/page";
+import FaqPage from "./v1/app/faq/page";
 // ...existing code...
 
 function AppRoute({
@@ -63,6 +64,7 @@ function App() {
         { path: "/about", element: <AboutPage /> },
         { path: "/cards", element: <CardsPage /> },
         { path: "/contactus", element: <ContactPage /> },
+        { path: "/faq", element: <FaqPage /> },
         { path: "/forgot-password", element: <ForgotPasswordPage /> },
         { path: "/help", element: <HelpPage /> },
         { path: "/multicurrency", element: <MulticurrencyPage /> },

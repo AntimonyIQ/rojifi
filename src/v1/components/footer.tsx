@@ -70,7 +70,7 @@ export function Footer() {
                                 </a>
                             </li>
                             <li>
-                                <a href="#faq" className="hover:text-white">
+                                <a href="/faq" className="hover:text-white">
                                     FAQs
                                 </a>
                             </li>

@@ -25,6 +25,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://www.rojifi.com/faq</loc>
+    <lastmod>2025-09-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://www.rojifi.com/help</loc>
     <lastmod>2025-09-05</lastmod>
     <changefreq>monthly</changefreq>

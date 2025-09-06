@@ -1,12 +1,12 @@
 "use client"
 
 import type React from "react"
-import { useMemo, useState } from "react"
+import { useState } from "react"
 import { Button } from "@/v1/components/ui/button"
 import { Input } from "@/v1/components/ui/input"
 import { Label } from "@/v1/components/ui/label"
 import { Checkbox } from "@/v1/components/ui/checkbox"
-import { Mail, User, X, Briefcase, DollarSign, Map, Building, Mailbox, MessageSquare, MapPinHouse, ChevronsUpDownIcon, CheckIcon, ArrowUpRight } from "lucide-react"
+import { X, ChevronsUpDownIcon, CheckIcon, ArrowUpRight } from "lucide-react"
 import { Logo } from "@/v1/components/logo"
 import { Textarea } from "../ui/textarea";
 import countries from "../../data/country_state.json";
@@ -51,6 +51,7 @@ export function RequestAccessForm() {
         agreeToMarketing: false,
         phoneNumber: "",
         countryCode: "234",
+        selectedCountryCode: "Nigeria", // Track specific country for phone code
         businessName: "",
         address: "",
         city: "",
@@ -58,7 +59,7 @@ export function RequestAccessForm() {
         country: "Nigeria",
         message: "",
         volume: "",
-        state: ""
+        state: "Unknown",
     })
     // Display value for the volume input (with commas). formData.volume stores raw digits only.
     const formatNumber = (val: string) => (val ? val.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : val)
@@ -68,17 +69,6 @@ export function RequestAccessForm() {
     // const isValidName = (name: string) => /^[A-Za-z]{2,}$/.test(name); // TODO: Implement name validation
     const isValidPhone = (phone: string) => /^[0-9]+$/.test(phone);
     const isValidEmail = (email: string) => /\S+@\S+\.\S+/.test(email);
-
-    // Deduplicate countries by phonecode so we don't render multiple entries with the same key/value
-    const uniqueCountries = useMemo(() => {
-        const seen = new Set<string>();
-        return countries.filter((c) => {
-            if (!c || typeof c.phonecode === "undefined") return false;
-            if (seen.has(c.phonecode)) return false;
-            seen.add(c.phonecode);
-            return true;
-        });
-    }, []);
 
     const handleInputChange = (field: string, value: string | boolean) => {
         let sanitizedValue = value;
@@ -270,19 +260,18 @@ export function RequestAccessForm() {
                                     <Label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
                                         First name <span className="text-red-500">*</span>
                                     </Label>
-                                    <div className="relative">
+                                    <div>
                                         <Input
                                             id="firstName"
                                             name="firstName"
                                             type="text"
                                             autoComplete="given-name"
                                             required
-                                            className="pl-10 h-12"
+                                            className="h-12"
                                             placeholder="First name"
                                             value={formData.firstName}
                                             onChange={(e) => handleInputChange("firstName", e.target.value)}
                                         />
-                                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                                     </div>
                                 </div>
 
@@ -290,18 +279,17 @@ export function RequestAccessForm() {
                                     <Label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
                                         Last name
                                     </Label>
-                                    <div className="relative">
+                                    <div>
                                         <Input
                                             id="lastName"
                                             name="lastName"
                                             type="text"
                                             autoComplete="family-name"
-                                            className="pl-10 h-12"
+                                            className="h-12"
                                             placeholder="Last name"
                                             value={formData.lastName}
                                             onChange={(e) => handleInputChange("lastName", e.target.value)}
                                         />
-                                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                                     </div>
                                 </div>
                             </div>
@@ -310,18 +298,17 @@ export function RequestAccessForm() {
                                 <Label htmlFor="middleName" className="block text-sm font-medium text-gray-700 mb-2">
                                     Other Name <span className="text-red-500">*</span>
                                 </Label>
-                                <div className="relative">
+                                <div>
                                     <Input
                                         id="middleName"
                                         name="middleName"
                                         type="text"
                                         autoComplete="family-name"
-                                        className="pl-10 h-12"
+                                        className="h-12"
                                         placeholder="Other"
                                         value={formData.middleName}
                                         onChange={(e) => handleInputChange("middleName", e.target.value)}
                                     />
-                                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                                 </div>
                             </div>
 
@@ -329,19 +316,18 @@ export function RequestAccessForm() {
                                 <Label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                                     Email address <span className="text-red-500">*</span>
                                 </Label>
-                                <div className="relative">
+                                <div>
                                     <Input
                                         id="email"
                                         name="email"
                                         type="email"
                                         autoComplete="email"
                                         required
-                                        className="pl-10 h-12"
+                                        className="h-12"
                                         placeholder="Enter your email"
                                         value={formData.email}
                                         onChange={(e) => handleInputChange("email", e.target.value)}
                                     />
-                                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                                 </div>
                             </div>
 
@@ -359,31 +345,36 @@ export function RequestAccessForm() {
                                                 aria-expanded={popOpen}
                                                 className="w-28 justify-between"
                                             >
-                                                <img src={`https://flagcdn.com/w320/${uniqueCountries.find((country) => country.phonecode === formData.countryCode)?.iso2.toLowerCase()}.png`} alt="" width={18} height={18} />
+                                                <img src={`https://flagcdn.com/w320/${countries.find((country) => country.name === formData.selectedCountryCode)?.iso2.toLowerCase()}.png`} alt="" width={18} height={18} />
                                                 {formData.countryCode
-                                                    ? uniqueCountries.find((country) => country.phonecode === formData.countryCode)?.phonecode
+                                                    ? `+${formData.countryCode}`
                                                     : "Select country..."}
                                                 <ChevronsUpDownIcon className="ml-1 h-4 w-4 shrink-0 opacity-50" />
                                             </Button>
                                         </PopoverTrigger>
                                         <PopoverContent className="w-60 p-0">
                                             <Command>
-                                                <CommandInput placeholder="Search framework..." />
+                                                <CommandInput placeholder="Search country..." />
                                                 <CommandList>
                                                     <CommandEmpty>No country found.</CommandEmpty>
                                                     <CommandGroup>
-                                                        {uniqueCountries.map((country) => (
+                                                        {countries.map((country, index) => (
                                                             <CommandItem
-                                                                key={country.name}
-                                                                value={country.phonecode}
+                                                                key={`${country.name}-${index}`}
+                                                                value={country.name}
                                                                 onSelect={(currentValue) => {
-                                                                    handleInputChange("countryCode", currentValue)
+                                                                    const selectedCountry = countries.find(c => c.name.toLowerCase() === currentValue.toLowerCase())
+                                                                    if (selectedCountry) {
+                                                                        handleInputChange("countryCode", selectedCountry.phonecode)
+                                                                        handleInputChange("selectedCountryCode", selectedCountry.name)
+                                                                    }
+                                                                    setPopOpen(false);
                                                                 }}
                                                             >
                                                                 <CheckIcon
                                                                     className={cn(
                                                                         "mr-2 h-4 w-4",
-                                                                        formData.countryCode === country.phonecode ? "opacity-100" : "opacity-0"
+                                                                        formData.selectedCountryCode === country.name ? "opacity-100" : "opacity-0"
                                                                     )}
                                                                 />
                                                                 <img src={`https://flagcdn.com/w320/${country.iso2.toLowerCase()}.png`} alt="" width={18} height={18} />
@@ -413,19 +404,18 @@ export function RequestAccessForm() {
                                 <Label htmlFor="businessName" className="block text-sm font-medium text-gray-700 mb-2">
                                     Name of your Business <span className="text-red-500">*</span>
                                 </Label>
-                                <div className="relative">
+                                <div>
                                     <Input
                                         id="businessName"
                                         name="businessName"
                                         type="text"
                                         autoComplete="work name"
                                         required
-                                        className="pl-10 h-12"
+                                        className="h-12"
                                         placeholder="Enter your business name"
                                         value={formData.businessName}
                                         onChange={(e) => handleInputChange("businessName", e.target.value)}
                                     />
-                                    <Briefcase className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                                 </div>
                             </div>
 
@@ -433,19 +423,18 @@ export function RequestAccessForm() {
                                 <Label htmlFor="volume" className="block text-sm font-medium text-gray-700 mb-2">
                                     Volume Processed Weekly <span className="text-red-500">*</span>
                                 </Label>
-                                <div className="relative">
+                                <div>
                                     <Input
                                         id="volume"
                                         name="volume"
                                         type="text"
                                         autoComplete="transaction-amount"
                                         required
-                                        className="pl-10 h-12"
+                                        className="h-12"
                                         placeholder="Enter volume processed weekly"
                                         value={displayVolume}
                                         onChange={(e) => handleInputChange("volume", e.target.value)}
                                     />
-                                    <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                                 </div>
                             </div>
 
@@ -459,19 +448,18 @@ export function RequestAccessForm() {
                                 <Label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">
                                     Address <span className="text-red-500">*</span>
                                 </Label>
-                                <div className="relative">
+                                <div>
                                     <Input
                                         id="address"
                                         name="address"
                                         type="text"
                                         autoComplete="address-level1"
                                         required
-                                        className="pl-10 h-12"
+                                        className="h-12"
                                         placeholder="Enter your address"
                                         value={formData.address}
                                         onChange={(e) => handleInputChange("address", e.target.value)}
                                     />
-                                    <Map className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                                 </div>
                             </div>
 
@@ -480,19 +468,18 @@ export function RequestAccessForm() {
                                     <Label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-2">
                                         City <span className="text-red-500">*</span>
                                     </Label>
-                                    <div className="relative">
+                                    <div>
                                         <Input
                                             id="city"
                                             name="city"
                                             type="text"
                                             autoComplete="city"
                                             required
-                                            className="pl-10 h-12"
+                                            className="h-12"
                                             placeholder="Enter your city"
                                             value={formData.city}
                                             onChange={(e) => handleInputChange("city", e.target.value)}
                                         />
-                                        <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                                     </div>
                                 </div>
 
@@ -500,26 +487,26 @@ export function RequestAccessForm() {
                                     <Label htmlFor="postal" className="block text-sm font-medium text-gray-700 mb-2">
                                         Postal Code <span className="text-red-500">*</span>
                                     </Label>
-                                    <div className="relative">
+                                    <div>
                                         <Input
                                             id="postal"
                                             name="postal"
                                             type="text"
                                             autoComplete="postal-code"
-                                            className="pl-10 h-12"
+                                            className="h-12"
                                             placeholder="Enter your postal code"
                                             value={formData.postal}
                                             required
                                             onChange={(e) => handleInputChange("postal", e.target.value)}
                                         />
-                                        <Mailbox className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                                     </div>
                                 </div>
                             </div>
 
+                            {/* 
                             <div>
                                 <Label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-2">
-                                    State <span className="text-red-500">*</span>
+                                    State / Province <span className="text-red-500">*</span>
                                 </Label>
                                 <div className="relative">
                                     <Input
@@ -536,6 +523,7 @@ export function RequestAccessForm() {
                                     <MapPinHouse className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                                 </div>
                             </div>
+                            */}
 
                             <div>
                                 <Label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-2">
@@ -552,9 +540,9 @@ export function RequestAccessForm() {
                                                 className="w-full justify-between"
                                             >
                                                 <div className="flex flex-row items-center gap-2">
-                                                    <img src={`https://flagcdn.com/w320/${uniqueCountries.find((country) => country.name === formData.country)?.iso2.toLowerCase()}.png`} alt="" width={18} height={18} />
+                                                    <img src={`https://flagcdn.com/w320/${countries.find((country) => country.name === formData.country)?.iso2.toLowerCase()}.png`} alt="" width={18} height={18} />
                                                     {formData.country
-                                                        ? uniqueCountries.find((country) => country.name === formData.country)?.name
+                                                        ? countries.find((country) => country.name === formData.country)?.name
                                                         : "Select country..."}
                                                 </div>
                                                 <ChevronsUpDownIcon className="ml-1 h-4 w-4 shrink-0 opacity-50" />
@@ -562,16 +550,17 @@ export function RequestAccessForm() {
                                         </PopoverTrigger>
                                         <PopoverContent className="w-full p-0">
                                             <Command>
-                                                <CommandInput placeholder="Search framework..." />
+                                                <CommandInput placeholder="Search country..." />
                                                 <CommandList>
                                                     <CommandEmpty>No country found.</CommandEmpty>
                                                     <CommandGroup>
-                                                        {uniqueCountries.map((country) => (
+                                                        {countries.map((country, index) => (
                                                             <CommandItem
-                                                                key={country.name}
+                                                                key={`${country.name}-${index}`}
                                                                 value={country.name}
                                                                 onSelect={(currentValue) => {
                                                                     handleInputChange("country", currentValue)
+                                                                    setCountryPopover(false)
                                                                 }}
                                                             >
                                                                 <CheckIcon
@@ -596,18 +585,17 @@ export function RequestAccessForm() {
                                 <Label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
                                     Tell us more about your business <span className="text-red-500">*</span>
                                 </Label>
-                                <div className="relative flex flex-row !items-start !justify-start">
+                                <div className="flex flex-row !items-start !justify-start">
                                     <Textarea
                                         id="message"
                                         name="message"
                                         autoComplete="message"
                                         required
-                                        className="pl-10 h-12"
-                                        placeholder="Enter your message"
+                                        className="h-12"
+                                        placeholder=""
                                         value={formData.message}
                                         onChange={(e) => handleInputChange("message", e.target.value)}
                                     />
-                                    <MessageSquare className="absolute left-3 top-1/2 transform -translate-y-8 h-5 w-5 text-gray-400" />
                                 </div>
                             </div>
 

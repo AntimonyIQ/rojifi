@@ -1,7 +1,6 @@
 import { motion } from "framer-motion"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/v1/components/ui/accordion"
 import { ArrowRight } from "lucide-react"
-import { Link } from "wouter"
 
 const faqs = [
     {
@@ -35,12 +34,12 @@ const faqs = [
         answer: (
             <div className="flex flex-row item-center gap-1">
                 To create account on Rojifi kindly click on
-                <Link
+                <a
                     href="/request-access"
                     className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
                 >
                     access link <ArrowRight className="h-4 w-4" />
-                </Link>
+                </a>
             </div>
         )
     }

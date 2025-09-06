@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useMemo } from "react"
+import { useState } from "react"
 import { Button } from "@/v1/components/ui/button"
 import { Input } from "@/v1/components/ui/input"
 import { Label } from "@/v1/components/ui/label"
@@ -53,19 +53,9 @@ export function ContactForm() {
         message: "",
         agreeToTerms: false,
         countryCode: "234",
+        selectedCountry: "Nigeria", // Default to Nigeria since countryCode is "234"
     });
     const sd: SessionData = session.getUserData();
-
-    // Deduplicate countries by phonecode so we don't render multiple entries with the same key/value
-    const uniqueCountries = useMemo(() => {
-        const seen = new Set<string>();
-        return countries.filter((c) => {
-            if (!c || typeof c.phonecode === "undefined") return false;
-            if (seen.has(c.phonecode)) return false;
-            seen.add(c.phonecode);
-            return true;
-        });
-    }, []);
 
     // Validation helpers
     const isValidName = (name: string) => /^[A-Za-z]{2,}$/.test(name);
@@ -351,9 +341,9 @@ export function ContactForm() {
                                             aria-expanded={popOpen}
                                             className="w-28 justify-between"
                                         >
-                                            <img src={`https://flagcdn.com/w320/${uniqueCountries.find((country) => country.phonecode === formData.countryCode)?.iso2.toLowerCase()}.png`} alt="" width={18} height={18} />
+                                            <img src={`https://flagcdn.com/w320/${countries.find((country) => country.name === formData.selectedCountry)?.iso2.toLowerCase()}.png`} alt="" width={18} height={18} />
                                             {formData.countryCode
-                                                ? uniqueCountries.find((country) => country.phonecode === formData.countryCode)?.phonecode
+                                                ? `+${formData.countryCode}`
                                                 : "Select country..."}
                                             <ChevronsUpDownIcon className="ml-1 h-4 w-4 shrink-0 opacity-50" />
                                         </Button>
@@ -364,14 +354,15 @@ export function ContactForm() {
                                             <CommandList>
                                                 <CommandEmpty>No country found.</CommandEmpty>
                                                 <CommandGroup>
-                                                    {uniqueCountries.map((country) => (
+                                                    {countries.map((country, index) => (
                                                         <CommandItem
-                                                            key={country.name}
+                                                            key={`${country.name}-${index}`}
                                                             value={country.name}
                                                             onSelect={(currentValue) => {
-                                                                const selectedCountry = uniqueCountries.find(c => c.name.toLowerCase() === currentValue.toLowerCase())
+                                                                const selectedCountry = countries.find(c => c.name.toLowerCase() === currentValue.toLowerCase())
                                                                 if (selectedCountry) {
                                                                     handleInputChange("countryCode", selectedCountry.phonecode)
+                                                                    handleInputChange("selectedCountry", selectedCountry.name)
                                                                 }
                                                                 setPopOpen(false)
                                                             }}
@@ -379,7 +370,7 @@ export function ContactForm() {
                                                             <CheckIcon
                                                                 className={cn(
                                                                     "mr-2 h-4 w-4",
-                                                                    formData.countryCode === country.phonecode ? "opacity-100" : "opacity-0"
+                                                                    formData.selectedCountry === country.name ? "opacity-100" : "opacity-0"
                                                                 )}
                                                             />
                                                             <img src={`https://flagcdn.com/w320/${country.iso2.toLowerCase()}.png`} alt="" width={18} height={18} />
@@ -416,7 +407,7 @@ export function ContactForm() {
                                     autoComplete="message"
                                     required
                                     className="pl-10 h-12"
-                                    placeholder="Message"
+                                    placeholder="Enter reason for contacting us"
                                     value={formData.message}
                                     onChange={(e) => handleInputChange("message", e.target.value)}
                                 />
