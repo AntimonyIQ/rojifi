@@ -7,6 +7,24 @@ export interface ICarouselData {
     desc: string;
 }
 
+const carouselItems: ICarouselData[] = [
+    {
+        id: 1,
+        title: "Global Transactions Made Simple for Local Businesses",
+        desc: "Effortlessly send and receive global payments to your business partners in more than 80+ currencies.",
+    },
+    {
+        id: 2,
+        title: "Empower your business with instant, unrestricted FX payments",
+        desc: "Transform your payment process with lightning-fast transactions and infinite FX liquidity, empowering you to settle with partners worldwide without boundaries.",
+    },
+    {
+        id: 3,
+        title: "Secure & Fast",
+        desc: "Experience lightning-fast transactions with military-grade encryption.",
+    },
+];
+
 interface CarouselProps {
     data: ICarouselData[];
     interval?: number; // in milliseconds
@@ -96,3 +114,5 @@ export class Carousel extends React.Component<CarouselProps, CarouselState> {
         );
     }
 }
+
+export { carouselItems };

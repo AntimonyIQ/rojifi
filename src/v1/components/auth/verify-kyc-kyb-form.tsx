@@ -5,7 +5,7 @@ import { Button } from "@/v1/components/ui/button"
 import { Label } from "@/v1/components/ui/label"
 import { X, Plus, Check, ExternalLink } from "lucide-react"
 import { Logo } from "@/v1/components/logo"
-import { Carousel, ICarouselData } from "../carousel"
+import { Carousel, carouselItems } from "../carousel"
 import GlobeWrapper from "../globe"
 import Defaults from "@/v1/defaults/defaults"
 import { IResponse } from "@/v1/interface/interface"
@@ -13,24 +13,6 @@ import { Status } from "@/v1/enums/enums"
 import { session, SessionData } from "@/v1/session/session"
 import { toast } from "sonner"
 import { Link, useParams } from "wouter"
-
-const carouselItems: ICarouselData[] = [
-    {
-        id: 1,
-        title: "Secure & Fast",
-        desc: "Experience lightning-fast transactions with military-grade encryption.",
-    },
-    {
-        id: 2,
-        title: "Global Access",
-        desc: "Use your wallet anywhere in the world with real-time support.",
-    },
-    {
-        id: 3,
-        title: "Smart Tools",
-        desc: "Swap, gift, and withdraw with built-in AI-assisted features.",
-    },
-];
 
 export function KYBVerificationForm() {
     const [dragActive, setDragActive] = useState(false);

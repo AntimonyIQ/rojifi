@@ -32,25 +32,7 @@ import { Status } from "@/v1/enums/enums"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/v1/components/ui/dialog"
 import { Link } from "wouter"
 import GlobeWrapper from "../globe"
-import { Carousel, ICarouselData } from "../carousel"
-
-const carouselItems: ICarouselData[] = [
-    {
-        id: 1,
-        title: "Secure & Fast",
-        desc: "Experience lightning-fast transactions with military-grade encryption.",
-    },
-    {
-        id: 2,
-        title: "Global Access",
-        desc: "Use your wallet anywhere in the world with real-time support.",
-    },
-    {
-        id: 3,
-        title: "Smart Tools",
-        desc: "Swap, gift, and withdraw with built-in AI-assisted features.",
-    },
-];
+import { Carousel, carouselItems } from "../carousel"
 
 export function RequestAccessForm() {
     const [isLoading, setIsLoading] = useState(false)

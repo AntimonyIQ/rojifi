@@ -9,7 +9,7 @@ import { Checkbox } from "@/v1/components/ui/checkbox"
 import { Eye, EyeOff, Mail, Lock, User, X, AlertCircle, ArrowUpRight } from "lucide-react"
 import { Logo } from "@/v1/components/logo"
 import { OTPVerificationModal } from "../modal/otp";
-import { Carousel, ICarouselData } from "../carousel"
+import { Carousel, carouselItems } from "../carousel"
 import GlobeWrapper from "../globe"
 import { session, SessionData } from "@/v1/session/session"
 import Defaults from "@/v1/defaults/defaults"
@@ -30,24 +30,6 @@ const logoVariants: Variants = {
         },
     },
 }
-
-const carouselItems: ICarouselData[] = [
-    {
-        id: 1,
-        title: "Secure & Fast",
-        desc: "Experience lightning-fast transactions with military-grade encryption.",
-    },
-    {
-        id: 2,
-        title: "Global Access",
-        desc: "Use your wallet anywhere in the world with real-time support.",
-    },
-    {
-        id: 3,
-        title: "Smart Tools",
-        desc: "Swap, gift, and withdraw with built-in AI-assisted features.",
-    },
-];
 
 export function SignupForm() {
     const [showPassword, setShowPassword] = useState(false);
