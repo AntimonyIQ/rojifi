@@ -14,7 +14,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/v1/components/ui/dialog"
-import { Briefcase, CheckIcon, ChevronsUpDownIcon, Mail, MessageSquare, User, X, ArrowUpRight } from "lucide-react"
+import { CheckIcon, ChevronsUpDownIcon, X, ArrowUpRight } from "lucide-react"
 import { Logo } from "@/v1/components/logo"
 import { Textarea } from "../ui/textarea"
 import Defaults from "@/v1/defaults/defaults"
@@ -251,19 +251,18 @@ export function ContactForm() {
                                 <Label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
                                     First name <span className="text-red-500">*</span>
                                 </Label>
-                                <div className="relative">
+                                <div>
                                     <Input
                                         id="firstName"
                                         name="firstName"
                                         type="text"
                                         autoComplete="given-name"
                                         required
-                                        className="pl-10 h-12"
+                                        className="h-12"
                                         placeholder="First name"
                                         value={formData.firstName}
                                         onChange={(e) => handleInputChange("firstName", e.target.value)}
                                     />
-                                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                                 </div>
                             </div>
 
@@ -271,18 +270,17 @@ export function ContactForm() {
                                 <Label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
                                     Last name
                                 </Label>
-                                <div className="relative">
+                                <div>
                                     <Input
                                         id="lastName"
                                         name="lastName"
                                         type="text"
                                         autoComplete="family-name"
-                                        className="pl-10 h-12"
+                                        className="h-12"
                                         placeholder="Last name"
                                         value={formData.lastName}
                                         onChange={(e) => handleInputChange("lastName", e.target.value)}
                                     />
-                                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                                 </div>
                             </div>
                         </div>
@@ -291,19 +289,18 @@ export function ContactForm() {
                             <Label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                                 Email address <span className="text-red-500">*</span>
                             </Label>
-                            <div className="relative">
+                            <div>
                                 <Input
                                     id="email"
                                     name="email"
                                     type="email"
                                     autoComplete="work email"
                                     required
-                                    className="pl-10 h-12"
+                                    className="h-12"
                                     placeholder="Enter your email"
                                     value={formData.email}
                                     onChange={(e) => handleInputChange("email", e.target.value)}
                                 />
-                                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                             </div>
                         </div>
 
@@ -311,19 +308,18 @@ export function ContactForm() {
                             <Label htmlFor="businessName" className="block text-sm font-medium text-gray-700 mb-2">
                                 Name of your Business <span className="text-red-500">*</span>
                             </Label>
-                            <div className="relative">
+                            <div>
                                 <Input
                                     id="businessName"
                                     name="businessName"
                                     type="text"
                                     autoComplete="work name"
                                     required
-                                    className="pl-10 h-12"
+                                    className="h-12"
                                     placeholder="Enter your business name"
                                     value={formData.businessName}
                                     onChange={(e) => handleInputChange("businessName", e.target.value)}
                                 />
-                                <Briefcase className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                             </div>
                         </div>
 
@@ -400,18 +396,17 @@ export function ContactForm() {
                             <Label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
                                 Your Message <span className="text-red-500">*</span>
                             </Label>
-                            <div className="relative flex flex-row !items-start !justify-start">
+                            <div className="flex flex-row !items-start !justify-start">
                                 <Textarea
                                     id="message"
                                     name="message"
                                     autoComplete="message"
                                     required
-                                    className="pl-10 h-12"
+                                    className="h-12"
                                     placeholder="Enter reason for contacting us"
                                     value={formData.message}
                                     onChange={(e) => handleInputChange("message", e.target.value)}
                                 />
-                                <MessageSquare className="absolute left-3 top-1/2 transform -translate-y-8 h-5 w-5 text-gray-400" />
                             </div>
                         </div>
 

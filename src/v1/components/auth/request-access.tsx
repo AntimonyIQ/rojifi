@@ -224,9 +224,9 @@ export function RequestAccessForm() {
                                     <DialogDescription className="text-center text-gray-600 font-medium">Thank you for your request! You will be notified once approved by the Rojifi team.</DialogDescription>
                                 </DialogHeader>
                                 <DialogFooter className="flex justify-center gap-1">
-                                    <Button variant="outline" size="md" onClick={() => setShowSuccessModal(false)}>
+                                    {/* <Button variant="outline" size="md" onClick={() => setShowSuccessModal(false)}>
                                         Cancel
-                                    </Button>
+                                    </Button> */}
                                     <Button size="md" onClick={() => { setShowSuccessModal(false); window.location.href = "/"; }} className="text-white">
                                         <ArrowUpRight size={16} />
                                         Back to Homepage

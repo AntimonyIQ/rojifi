@@ -121,8 +121,11 @@ export function Header({ isLoggedIn }: HeaderProps) {
                 <div className="hidden md:flex items-center gap-4">
                     {isLoggedIn ? (
                         <>
-                            <Button asChild className="text-white">
-                                <a href="/dashboard/NGN">Dashboard</a>
+                            <Button
+                                className="text-white"
+                                onClick={() => window.location.href = "/dashboard/NGN"}
+                            >
+                                Dashboard
                             </Button>
                             <Button
                                 variant="outline"
@@ -136,14 +139,23 @@ export function Header({ isLoggedIn }: HeaderProps) {
                         </>
                     ) : (
                         <>
-                            <Button variant="ghost">
-                                <a href="/contactus">Contact Us</a>
+                            <Button
+                                variant="ghost"
+                                onClick={() => window.location.href = "/contactus"}
+                            >
+                                Contact Us
                             </Button>
-                            <Button variant="outline" asChild>
-                                <a href="/login">Sign in</a>
+                            <Button
+                                variant="outline"
+                                onClick={() => window.location.href = "/login"}
+                            >
+                                Sign in
                             </Button>
-                            <Button asChild className="text-white">
-                                <a href="/request-access">Request Access</a>
+                            <Button
+                                className="text-white"
+                                onClick={() => window.location.href = "/request-access"}
+                            >
+                                Request Access
                             </Button>
                         </>
                     )}
@@ -218,8 +230,11 @@ export function Header({ isLoggedIn }: HeaderProps) {
                             <div className="flex flex-col gap-2 pt-2">
                                 {isLoggedIn ? (
                                     <>
-                                        <Button asChild className="w-full text-white">
-                                            <a href="/dashboard/NGN">Dashboard</a>
+                                        <Button
+                                            className="w-full text-white"
+                                            onClick={() => window.location.href = "/dashboard/NGN"}
+                                        >
+                                            Dashboard
                                         </Button>
                                         <Button
                                             variant="outline"
@@ -234,14 +249,25 @@ export function Header({ isLoggedIn }: HeaderProps) {
                                     </>
                                 ) : (
                                     <>
-                                        <Button variant="outline" asChild className="w-full">
-                                            <a href="/contactus">Contact Us</a>
+                                        <Button
+                                            variant="outline"
+                                            className="w-full"
+                                            onClick={() => window.location.href = "/contactus"}
+                                        >
+                                            Contact Us
                                         </Button>
-                                        <Button variant="outline" asChild className="w-full">
-                                            <a href="/login">Sign in</a>
+                                        <Button
+                                            variant="outline"
+                                            className="w-full"
+                                            onClick={() => window.location.href = "/login"}
+                                        >
+                                            Sign in
                                         </Button>
-                                        <Button asChild className="w-full text-white">
-                                            <a href="/request-access">Request Access</a>
+                                        <Button
+                                            className="w-full text-white"
+                                            onClick={() => window.location.href = "/request-access"}
+                                        >
+                                            Request Access
                                         </Button>
                                     </>
                                 )}
