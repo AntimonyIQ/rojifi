@@ -360,16 +360,19 @@ export function ContactForm() {
                                     </PopoverTrigger>
                                     <PopoverContent className="w-60 p-0">
                                         <Command>
-                                            <CommandInput placeholder="Search framework..." />
+                                            <CommandInput placeholder="Search country..." />
                                             <CommandList>
                                                 <CommandEmpty>No country found.</CommandEmpty>
                                                 <CommandGroup>
                                                     {uniqueCountries.map((country) => (
                                                         <CommandItem
                                                             key={country.name}
-                                                            value={country.phonecode}
+                                                            value={country.name}
                                                             onSelect={(currentValue) => {
-                                                                handleInputChange("countryCode", currentValue)
+                                                                const selectedCountry = uniqueCountries.find(c => c.name.toLowerCase() === currentValue.toLowerCase())
+                                                                if (selectedCountry) {
+                                                                    handleInputChange("countryCode", selectedCountry.phonecode)
+                                                                }
                                                                 setPopOpen(false)
                                                             }}
                                                         >

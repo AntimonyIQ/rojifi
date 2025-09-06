@@ -53,7 +53,7 @@ export class Carousel extends React.Component<CarouselProps, CarouselState> {
     }
 
     startAutoPlay(): void {
-        const { interval = 5000 } = this.props;
+        const { interval = 10000 } = this.props;
         this.intervalRef = setInterval(() => {
             this.setState((prev) => ({
                 current: (prev.current + 1) % this.props.data.length,
