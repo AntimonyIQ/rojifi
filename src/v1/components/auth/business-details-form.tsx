@@ -34,7 +34,7 @@ import GlobeWrapper from "../globe"
 import { Carousel, carouselItems } from "../carousel"
 import { motion, Variants } from "framer-motion"
 import { format } from "date-fns"
-import countries from "../../data/country_state.json";
+// import countries from "../../data/country_state.json";
 
 const logoVariants: Variants = {
     animate: {
@@ -138,7 +138,7 @@ export function BusinessDetailsForm() {
     const [isNotApprove, setIsNotApprove] = useState(false)
 
     // Popover states
-    const [countryPopover, setCountryPopover] = useState(false)
+    // const [countryPopover, setCountryPopover] = useState(false)
     const [activityPopover, setActivityPopover] = useState(false)
     const [legalFormPopover, setLegalFormPopover] = useState(false)
     const [statusPopover, setStatusPopover] = useState(false)

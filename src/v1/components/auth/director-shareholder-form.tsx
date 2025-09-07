@@ -4,11 +4,10 @@ import { Button } from "@/v1/components/ui/button"
 import { Input } from "@/v1/components/ui/input"
 import { Label } from "@/v1/components/ui/label"
 import { Checkbox } from "@/v1/components/ui/checkbox"
-import { Card, CardContent } from "@/v1/components/ui/card"
 import { Popover, PopoverContent, PopoverTrigger } from "@/v1/components/ui/popover"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/v1/components/ui/command"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/v1/components/ui/select"
-import { Check, Plus, Upload, ArrowLeft, ArrowRight, Trash2, X, ChevronDown, ArrowUpRight, AlertCircle, ChevronsUpDown, CalendarIcon } from "lucide-react"
+import { Check, Plus, ArrowLeft, ArrowRight, Trash2, X, ArrowUpRight, AlertCircle, ChevronsUpDown, CalendarIcon } from "lucide-react"
 import { cn } from "@/v1/lib/utils"
 import { format } from "date-fns"
 import { Link, useParams } from "wouter"
@@ -16,7 +15,6 @@ import { session, SessionData } from "@/v1/session/session"
 import { Status } from "@/v1/enums/enums"
 import { IResponse } from "@/v1/interface/interface"
 import Defaults from "@/v1/defaults/defaults"
-import Loading from "@/v1/components/loading"
 import { toast } from "sonner"
 import { Logo } from "@/v1/components/logo"
 import { Carousel, carouselItems } from "../carousel"
@@ -133,8 +131,40 @@ export function DirectorShareholderForm() {
         }
     }
 
-    const createNewForm = (): DirectorShareholderFormData => {
-        // Determine role based on selection
+    const createNewForm = (isAdditional: boolean = false): DirectorShareholderFormData => {
+        if (isAdditional) {
+            // For additional forms, start with empty values that user can select
+            return {
+                firstName: "",
+                lastName: "",
+                middleName: "",
+                email: "",
+                jobTitle: "",
+                role: "",
+                isDirector: false,
+                isShareholder: false,
+                shareholderPercentage: "",
+                dateOfBirth: undefined,
+                nationality: "",
+                phoneCode: "234",
+                selectedCountryCode: "Nigeria",
+                phoneNumber: "",
+                idType: "",
+                idNumber: "",
+                issuedCountry: "",
+                issueDate: undefined,
+                expiryDate: undefined,
+                streetAddress: "",
+                city: "",
+                state: "",
+                postalCode: "",
+                country: "",
+                idDocument: null,
+                proofOfAddress: null
+            }
+        }
+
+        // For first form, use pre-filled values from selection
         let roleDisplay = "";
         if (selectionData.isDirector && selectionData.isShareholder) {
             roleDisplay = "Director and Shareholder";
@@ -191,7 +221,7 @@ export function DirectorShareholderForm() {
     }
 
     const handleAddForm = () => {
-        setForms(prev => [...prev, createNewForm()])
+        setForms(prev => [...prev, createNewForm(true)])
     }
 
     const handleRemoveForm = (index: number) => {
@@ -202,8 +232,27 @@ export function DirectorShareholderForm() {
         setForms(prev => prev.map((form, i) =>
             i === index ? { ...form, [field]: value } : form
         ))
+        // Clear validation error when user starts typing
+        const fieldKey = `${index}-${field}`;
+        if (validationErrors[fieldKey]) {
+            setValidationErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors[fieldKey];
+                return newErrors;
+            });
+        }
         setError(null)
     }
+
+    /*
+    const handleValidationError = (index: number, field: string, error: string) => {
+        const fieldKey = `${index}-${field}`;
+        setValidationErrors(prev => ({
+            ...prev,
+            [fieldKey]: error
+        }));
+    }
+    */
 
     const togglePopover = (key: string, value: boolean) => {
         setPopoverStates(prev => ({ ...prev, [key]: value }))
@@ -401,7 +450,7 @@ export function DirectorShareholderForm() {
                         {/* Form Content */}
                         <div className="text-center mb-8">
                             <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                                {currentStage === FormStage.SELECTION ? "Director & Shareholder Information" : "Complete Details"}
+                                {currentStage === FormStage.SELECTION ? "Director & Shareholder Information" : "Director Details"}
                             </h1>
                             <p className="text-gray-600">
                                 {currentStage === FormStage.SELECTION
@@ -423,7 +472,7 @@ export function DirectorShareholderForm() {
                                     className="space-y-6"
                                 >
                                     <div>
-                                        <Label className="text-base font-semibold">Select Role(s)*</Label>
+                                        <Label className="text-base font-semibold">Select Role(s)<span className="text-red-500">*</span></Label>
                                         <div className="mt-3 space-y-3">
                                             <div className="flex items-center space-x-2">
                                                 <Checkbox
@@ -495,9 +544,10 @@ export function DirectorShareholderForm() {
                                             key={index}
                                             form={form}
                                             index={index}
+                                            isFirstForm={index === 0}
                                             onFormChange={handleFormChange}
                                             onFileUpload={handleFileUpload}
-                                            onRemove={forms.length > 1 ? () => handleRemoveForm(index) : undefined}
+                                            onRemove={forms.length > 1 && index > 0 ? () => handleRemoveForm(index) : undefined}
                                             popoverStates={popoverStates}
                                             togglePopover={togglePopover}
                                             uploadingFiles={uploadingFiles}
@@ -511,7 +561,7 @@ export function DirectorShareholderForm() {
                                         type="button"
                                         variant="outline"
                                         onClick={handleAddForm}
-                                        className="w-full h-12"
+                                        className="w-full h-12 bg-green-50 border-green-600 text-green-600 hover:bg-green-600 hover:text-white"
                                     >
                                         <Plus className="mr-2 h-4 w-4" />
                                         Add Another Director/Shareholder
@@ -538,10 +588,10 @@ export function DirectorShareholderForm() {
                                     </div>
 
                                     <div className="text-center text-sm text-gray-600">
-                                        Have an account?{" "}
-                                        <Link href="/login" className="text-primary hover:text-primary/80 font-medium">
-                                            Sign in
-                                        </Link>
+                                        Have any issues?{" "}
+                                        <a href="mailto:support@rojifi.com" className="text-primary hover:text-primary/80 font-medium">
+                                            Contact Support
+                                        </a>
                                     </div>
                                 </motion.div>
                             )}
@@ -570,6 +620,7 @@ export function DirectorShareholderForm() {
 interface DirectorShareholderFormCardProps {
     form: DirectorShareholderFormData;
     index: number;
+    isFirstForm: boolean;
     onFormChange: (index: number, field: string, value: any) => void;
     onFileUpload: (file: File, formIndex: number, fieldType: 'idDocument' | 'proofOfAddress') => void;
     onRemove?: () => void;
@@ -584,6 +635,7 @@ interface DirectorShareholderFormCardProps {
 function DirectorShareholderFormCard({
     form,
     index,
+    isFirstForm,
     onFormChange,
     onFileUpload,
     onRemove,
@@ -594,10 +646,12 @@ function DirectorShareholderFormCard({
     validationErrors,
     countries
 }: DirectorShareholderFormCardProps) {
+    // Local validation state
+    const [localValidationErrors, setLocalValidationErrors] = useState<Record<string, string>>({});
+    console.log('Local Validation Errors:', validationErrors);
+
     // Validation function
     const validateField = (field: string, value: any): string => {
-        const fieldKey = `${index}-${field}`;
-        
         switch (field) {
             case 'firstName':
                 if (!value || value.trim().length < 2) return 'First name must be at least 2 characters';
@@ -640,30 +694,69 @@ function DirectorShareholderFormCard({
     };
 
     const getFieldError = (field: string): string => {
-        return validationErrors[`${index}-${field}`] || '';
+        return localValidationErrors[field] || '';
     };
 
     const hasFieldError = (field: string): boolean => {
-        return !!validationErrors[`${index}-${field}`];
+        return !!localValidationErrors[field];
     };
 
     const handleFieldChange = (field: string, value: any) => {
         onFormChange(index, field, value);
-        // Validate and update errors in real-time
+        // Clear validation error when user starts typing
+        if (localValidationErrors[field]) {
+            setLocalValidationErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors[field];
+                return newErrors;
+            });
+        }
+    };
+
+    const handleFieldBlur = (field: string, value: any) => {
         const error = validateField(field, value);
-        const fieldKey = `${index}-${field}`;
-        
-        // Since we can't directly modify validationErrors from here,
-        // we'll need the parent to handle this. For now, let's use onFormChange
-        // and pass validation info
+        if (error) {
+            setLocalValidationErrors(prev => ({
+                ...prev,
+                [field]: error
+            }));
+        }
+    };
+
+    const handleRoleChange = (roleType: 'director' | 'shareholder', checked: boolean) => {
+        if (!isFirstForm) {
+            onFormChange(index, roleType === 'director' ? 'isDirector' : 'isShareholder', checked);
+
+            // Update role display
+            const newIsDirector = roleType === 'director' ? checked : form.isDirector;
+            const newIsShareholder = roleType === 'shareholder' ? checked : form.isShareholder;
+
+            let roleDisplay = "";
+            if (newIsDirector && newIsShareholder) {
+                roleDisplay = "Director and Shareholder";
+            } else if (newIsDirector) {
+                roleDisplay = "Director";
+            } else if (newIsShareholder) {
+                roleDisplay = "Shareholder";
+            }
+
+            onFormChange(index, 'role', roleDisplay);
+        }
+    };
+
+    const handleFileRemove = (fieldType: 'idDocument' | 'proofOfAddress') => {
+        onFormChange(index, fieldType, null);
+        onFormChange(index, `${fieldType}Url`, undefined);
     };
 
     return (
         <div className="space-y-6 border-b border-gray-200 pb-6 last:border-b-0">
             <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-gray-900">
-                    {form.firstName ? `${form.firstName} ${form.lastName}` : `Person ${index + 1}`}
-                </h3>
+                {!isFirstForm && (
+                    <h3 className="text-lg font-semibold text-gray-900">
+                        {form.firstName ? `${form.firstName} ${form.lastName}` : `Person ${index + 1}`}
+                    </h3>
+                )}
                 {onRemove && (
                     <Button variant="outline" size="sm" className="text-red-600 border-red-600 bg-red-50 hover:bg-red-600 hover:text-white" onClick={onRemove}>
                         <Trash2 className="h-4 w-4" />
@@ -681,12 +774,7 @@ function DirectorShareholderFormCard({
                     className={`h-12 ${hasFieldError('firstName') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
                     value={form.firstName}
                     onChange={(e) => handleFieldChange('firstName', e.target.value)}
-                    onBlur={(e) => {
-                        const error = validateField('firstName', e.target.value);
-                        if (error) {
-                            // We'll handle validation error setting in parent
-                        }
-                    }}
+                    onBlur={(e) => handleFieldBlur('firstName', e.target.value)}
                     placeholder="First name"
                 />
                 {getFieldError('firstName') && (
@@ -716,12 +804,7 @@ function DirectorShareholderFormCard({
                         className={`h-12 ${hasFieldError('lastName') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
                         value={form.lastName}
                         onChange={(e) => handleFieldChange('lastName', e.target.value)}
-                        onBlur={(e) => {
-                            const error = validateField('lastName', e.target.value);
-                            if (error) {
-                                // We'll handle validation error setting in parent
-                            }
-                        }}
+                        onBlur={(e) => handleFieldBlur('lastName', e.target.value)}
                         placeholder="Last name"
                     />
                     {getFieldError('lastName') && (
@@ -741,12 +824,7 @@ function DirectorShareholderFormCard({
                         className={`h-12 ${hasFieldError('email') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
                         value={form.email}
                         onChange={(e) => handleFieldChange('email', e.target.value)}
-                        onBlur={(e) => {
-                            const error = validateField('email', e.target.value);
-                            if (error) {
-                                // We'll handle validation error setting in parent
-                            }
-                        }}
+                        onBlur={(e) => handleFieldBlur('email', e.target.value)}
                         placeholder="email@example.com"
                     />
                     {getFieldError('email') && (
@@ -771,12 +849,33 @@ function DirectorShareholderFormCard({
                 <Label className="block text-sm font-medium text-gray-700 mb-2">
                     Role<span className="text-red-500">*</span>
                 </Label>
-                <Input
-                    className="h-12"
-                    value={form.role}
-                    disabled
-                    placeholder="Role"
-                />
+                {isFirstForm ? (
+                    <Input
+                        className="h-12"
+                        value={form.role}
+                        disabled
+                        placeholder="Role"
+                    />
+                ) : (
+                    <div className="space-y-3">
+                        <div className="flex items-center space-x-2">
+                            <Checkbox
+                                id={`director-${index}`}
+                                checked={form.isDirector}
+                                onCheckedChange={(checked) => handleRoleChange('director', checked as boolean)}
+                            />
+                            <Label htmlFor={`director-${index}`} className="font-normal">Director</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <Checkbox
+                                id={`shareholder-${index}`}
+                                checked={form.isShareholder}
+                                onCheckedChange={(checked) => handleRoleChange('shareholder', checked as boolean)}
+                            />
+                            <Label htmlFor={`shareholder-${index}`} className="font-normal">Shareholder</Label>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {form.isShareholder && (
@@ -799,12 +898,7 @@ function DirectorShareholderFormCard({
                                 handleFieldChange('shareholderPercentage', value)
                             }
                         }}
-                        onBlur={(e) => {
-                            const error = validateField('shareholderPercentage', e.target.value);
-                            if (error) {
-                                // We'll handle validation error setting in parent
-                            }
-                        }}
+                        onBlur={(e) => handleFieldBlur('shareholderPercentage', e.target.value)}
                         placeholder="25"
                     />
                     {getFieldError('shareholderPercentage') && (
@@ -877,12 +971,7 @@ function DirectorShareholderFormCard({
                             className={`h-12 ${hasFieldError('phoneNumber') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
                             value={form.phoneNumber}
                             onChange={(e) => handleFieldChange('phoneNumber', e.target.value)}
-                            onBlur={(e) => {
-                                const error = validateField('phoneNumber', e.target.value);
-                                if (error) {
-                                    // We'll handle validation error setting in parent
-                                }
-                            }}
+                            onBlur={(e) => handleFieldBlur('phoneNumber', e.target.value)}
                             placeholder="Phone number"
                         />
                         {getFieldError('phoneNumber') && (
@@ -901,12 +990,44 @@ function DirectorShareholderFormCard({
                     <Label className="block text-sm font-medium text-gray-700 mb-2">
                         Date of Birth<span className="text-red-500">*</span>
                     </Label>
-                    <Input
-                        value={form.dateOfBirth ? format(new Date(form.dateOfBirth), "MMMM d, yyyy") : ""}
-                        disabled
-                        className="w-full h-12 bg-gray-50 text-gray-600"
-                        placeholder="Date will be pre-filled"
-                    />
+                    {isFirstForm ? (
+                        <Input
+                            value={form.dateOfBirth ? format(new Date(form.dateOfBirth), "MMMM d, yyyy") : ""}
+                            disabled
+                            className="w-full h-12 bg-gray-50 text-gray-600"
+                            placeholder="Date will be pre-filled"
+                        />
+                    ) : (
+                        <Popover
+                            open={popoverStates[`dateOfBirth-${index}`]}
+                            onOpenChange={(open) => togglePopover(`dateOfBirth-${index}`, open)}
+                        >
+                            <PopoverTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    className={cn(
+                                        "w-full h-12 justify-start text-left font-normal",
+                                        !form.dateOfBirth && "text-muted-foreground"
+                                    )}
+                                >
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {form.dateOfBirth ? format(form.dateOfBirth, "PPP") : "Select date"}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                    mode="single"
+                                    selected={form.dateOfBirth}
+                                    onSelect={(date) => {
+                                        onFormChange(index, 'dateOfBirth', date)
+                                        togglePopover(`dateOfBirth-${index}`, false)
+                                    }}
+                                    disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+                                    initialFocus
+                                />
+                            </PopoverContent>
+                        </Popover>
+                    )}
                 </div>
                 <div>
                     <Label className="block text-sm font-medium text-gray-700 mb-2">
@@ -967,7 +1088,7 @@ function DirectorShareholderFormCard({
             <div className="grid grid-cols-2 gap-4">
                 <div>
                     <Label className="block text-sm font-medium text-gray-700 mb-2">
-                        ID Type*
+                        ID Type<span className="text-red-500">*</span>
                     </Label>
                     <Select
                         value={form.idType}
@@ -984,21 +1105,25 @@ function DirectorShareholderFormCard({
                 </div>
                 <div>
                     <Label htmlFor={`idNumber-${index}`} className="block text-sm font-medium text-gray-700 mb-2">
-                        ID Number*
+                        ID Number<span className="text-red-500">*</span>
                     </Label>
                     <Input
                         id={`idNumber-${index}`}
-                        className="h-12"
+                        className={`h-12 ${hasFieldError('idNumber') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
                         value={form.idNumber}
-                        onChange={(e) => onFormChange(index, 'idNumber', e.target.value)}
+                        onChange={(e) => handleFieldChange('idNumber', e.target.value)}
+                        onBlur={(e) => handleFieldBlur('idNumber', e.target.value)}
                         placeholder="ID number"
                     />
+                    {getFieldError('idNumber') && (
+                        <p className="text-red-500 text-xs mt-1">{getFieldError('idNumber')}</p>
+                    )}
                 </div>
             </div>
 
             <div>
                 <Label className="block text-sm font-medium text-gray-700 mb-2">
-                    Issued Country*
+                    Issued Country<span className="text-red-500">*</span>
                 </Label>
                 <Popover
                     open={popoverStates[`issuedCountry-${index}`]}
@@ -1050,7 +1175,7 @@ function DirectorShareholderFormCard({
             <div className="grid grid-cols-2 gap-4">
                 <div>
                     <Label className="block text-sm font-medium text-gray-700 mb-2">
-                        Issue Date*
+                        Issue Date<span className="text-red-500">*</span>
                     </Label>
                     <Popover
                         open={popoverStates[`issueDate-${index}`]}
@@ -1084,7 +1209,7 @@ function DirectorShareholderFormCard({
                 </div>
                 <div>
                     <Label className="block text-sm font-medium text-gray-700 mb-2">
-                        Expiry Date*
+                        Expiry Date<span className="text-red-500">*</span>
                     </Label>
                     <Popover
                         open={popoverStates[`expiryDate-${index}`]}
@@ -1124,60 +1249,76 @@ function DirectorShareholderFormCard({
             {/* Address Information */}
             <div>
                 <Label htmlFor={`streetAddress-${index}`} className="block text-sm font-medium text-gray-700 mb-2">
-                    Street Address*
+                    Street Address<span className="text-red-500">*</span>
                 </Label>
                 <Input
                     id={`streetAddress-${index}`}
-                    className="h-12"
+                    className={`h-12 ${hasFieldError('streetAddress') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
                     value={form.streetAddress}
-                    onChange={(e) => onFormChange(index, 'streetAddress', e.target.value)}
+                    onChange={(e) => handleFieldChange('streetAddress', e.target.value)}
+                    onBlur={(e) => handleFieldBlur('streetAddress', e.target.value)}
                     placeholder="Street address"
                 />
+                {getFieldError('streetAddress') && (
+                    <p className="text-red-500 text-xs mt-1">{getFieldError('streetAddress')}</p>
+                )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
                 <div>
                     <Label htmlFor={`city-${index}`} className="block text-sm font-medium text-gray-700 mb-2">
-                        City*
+                        City<span className="text-red-500">*</span>
                     </Label>
                     <Input
                         id={`city-${index}`}
-                        className="h-12"
+                        className={`h-12 ${hasFieldError('city') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
                         value={form.city}
-                        onChange={(e) => onFormChange(index, 'city', e.target.value)}
+                        onChange={(e) => handleFieldChange('city', e.target.value)}
+                        onBlur={(e) => handleFieldBlur('city', e.target.value)}
                         placeholder="City"
                     />
+                    {getFieldError('city') && (
+                        <p className="text-red-500 text-xs mt-1">{getFieldError('city')}</p>
+                    )}
                 </div>
                 <div>
                     <Label htmlFor={`postalCode-${index}`} className="block text-sm font-medium text-gray-700 mb-2">
-                        Postal Code*
+                        Postal Code<span className="text-red-500">*</span>
                     </Label>
                     <Input
                         id={`postalCode-${index}`}
-                        className="h-12"
+                        className={`h-12 ${hasFieldError('postalCode') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
                         value={form.postalCode}
-                        onChange={(e) => onFormChange(index, 'postalCode', e.target.value)}
+                        onChange={(e) => handleFieldChange('postalCode', e.target.value)}
+                        onBlur={(e) => handleFieldBlur('postalCode', e.target.value)}
                         placeholder="Postal code"
                     />
+                    {getFieldError('postalCode') && (
+                        <p className="text-red-500 text-xs mt-1">{getFieldError('postalCode')}</p>
+                    )}
                 </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
                 <div>
                     <Label htmlFor={`state-${index}`} className="block text-sm font-medium text-gray-700 mb-2">
-                        State/Province*
+                        State/Province<span className="text-red-500">*</span>
                     </Label>
                     <Input
                         id={`state-${index}`}
-                        className="h-12"
+                        className={`h-12 ${hasFieldError('state') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
                         value={form.state}
-                        onChange={(e) => onFormChange(index, 'state', e.target.value)}
+                        onChange={(e) => handleFieldChange('state', e.target.value)}
+                        onBlur={(e) => handleFieldBlur('state', e.target.value)}
                         placeholder="State or Province"
                     />
+                    {getFieldError('state') && (
+                        <p className="text-red-500 text-xs mt-1">{getFieldError('state')}</p>
+                    )}
                 </div>
                 <div>
                     <Label className="block text-sm font-medium text-gray-700 mb-2">
-                        Country*
+                        Country<span className="text-red-500">*</span>
                     </Label>
                     <Popover
                         open={popoverStates[`country-${index}`]}
@@ -1233,20 +1374,24 @@ function DirectorShareholderFormCard({
             {/* Document Uploads */}
             <div className="space-y-6">
                 <FileUploadField
-                    label="Upload ID Document*"
+                    label="Upload ID Document (Passport or Driver's License)"
+                    required={true}
                     fieldKey={`${index}-idDocument`}
                     file={form.idDocument}
                     uploading={uploadingFiles[`${index}-idDocument`]}
                     error={fieldErrors[`${index}-idDocument`]}
                     onFileSelect={(file) => onFileUpload(file, index, 'idDocument')}
+                    onFileRemove={() => handleFileRemove('idDocument')}
                 />
                 <FileUploadField
-                    label="Upload Proof of Address*"
+                    label="Upload Proof of Address (utility bill, residence permit, etc.)"
+                    required={true}
                     fieldKey={`${index}-proofOfAddress`}
                     file={form.proofOfAddress}
                     uploading={uploadingFiles[`${index}-proofOfAddress`]}
                     error={fieldErrors[`${index}-proofOfAddress`]}
                     onFileSelect={(file) => onFileUpload(file, index, 'proofOfAddress')}
+                    onFileRemove={() => handleFileRemove('proofOfAddress')}
                 />
             </div>
         </div>
@@ -1256,14 +1401,16 @@ function DirectorShareholderFormCard({
 // File upload component
 interface FileUploadFieldProps {
     label: string;
+    required?: boolean;
     fieldKey: string;
     file: File | null;
     uploading: boolean;
     error: string;
     onFileSelect: (file: File) => void;
+    onFileRemove: () => void;
 }
 
-function FileUploadField({ label, fieldKey, file, uploading, error, onFileSelect }: FileUploadFieldProps) {
+function FileUploadField({ label, required = false, fieldKey, file, uploading, error, onFileSelect, onFileRemove }: FileUploadFieldProps) {
     const fileInputRef = useRef<HTMLInputElement>(null)
     const [dragActive, setDragActive] = useState(false)
 
@@ -1286,7 +1433,9 @@ function FileUploadField({ label, fieldKey, file, uploading, error, onFileSelect
 
     return (
         <div>
-            <Label className="block text-lg font-bold text-gray-700 mb-2">{label}</Label>
+            <Label className="block text-lg font-bold text-gray-700 mb-2">
+                {label}{required && <span className="text-red-500">*</span>}
+            </Label>
             <div
                 className={cn(
                     "relative border-2 border-dashed rounded-lg p-8 text-center transition-colors focus-within:ring-2 focus-within:ring-primary cursor-pointer",
@@ -1362,7 +1511,7 @@ function FileUploadField({ label, fieldKey, file, uploading, error, onFileSelect
                             type="button"
                             onClick={(e) => {
                                 e.stopPropagation()
-                                // Remove file logic would go here
+                                onFileRemove()
                             }}
                             className="ml-auto text-red-500 hover:text-red-600"
                             aria-label={`Remove ${fieldKey}`}
