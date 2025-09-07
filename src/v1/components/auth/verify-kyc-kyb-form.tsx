@@ -1,9 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/v1/components/ui/button"
 import { Label } from "@/v1/components/ui/label"
-import { X, Plus, Check, ExternalLink } from "lucide-react"
+import { X, Plus, Check, ExternalLink, AlertCircle, ArrowUpRight } from "lucide-react"
 import { Logo } from "@/v1/components/logo"
 import { Carousel, carouselItems } from "../carousel"
 import GlobeWrapper from "../globe"
@@ -13,10 +13,13 @@ import { Status } from "@/v1/enums/enums"
 import { session, SessionData } from "@/v1/session/session"
 import { toast } from "sonner"
 import { Link, useParams } from "wouter"
+import { motion } from "framer-motion"
 
 export function KYBVerificationForm() {
     const [dragActive, setDragActive] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [isNotApprove, setIsNotApprove] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [formData, setFormData] = useState<Record<string, File | null>>({
         cacCertOfIncoporation: null,
@@ -48,6 +51,47 @@ export function KYBVerificationForm() {
     const sd: SessionData = session.getUserData();
 
     const { id } = useParams();
+
+    const loadData = async () => {
+        try {
+            const response = await fetch(`${Defaults.API_BASE_URL}/requestaccess/approved/${id}`, {
+                method: 'GET',
+                headers: {
+                    ...Defaults.HEADERS,
+                    'x-rojifi-handshake': sd.client.publicKey,
+                    'x-rojifi-deviceid': sd.deviceid,
+                }
+            });
+
+            if (!response.ok) {
+                setIsNotApprove(true);
+            } else {
+                setIsNotApprove(false);
+            }
+        } catch (error) {
+            console.error('Error loading data:', error);
+            setIsNotApprove(true);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (id) {
+            loadData();
+        }
+    }, [id]);
+
+    const logoVariants = {
+        animate: {
+            scale: [1, 1.1, 1],
+            transition: {
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut"
+            }
+        }
+    }
 
     const handleDrag = (e: React.DragEvent) => {
         e.preventDefault();
@@ -289,6 +333,38 @@ export function KYBVerificationForm() {
         </div>
     );
 
+    if (loading || isLoading) {
+        return (
+            <div className="fixed top-0 bottom-0 left-0 right-0 z-50 flex items-center justify-center bg-white">
+                <div className="flex min-h-screen items-center justify-center bg-background">
+                    <motion.div variants={logoVariants} animate="animate">
+                        <Logo className="h-16 w-auto" />
+                    </motion.div>
+                </div>
+            </div>
+        )
+    }
+
+    if (isNotApprove) {
+        return (
+            <div className="fixed inset-0 bg-white flex items-center justify-center">
+                <div className="text-center max-w-lg px-6">
+                    <AlertCircle className="mx-auto h-12 w-12 text-gray-500" />
+                    <h2 className="mt-4 text-2xl font-semibold text-gray-900">Request access required</h2>
+                    <p className="mt-2 text-gray-600">You currently don't have access to this page. Please request access to continue.</p>
+                    <div className="mt-6">
+                        <Link href="/request-access" className="inline-flex">
+                            <Button className="px-6 py-2 bg-primary hover:bg-primary/90 text-white">
+                                <ArrowUpRight size={18} />
+                                Request Access
+                            </Button>
+                        </Link>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
     return (
         <div className="fixed top-0 bottom-0 left-0 right-0">
             <div className="w-full h-full flex flex-row items-start justify-between">
@@ -313,7 +389,7 @@ export function KYBVerificationForm() {
                             {renderUploadField("cacCertOfIncoporation", "CAC Certificate of Incorporation")}
                             {renderUploadField("memorandumArticlesOfAssociation", "Memorandum & Articles of Association (Memart)")}
                             {renderUploadField("cacStatusReport", "CAC Status Report")}
-                            {renderUploadField("proofOfAddress", "Proof of Address (Recent Utility Bill)")}
+                            {renderUploadField("proofOfAddress", "Business Proof of Address (Recent Utility Bill, Bank Statement, Etc...)")}
 
                             <div className="space-y-4">
                                 <Button type="submit" className="w-full h-12 bg-primary hover:bg-primary/90 text-white" disabled={isLoading}>

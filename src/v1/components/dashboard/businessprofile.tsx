@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CheckCircle2, Files, MapPin, UsersIcon, Building, Calendar, Globe, Phone, Mail, Shield, Award, Clock, ArrowRight, Edit, Download } from "lucide-react";
+import { CheckCircle2, Files, MapPin, UsersIcon, Building, Calendar, Globe, Phone, Mail, Shield, Award, Clock, ArrowRight, Download, DollarSign, TrendingUp, Users, Eye } from "lucide-react";
 import Loading from "../loading";
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
@@ -11,6 +11,7 @@ import { Badge } from "../ui/badge";
 import { motion } from "framer-motion";
 import { ISender } from "@/v1/interface/interface";
 import { session, SessionData } from "@/v1/session/session";
+import { Link, useParams } from "wouter";
 
 enum Tabs {
     KYC = "KYC",
@@ -22,9 +23,10 @@ export function BusinessProfileView() {
     const [kycCompleted, setKycCompleted] = useState<boolean>(false);
     const [sender, setSender] = useState<ISender | null>(null);
     const sd: SessionData = session.getUserData();
+    const { wallet } = useParams();
 
     const [_currentPage, setCurrentPage] = useState(1);
-    const [statusFilter, setStatusFilter] = useState("Overview");
+    const [statusFilter, setStatusFilter] = useState("KYC");
 
     const statusTabs = Object.values(Tabs);
 
@@ -259,10 +261,18 @@ export function BusinessProfileView() {
                                             <p className="text-gray-600">Company details and registration information</p>
                                         </div>
                                     </div>
-                                    <Button variant="outline" className="px-4 py-2 h-auto">
-                                        <Edit className="mr-2 h-4 w-4" />
-                                        Edit Profile
-                                    </Button>
+                                    <div className="flex gap-2">
+                                        <Button variant="outline" className="px-4 py-2 h-auto">
+                                            <Eye className="mr-2 h-4 w-4" />
+                                            View Details
+                                        </Button>
+                                        <Link href={`/dashboard/${wallet}/sender/edit`}>
+                                            <Button className="px-4 py-2 h-auto">
+                                                <Building className="mr-2 h-4 w-4" />
+                                                Edit Profile
+                                            </Button>
+                                        </Link>
+                                    </div>
                                 </div>
 
                                 {/* Business Details Grid */}
@@ -274,6 +284,16 @@ export function BusinessProfileView() {
                                         </Label>
                                         <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
                                             <p className="font-semibold text-gray-900">{sender?.businessName || "Not provided"}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                            <Building className="h-4 w-4 text-purple-600" />
+                                            Trading Name
+                                        </Label>
+                                        <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
+                                            <p className="font-semibold text-gray-900">{sender?.tradingName || "Not provided"}</p>
                                         </div>
                                     </div>
 
@@ -300,10 +320,147 @@ export function BusinessProfileView() {
                                     <div className="space-y-2">
                                         <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
                                             <Globe className="h-4 w-4 text-purple-600" />
+                                            Website
+                                        </Label>
+                                        <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
+                                            <p className="font-semibold text-gray-900 break-all">{sender?.website || "Not provided"}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                            <Files className="h-4 w-4 text-purple-600" />
+                                            Legal Form
+                                        </Label>
+                                        <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
+                                            <p className="font-semibold text-gray-900">{sender?.legalForm || "Not provided"}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                            <Building className="h-4 w-4 text-purple-600" />
+                                            Company Activity
+                                        </Label>
+                                        <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
+                                            <p className="font-semibold text-gray-900">{sender?.companyActivity || "Not provided"}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                            <Globe className="h-4 w-4 text-purple-600" />
                                             Country of Incorporation
                                         </Label>
                                         <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
                                             <p className="font-semibold text-gray-900">{sender?.countryOfIncorporation || "Not provided"}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                            <Calendar className="h-4 w-4 text-purple-600" />
+                                            Registration Date
+                                        </Label>
+                                        <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
+                                            <p className="text-gray-900">
+                                                {sender?.registrationDate
+                                                    ? new Date(sender.registrationDate).toLocaleDateString()
+                                                    : "Not provided"
+                                                }
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                            <Calendar className="h-4 w-4 text-purple-600" />
+                                            Onboarding Date
+                                        </Label>
+                                        <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
+                                            <p className="text-gray-900">
+                                                {sender?.onboardingDate
+                                                    ? new Date(sender.onboardingDate).toLocaleDateString()
+                                                    : "Not provided"
+                                                }
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Address Information Card */}
+                        <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
+                            <CardContent className="p-8">
+                                <div className="flex items-center gap-4 mb-6">
+                                    <div className="w-12 h-12 bg-teal-600 rounded-full flex items-center justify-center">
+                                        <MapPin className="h-6 w-6 text-white" />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-2xl font-bold text-gray-900">Address Information</h2>
+                                        <p className="text-gray-600">Registered business address details</p>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                            <MapPin className="h-4 w-4 text-emerald-600" />
+                                            Street Address
+                                        </Label>
+                                        <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
+                                            <p className="text-gray-900">{sender?.streetAddress || "Not provided"}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                            <MapPin className="h-4 w-4 text-emerald-600" />
+                                            Street Address 2
+                                        </Label>
+                                        <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
+                                            <p className="text-gray-900">{sender?.streetAddress2 || "Not provided"}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                            <Building className="h-4 w-4 text-emerald-600" />
+                                            City
+                                        </Label>
+                                        <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
+                                            <p className="text-gray-900">{sender?.city || "Not provided"}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                            <Building className="h-4 w-4 text-emerald-600" />
+                                            State
+                                        </Label>
+                                        <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
+                                            <p className="text-gray-900">{sender?.state || "Not provided"}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                            <Globe className="h-4 w-4 text-emerald-600" />
+                                            Region
+                                        </Label>
+                                        <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
+                                            <p className="text-gray-900">{sender?.region || "Not provided"}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                            <MapPin className="h-4 w-4 text-emerald-600" />
+                                            Postal Code
+                                        </Label>
+                                        <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
+                                            <p className="text-gray-900">{sender?.postalCode || "Not provided"}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -314,19 +471,19 @@ export function BusinessProfileView() {
                         <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
                             <CardContent className="p-8">
                                 <div className="flex items-center gap-4 mb-6">
-                                    <div className="w-12 h-12 bg-teal-600 rounded-full flex items-center justify-center">
+                                    <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
                                         <Phone className="h-6 w-6 text-white" />
                                     </div>
                                     <div>
                                         <h2 className="text-2xl font-bold text-gray-900">Contact Information</h2>
-                                        <p className="text-gray-600">Business address and contact details</p>
+                                        <p className="text-gray-600">Business contact details</p>
                                     </div>
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
                                         <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                                            <Mail className="h-4 w-4 text-emerald-600" />
+                                            <Mail className="h-4 w-4 text-blue-600" />
                                             Business Email
                                         </Label>
                                         <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
@@ -336,62 +493,334 @@ export function BusinessProfileView() {
 
                                     <div className="space-y-2">
                                         <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                                            <Phone className="h-4 w-4 text-emerald-600" />
+                                            <Phone className="h-4 w-4 text-blue-600" />
                                             Business Phone
                                         </Label>
                                         <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
-                                            <p className="text-gray-900">{sender?.phoneNumber || "Not provided"}</p>
+                                            <p className="text-gray-900">{sender?.phoneCountryCode} {sender?.phoneNumber || "Not provided"}</p>
                                         </div>
                                     </div>
 
                                     <div className="space-y-2">
                                         <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                                            <MapPin className="h-4 w-4 text-emerald-600" />
-                                            Business Address
+                                            <Files className="h-4 w-4 text-blue-600" />
+                                            Tax Identification Number
                                         </Label>
                                         <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
-                                            <p className="text-gray-900">{sender?.businessAddress || "Not provided"}</p>
+                                            <p className="text-gray-900">{sender?.taxIdentificationNumber || "Not provided"}</p>
                                         </div>
                                     </div>
 
                                     <div className="space-y-2">
                                         <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                                            <Building className="h-4 w-4 text-emerald-600" />
-                                            City & State
-                                        </Label>
-                                        <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
-                                            <p className="text-gray-900">
-                                                {sender?.businessCity && sender?.businessState
-                                                    ? `${sender.businessCity}, ${sender.businessState}`
-                                                    : "Not provided"
-                                                }
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                                            <Calendar className="h-4 w-4 text-emerald-600" />
-                                            Date of Incorporation
-                                        </Label>
-                                        <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
-                                            <p className="text-gray-900">
-                                                {sender?.dateOfIncorporation
-                                                    ? new Date(sender.dateOfIncorporation).toLocaleDateString()
-                                                    : "Not provided"
-                                                }
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                                            <Clock className="h-4 w-4 text-emerald-600" />
+                                            <Clock className="h-4 w-4 text-blue-600" />
                                             Account Status
                                         </Label>
                                         <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
                                             <Badge className={`${getStatusColor(sender?.status || '')} font-medium`}>
                                                 {sender?.status || "Unknown"}
+                                            </Badge>
+                                        </div>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Financial Information Card */}
+                        <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
+                            <CardContent className="p-8">
+                                <div className="flex items-center gap-4 mb-6">
+                                    <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center">
+                                        <DollarSign className="h-6 w-6 text-white" />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-2xl font-bold text-gray-900">Financial Information</h2>
+                                        <p className="text-gray-600">Company financial details and projections</p>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                            <DollarSign className="h-4 w-4 text-green-600" />
+                                            Share Capital
+                                        </Label>
+                                        <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
+                                            <p className="text-gray-900">
+                                                {sender?.shareCapital ? `${sender.shareCapital.toLocaleString()}` : "Not provided"}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                            <TrendingUp className="h-4 w-4 text-green-600" />
+                                            Last Year Turnover
+                                        </Label>
+                                        <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
+                                            <p className="text-gray-900">
+                                                {sender?.lastYearTurnover ? `${sender.lastYearTurnover.toLocaleString()}` : "Not provided"}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                            <Building className="h-4 w-4 text-green-600" />
+                                            Company Assets
+                                        </Label>
+                                        <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
+                                            <p className="text-gray-900">
+                                                {sender?.companyAssets ? `${sender.companyAssets.toLocaleString()}` : "Not provided"}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                            <TrendingUp className="h-4 w-4 text-green-600" />
+                                            Monthly Volume
+                                        </Label>
+                                        <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
+                                            <p className="text-gray-900">
+                                                {sender?.volume ? `${sender.volume.toLocaleString()}` : "Not provided"}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                            <DollarSign className="h-4 w-4 text-green-600" />
+                                            Expected Monthly Inbound Crypto
+                                        </Label>
+                                        <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
+                                            <p className="text-gray-900">
+                                                {sender?.expectedMonthlyInboundCryptoPayments ? `${sender.expectedMonthlyInboundCryptoPayments.toLocaleString()}` : "Not provided"}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                            <DollarSign className="h-4 w-4 text-green-600" />
+                                            Expected Monthly Outbound Crypto
+                                        </Label>
+                                        <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
+                                            <p className="text-gray-900">
+                                                {sender?.expectedMonthlyOutboundCryptoPayments ? `${sender.expectedMonthlyOutboundCryptoPayments.toLocaleString()}` : "Not provided"}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                            <DollarSign className="h-4 w-4 text-green-600" />
+                                            Expected Monthly Inbound Fiat
+                                        </Label>
+                                        <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
+                                            <p className="text-gray-900">
+                                                {sender?.expectedMonthlyInboundFiatPayments ? `${sender.expectedMonthlyInboundFiatPayments.toLocaleString()}` : "Not provided"}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                            <DollarSign className="h-4 w-4 text-green-600" />
+                                            Expected Monthly Outbound Fiat
+                                        </Label>
+                                        <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
+                                            <p className="text-gray-900">
+                                                {sender?.expectedMonthlyOutboundFiatPayments ? `${sender.expectedMonthlyOutboundFiatPayments.toLocaleString()}` : "Not provided"}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Risk & Compliance Card */}
+                        <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
+                            <CardContent className="p-8">
+                                <div className="flex items-center gap-4 mb-6">
+                                    <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center">
+                                        <Shield className="h-6 w-6 text-white" />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-2xl font-bold text-gray-900">Risk & Compliance</h2>
+                                        <p className="text-gray-600">Risk assessment and compliance information</p>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                            <Shield className="h-4 w-4 text-red-600" />
+                                            Risk Level
+                                        </Label>
+                                        <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
+                                            <p className="text-gray-900">{sender?.riskLevel || "Not provided"}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                            <UsersIcon className="h-4 w-4 text-red-600" />
+                                            Percentage Ownership
+                                        </Label>
+                                        <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
+                                            <p className="text-gray-900">{sender?.percentageOwnership ? `${sender.percentageOwnership}%` : "Not provided"}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2 md:col-span-2">
+                                        <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                            <Files className="h-4 w-4 text-red-600" />
+                                            Additional Due Diligence
+                                        </Label>
+                                        <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
+                                            <p className="text-gray-900">{sender?.additionalDueDiligenceConducted || "Not provided"}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Services & Sources Card */}
+                        <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
+                            <CardContent className="p-8">
+                                <div className="flex items-center gap-4 mb-6">
+                                    <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center">
+                                        <Users className="h-6 w-6 text-white" />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-2xl font-bold text-gray-900">Services & Sources</h2>
+                                        <p className="text-gray-600">Requested services and funding sources</p>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-6">
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                            <Building className="h-4 w-4 text-purple-600" />
+                                            Requested Nilos Services
+                                        </Label>
+                                        <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
+                                            <div className="flex flex-wrap gap-2">
+                                                {sender?.requestedNilosServices && sender.requestedNilosServices.length > 0 ? (
+                                                    sender.requestedNilosServices.map((service, index) => (
+                                                        <Badge key={index} variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                                                            {service.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                                        </Badge>
+                                                    ))
+                                                ) : (
+                                                    <p className="text-gray-900">Not provided</p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                            <DollarSign className="h-4 w-4 text-purple-600" />
+                                            Source of Wealth
+                                        </Label>
+                                        <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
+                                            <div className="flex flex-wrap gap-2">
+                                                {sender?.sourceOfWealth && sender.sourceOfWealth.length > 0 ? (
+                                                    sender.sourceOfWealth.map((source, index) => (
+                                                        <Badge key={index} variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                                                            {source.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                                        </Badge>
+                                                    ))
+                                                ) : (
+                                                    <p className="text-gray-900">Not provided</p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                            <TrendingUp className="h-4 w-4 text-purple-600" />
+                                            Anticipated Source of Funds on Nilos
+                                        </Label>
+                                        <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
+                                            <div className="flex flex-wrap gap-2">
+                                                {sender?.anticipatedSourceOfFundsOnNilos && sender.anticipatedSourceOfFundsOnNilos.length > 0 ? (
+                                                    sender.anticipatedSourceOfFundsOnNilos.map((source, index) => (
+                                                        <Badge key={index} variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                                                            {source.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                                        </Badge>
+                                                    ))
+                                                ) : (
+                                                    <p className="text-gray-900">Not provided</p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Compliance Declarations Card */}
+                        <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
+                            <CardContent className="p-8">
+                                <div className="flex items-center gap-4 mb-6">
+                                    <div className="w-12 h-12 bg-orange-600 rounded-full flex items-center justify-center">
+                                        <CheckCircle2 className="h-6 w-6 text-white" />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-2xl font-bold text-gray-900">Compliance Declarations</h2>
+                                        <p className="text-gray-600">Business compliance and regulatory declarations</p>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 gap-6">
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                            <MapPin className="h-4 w-4 text-orange-600" />
+                                            Operations and Registered Addresses Match
+                                        </Label>
+                                        <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
+                                            <Badge className={sender?.actualOperationsAndRegisteredAddressesMatch ? "bg-green-100 text-green-800 border-green-200" : "bg-red-100 text-red-800 border-red-200"}>
+                                                {sender?.actualOperationsAndRegisteredAddressesMatch ? "Yes" : "No"}
+                                            </Badge>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                            <Building className="h-4 w-4 text-orange-600" />
+                                            Company Provides Regulated Financial Services
+                                        </Label>
+                                        <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
+                                            <Badge className={sender?.companyProvideRegulatedFinancialServices ? "bg-green-100 text-green-800 border-green-200" : "bg-red-100 text-red-800 border-red-200"}>
+                                                {sender?.companyProvideRegulatedFinancialServices ? "Yes" : "No"}
+                                            </Badge>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                            <UsersIcon className="h-4 w-4 text-orange-600" />
+                                            Director or Beneficial Owner is PEP or US Person
+                                        </Label>
+                                        <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
+                                            <Badge className={sender?.directorOrBeneficialOwnerIsPEPOrUSPerson ? "bg-orange-100 text-orange-800 border-orange-200" : "bg-green-100 text-green-800 border-green-200"}>
+                                                {sender?.directorOrBeneficialOwnerIsPEPOrUSPerson ? "Yes" : "No"}
+                                            </Badge>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                            <Clock className="h-4 w-4 text-orange-600" />
+                                            Immediate Approval Requested
+                                        </Label>
+                                        <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
+                                            <Badge className={sender?.immediateApprove ? "bg-blue-100 text-blue-800 border-blue-200" : "bg-gray-100 text-gray-800 border-gray-200"}>
+                                                {sender?.immediateApprove ? "Yes" : "No"}
                                             </Badge>
                                         </div>
                                     </div>

@@ -6,7 +6,7 @@ import { Button } from "@/v1/components/ui/button"
 import { Input } from "@/v1/components/ui/input"
 import { Label } from "@/v1/components/ui/label"
 import { Checkbox } from "@/v1/components/ui/checkbox"
-import { Eye, EyeOff, Mail, Lock, User, X, AlertCircle, ArrowUpRight } from "lucide-react"
+import { Eye, EyeOff, X, AlertCircle, ArrowUpRight } from "lucide-react"
 import { Logo } from "@/v1/components/logo"
 import { OTPVerificationModal } from "../modal/otp";
 import { Carousel, carouselItems } from "../carousel"
@@ -39,10 +39,19 @@ export function SignupForm() {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [isNotApprove, setIsNotApprove] = useState(false)
+    const [passwordValidation, setPasswordValidation] = useState({
+        hasLength: false,
+        hasUppercase: false,
+        hasLowercase: false,
+        hasNumber: false,
+        hasSpecial: false
+    })
+    const [isPasswordMatching, setIsPasswordMatching] = useState(true)
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",
         middleName: "",
+        businessName: "",
         email: "",
         password: "",
         confirmPassword: "",
@@ -51,6 +60,38 @@ export function SignupForm() {
     });
     const { id } = useParams();
     const sd: SessionData = session.getUserData();
+
+    // Password validation function
+    const validatePassword = (password: string) => {
+        return {
+            hasLength: password.length >= 8,
+            hasUppercase: /[A-Z]/.test(password),
+            hasLowercase: /[a-z]/.test(password),
+            hasNumber: /\d/.test(password),
+            hasSpecial: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+        };
+    };
+
+    // Check if password is fully valid
+    const isPasswordValid = () => {
+        return Object.values(passwordValidation).every(Boolean);
+    };
+
+    // Check if all required fields are filled
+    const isFormValid = () => {
+        return (
+            formData.firstName.trim() !== "" &&
+            formData.lastName.trim() !== "" &&
+            formData.middleName.trim() !== "" &&
+            formData.businessName.trim() !== "" &&
+            formData.email.trim() !== "" &&
+            formData.password.trim() !== "" &&
+            formData.confirmPassword.trim() !== "" &&
+            isPasswordValid() &&
+            isPasswordMatching &&
+            formData.agreeToTerms
+        );
+    };
 
     useEffect(() => {
         loadData();
@@ -79,16 +120,36 @@ export function SignupForm() {
         }
 
         setFormData((prev) => ({ ...prev, [field]: sanitizedValue }));
+
+        // Real-time password validation
+        if (field === "password") {
+            const validation = validatePassword(String(sanitizedValue));
+            setPasswordValidation(validation);
+            // Check if confirm password still matches
+            if (formData.confirmPassword) {
+                setIsPasswordMatching(String(sanitizedValue) === formData.confirmPassword);
+            }
+        }
+
+        // Real-time confirm password validation
+        if (field === "confirmPassword") {
+            setIsPasswordMatching(formData.password === String(sanitizedValue));
+        }
+
         setError(null);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setError(null)
-        console.log("sd:", sd)
 
         if (!formData.agreeToTerms) {
-            setError("You must agree to the Terms and Conditions")
+            setError("You must agree to the Terms and Conditions to proceed")
+            return
+        }
+
+        if (!isPasswordValid()) {
+            setError("Password does not meet all requirements")
             return
         }
 
@@ -147,6 +208,7 @@ export function SignupForm() {
                     lastName: parseData.lastname,
                     middleName: parseData.middlename,
                     email: parseData.email,
+                    businessName: parseData.businessName,
                 }));
             }
         } catch (error: any) {
@@ -220,41 +282,39 @@ export function SignupForm() {
                                     <Label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
                                         First name <span className="text-red-500">*</span>
                                     </Label>
-                                    <div className="relative">
+                                    <div>
                                         <Input
                                             id="firstName"
                                             name="firstName"
                                             type="text"
                                             autoComplete="given-name"
-                                            className="pl-10 h-12"
+                                            className="h-12"
                                             placeholder="First name"
                                             value={formData.firstName}
                                             disabled={true}
                                             readOnly={true}
-                                            onChange={(_e) => { } /* handleInputChange("firstName", e.target.value) */}
+                                            onChange={(e) => handleInputChange("firstName", e.target.value)}
                                         />
-                                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                                     </div>
                                 </div>
 
                                 <div>
                                     <Label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
-                                        Last name
+                                        Last name <span className="text-red-500">*</span>
                                     </Label>
-                                    <div className="relative">
+                                    <div>
                                         <Input
                                             id="lastName"
                                             name="lastName"
                                             type="text"
                                             autoComplete="family-name"
-                                            className="pl-10 h-12"
+                                            className="h-12"
                                             placeholder="Last name"
                                             value={formData.lastName}
                                             disabled={true}
                                             readOnly={true}
-                                            onChange={(_e) => { } /* handleInputChange("lastName", e.target.value) */}
+                                            onChange={(e) => handleInputChange("lastName", e.target.value)}
                                         />
-                                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                                     </div>
                                 </div>
                             </div>
@@ -263,19 +323,19 @@ export function SignupForm() {
                                 <Label htmlFor="middleName" className="block text-sm font-medium text-gray-700 mb-2">
                                     Other Name <span className="text-red-500">*</span>
                                 </Label>
-                                <div className="relative">
+                                <div>
                                     <Input
                                         id="middleName"
                                         name="middleName"
                                         type="text"
                                         autoComplete="family-name"
-                                        className="pl-10 h-12"
+                                        className="h-12"
                                         placeholder="Other"
-                                        disabled={loading}
+                                        disabled={true}
+                                        readOnly={true}
                                         value={formData.middleName}
                                         onChange={(e) => handleInputChange("middleName", e.target.value)}
                                     />
-                                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                                 </div>
                             </div>
 
@@ -283,21 +343,41 @@ export function SignupForm() {
                                 <Label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                                     Email address <span className="text-red-500">*</span>
                                 </Label>
-                                <div className="relative">
+                                <div>
                                     <Input
                                         id="email"
                                         name="email"
                                         type="email"
                                         autoComplete="email"
                                         required
-                                        className="pl-10 h-12"
+                                        className="h-12"
                                         placeholder="Enter your email"
                                         value={formData.email}
                                         disabled={true}
                                         readOnly={true}
                                         onChange={(_e) => { } /* handleInputChange("email", e.target.value) */}
                                     />
-                                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                </div>
+                            </div>
+
+                            <div>
+                                <Label htmlFor="businessName" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Business Name <span className="text-red-500">*</span>
+                                </Label>
+                                <div>
+                                    <Input
+                                        id="businessName"
+                                        name="businessName"
+                                        type="text"
+                                        autoComplete="organization"
+                                        required
+                                        className="h-12"
+                                        placeholder="Enter your business name"
+                                        value={formData.businessName}
+                                        disabled={true}
+                                        readOnly={true}
+                                        onChange={(_e) => { } /* handleInputChange("email", e.target.value) */}
+                                    />
                                 </div>
                             </div>
 
@@ -312,13 +392,12 @@ export function SignupForm() {
                                         type={showPassword ? "text" : "password"}
                                         autoComplete="new-password"
                                         required
-                                        className="pl-10 pr-10 h-12"
+                                        className="pr-10 h-12"
                                         placeholder="Password"
                                         value={formData.password}
                                         disabled={loading}
                                         onChange={(e) => handleInputChange("password", e.target.value)}
                                     />
-                                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                                     <button
                                         type="button"
                                         className="absolute right-3 top-1/2 transform -translate-y-1/2"
@@ -327,6 +406,33 @@ export function SignupForm() {
                                         {showPassword ? <EyeOff className="h-5 w-5 text-gray-400" /> : <Eye className="h-5 w-5 text-gray-400" />}
                                     </button>
                                 </div>
+                                {formData.password && !isPasswordValid() && (
+                                    <div className="mt-2 space-y-1">
+                                        <p className="text-xs text-gray-600 mb-1">Password must include:</p>
+                                        <div className="space-y-1">
+                                            <div className={`flex items-center text-xs ${passwordValidation.hasLength ? 'text-green-600' : 'text-red-500'}`}>
+                                                <span className="mr-1">{passwordValidation.hasLength ? '✓' : '×'}</span>
+                                                At least 8 characters
+                                            </div>
+                                            <div className={`flex items-center text-xs ${passwordValidation.hasUppercase ? 'text-green-600' : 'text-red-500'}`}>
+                                                <span className="mr-1">{passwordValidation.hasUppercase ? '✓' : '×'}</span>
+                                                One uppercase letter
+                                            </div>
+                                            <div className={`flex items-center text-xs ${passwordValidation.hasLowercase ? 'text-green-600' : 'text-red-500'}`}>
+                                                <span className="mr-1">{passwordValidation.hasLowercase ? '✓' : '×'}</span>
+                                                One lowercase letter
+                                            </div>
+                                            <div className={`flex items-center text-xs ${passwordValidation.hasNumber ? 'text-green-600' : 'text-red-500'}`}>
+                                                <span className="mr-1">{passwordValidation.hasNumber ? '✓' : '×'}</span>
+                                                One number
+                                            </div>
+                                            <div className={`flex items-center text-xs ${passwordValidation.hasSpecial ? 'text-green-600' : 'text-red-500'}`}>
+                                                <span className="mr-1">{passwordValidation.hasSpecial ? '✓' : '×'}</span>
+                                                One special character
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             <div>
@@ -340,13 +446,12 @@ export function SignupForm() {
                                         type={showConfirmPassword ? "text" : "password"}
                                         autoComplete="new-password"
                                         required
-                                        className="pl-10 pr-10 h-12"
+                                        className="pr-10 h-12"
                                         placeholder="Confirm Password"
                                         value={formData.confirmPassword}
                                         disabled={loading}
                                         onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
                                     />
-                                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                                     <button
                                         type="button"
                                         className="absolute right-3 top-1/2 transform -translate-y-1/2"
@@ -359,6 +464,9 @@ export function SignupForm() {
                                         )}
                                     </button>
                                 </div>
+                                {formData.confirmPassword && !isPasswordMatching && (
+                                    <p className="text-red-500 text-xs mt-1">Passwords must match</p>
+                                )}
                             </div>
 
                             <div className="space-y-4">
@@ -396,7 +504,11 @@ export function SignupForm() {
                             </div>
 
                             <div className="space-y-4">
-                                <Button type="submit" className="w-full h-12 bg-primary hover:bg-primary/90 text-white" disabled={loading}>
+                                <Button
+                                    type="submit"
+                                    className="w-full h-12 bg-primary hover:bg-primary/90 text-white"
+                                    disabled={loading || !isFormValid()}
+                                >
                                     {loading ? "Creating account..." : "Submit"}
                                 </Button>
                             </div>
@@ -416,7 +528,7 @@ export function SignupForm() {
                             onSuccess={() => {
                                 setShowOtpModal(false);
                                 toast.success("Email verified successfully");
-                                window.location.href = `/signup/${id}/verification`;
+                                window.location.href = `/signup/${id}/business-details`;
                             }}
                         />
                     </div>

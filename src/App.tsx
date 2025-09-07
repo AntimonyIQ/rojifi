@@ -16,6 +16,7 @@ import TeamsPage from "./v1/app/dashboard/[wallet]/teams/page";
 import StatementPage from "./v1/app/dashboard/[wallet]/statement/page";
 import SwapPage from "./v1/app/dashboard/[wallet]/swap/page";
 import SenderPage from "./v1/app/dashboard/[wallet]/sender/page";
+import EditSenderPage from "./v1/app/dashboard/[wallet]/sender/edit/page";
 import OTCDashboardPage from "./v1/app/dashboard/[wallet]/otc/page";
 import PaymentPage from "./v1/app/dashboard/[wallet]/payment/page";
 import BusinessProfilePage from "./v1/app/dashboard/[wallet]/businessprofile/page";
@@ -36,9 +37,11 @@ import ResetPasswordPage from "./v1/app/reset-password/page";
 import VerifyEmailPage from "./v1/app/verify-email/page";
 import React from "react";
 import SignupPage from "./v1/app/signup/[id]/page";
+import BusinessDetailsPage from "./v1/app/signup/[id]/business-details/page";
 import KYCKYBVerificationPage from "./v1/app/signup/[id]/verification/page";
 import InvitationPage from "./v1/app/invitation/[id]/page";
 import FaqPage from "./v1/app/faq/page";
+import DirectorPage from "./v1/app/signup/[id]/director/page";
 // ...existing code...
 
 function AppRoute({
@@ -76,6 +79,8 @@ function App() {
         { path: "/reset-password", element: <ResetPasswordPage /> },
         { path: "/verify-email", element: <VerifyEmailPage /> },
         { path: "/signup/:id/verification", element: <KYCKYBVerificationPage /> },
+        { path: "/signup/:id/business-details", element: <BusinessDetailsPage /> },
+        { path: "/signup/:id/director", element: <DirectorPage /> },
         { path: "/signup/:id", element: <SignupPage /> },
         { path: "/invitation/:id", element: <InvitationPage /> },
     ];
@@ -93,6 +98,7 @@ function App() {
                 <AppRoute path="/dashboard/:wallet/teams" page={TeamsPage} />
                 <AppRoute path="/dashboard/:wallet/statement" page={StatementPage} />
                 <AppRoute path="/dashboard/:wallet/swap" page={SwapPage} />
+                <AppRoute path="/dashboard/:wallet/sender/edit" page={EditSenderPage} />
                 <AppRoute path="/dashboard/:wallet/sender" page={SenderPage} />
                 <AppRoute path="/dashboard/:wallet/otc" page={OTCDashboardPage} />
                 <AppRoute path="/dashboard/:wallet/payment" page={PaymentPage} />

@@ -246,6 +246,40 @@ export interface IbankWallet {
     updatedAt: Date;
 }
 
+export interface IDirectorAndShareholder {
+    _id?: string;
+    senderId: string;
+    firstName: string;
+    lastName: string;
+    middleName: string;
+    email: string;
+    jobTitle?: string;
+    role: string;
+    isDirector: boolean;
+    isShareholder: boolean;
+    shareholderPercentage?: number;
+    dateOfBirth: Date;
+    nationality: string;
+    phoneCode: string;
+    phoneNumber: string;
+    idType: "passport" | "drivers_license";
+    idNumber: string;
+    issuedCountry: string;
+    issueDate: Date;
+    expiryDate: Date;
+    streetAddress: string;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+    idDocument?: string; // URL to uploaded ID document
+    proofOfAddress?: string; // URL to uploaded proof of address
+    idDocumentVerified?: boolean;
+    proofOfAddressVerified?: boolean;
+    createdAt?: Date;
+    updatedAt?: Date;
+}
+
 export interface ITeamMember {
     rojifiId: string;
     userId?: string;
@@ -342,7 +376,67 @@ export interface ISender {
     businessProofOfAddressKyc: string;
     businessProofOfAddressKycVerified: boolean;
     businessProofOfAddressKycVerifiedAt: Date | null;
+
+    // Smile ID verification status for documents
+    businessMemorandumAndArticlesOfAssociationSmileIdStatus: "pending" | "verified" | "failed";
+    businessMemorandumAndArticlesOfAssociationSmileIdVerifiedAt: Date | null;
+    businessCertificateOfIncorporationSmileIdStatus: "pending" | "verified" | "failed";
+    businessCertificateOfIncorporationSmileIdVerifiedAt: Date | null;
+    businessCertificateOfIncorporationStatusReportSmileIdStatus: "pending" | "verified" | "failed";
+    businessCertificateOfIncorporationStatusReportSmileIdVerifiedAt: Date | null;
+    businessProofOfAddressSmileIdStatus: "pending" | "verified" | "failed";
+    businessProofOfAddressSmileIdVerifiedAt: Date | null;
+
+    // Nilos integration
+    nilosStatus: "pending" | "approved" | "rejected" | "under_review";
+    nilosId: string | null;
+    nilosApprovedAt: Date | null;
+    nilosRejectedAt: Date | null;
+
     status: SenderStatus;
+
+    // Additional fields from business details form
+    // Company basic info
+    name?: string; // Company name (might be same as businessName)
+    website?: string;
+    legalForm?: string;
+    companyActivity?: string;
+    registrationDate?: Date;
+    onboardingDate?: Date;
+    tradingName?: string;
+
+    // Detailed address fields (in addition to existing businessAddress)
+    streetAddress?: string;
+    streetAddress2?: string;
+    city?: string; // More specific than businessCity
+    state?: string; // More specific than businessState
+    region?: string;
+    postalCode?: string; // More specific than businessPostalCode
+
+    // Financial information
+    shareCapital?: number;
+    lastYearTurnover?: number;
+    companyAssets?: number;
+    expectedMonthlyInboundCryptoPayments?: number;
+    expectedMonthlyOutboundCryptoPayments?: number;
+    expectedMonthlyInboundFiatPayments?: number;
+    expectedMonthlyOutboundFiatPayments?: number;
+
+    // Risk and compliance
+    riskLevel?: string;
+    additionalDueDiligenceConducted?: string;
+
+    // Multi-select arrays
+    requestedNilosServices?: string[];
+    sourceOfWealth?: string[];
+    anticipatedSourceOfFundsOnNilos?: string[];
+
+    // Boolean compliance fields
+    actualOperationsAndRegisteredAddressesMatch?: boolean;
+    companyProvideRegulatedFinancialServices?: boolean;
+    directorOrBeneficialOwnerIsPEPOrUSPerson?: boolean;
+    immediateApprove?: boolean;
+
     createdAt: Date;
     updatedAt: Date;
 }
