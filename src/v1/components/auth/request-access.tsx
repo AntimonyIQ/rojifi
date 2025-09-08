@@ -209,7 +209,13 @@ export function RequestAccessForm() {
                     break;
 
                 case "phoneNumber":
+                    // Only allow digits 0-9
                     sanitizedValue = value.replace(/[^0-9]/g, "");
+                    // Remove country code prefix if user accidentally included it
+                    const currentPrefix = String(formData.countryCode || "").replace(/^\+/, "");
+                    if (currentPrefix && sanitizedValue.startsWith(currentPrefix)) {
+                        sanitizedValue = sanitizedValue.slice(currentPrefix.length);
+                    }
                     break;
 
                 case "volume":
@@ -343,6 +349,29 @@ export function RequestAccessForm() {
             if (data.status === Status.SUCCESS) {
                 toast.success("Form submitted successfully!");
                 setShowSuccessModal(true);
+                setFormData({
+                    firstName: "",
+                    lastName: "",
+                    middleName: "",
+                    email: "",
+                    password: "",
+                    confirmPassword: "",
+                    agreeToTerms: false,
+                    agreeToMarketing: false,
+                    phoneNumber: "",
+                    countryCode: "234",
+                    selectedCountryCode: "Nigeria", // Track specific country for phone code
+                    businessName: "",
+                    businessWebsite: "",
+                    address: "",
+                    city: "",
+                    postal: "",
+                    country: "Nigeria",
+                    message: "",
+                    volume: "",
+                    state: "Unknown",
+                });
+                setDisplayVolume("");
             }
         } catch (err: any) {
             setError(err.message || "Failed to submit form, please try again.")

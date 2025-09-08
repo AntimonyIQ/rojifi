@@ -232,3 +232,23 @@ export enum TeamRole {
     MEMBER = "member",
     ACCOUNTANT = "accountant",
 }
+
+export enum WhichDocument {
+    MEMORANDUM_ARTICLES = "memorandum_and_articles_of_association",
+    CERTIFICATE_INCORPORATION = "certificate_of_incorporation",
+    INCORPORATION_STATUS = "incorporation_status_report",
+    PROOF_ADDRESS = "proof_of_address",
+    PROOF_BUSINESS_ADDRESS = "proof_of_business_address",
+    CAC_CERTIFICATE = "cac_certificate",
+    TAX_IDENTIFICATION = "tax_identification_certificate",
+    BUSINESS_REGISTRATION = "business_registration_certificate",
+}
+
+// Enum of sender document keys used across the system (KYC & SmileID tracking)
+export enum SenderDocuments {
+    MEMORANDUM_AND_ARTICLES = "businessMemorandumAndArticlesOfAssociation",
+    CERTIFICATE_OF_INCORPORATION = "businessCertificateOfIncorporation",
+    INCORPORATION_STATUS_REPORT = "businessCertificateOfIncorporationStatusReport",
+    PROOF_OF_ADDRESS = "businessProofOfAddress",
+    PROOF_OF_BUSINESS_ADDRESS = "businessProofOfBusinessAddress",
+}

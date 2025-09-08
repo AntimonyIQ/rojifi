@@ -111,16 +111,16 @@ export function BusinessProfileView() {
     const getDocumentStatuses = () => {
         if (!sender) return { allVerified: false, hasFailed: false, inReview: false };
 
-        const documents = [
-            sender.businessMemorandumAndArticlesOfAssociationSmileIdStatus,
-            sender.businessCertificateOfIncorporationSmileIdStatus,
-            sender.businessCertificateOfIncorporationStatusReportSmileIdStatus,
-            sender.businessProofOfAddressSmileIdStatus
-        ];
+        // Use the new documents array structure
+        const documents = sender.documents || [];
 
-        const allVerified = documents.every(status => status === "verified");
-        const hasFailed = documents.some(status => status === "failed");
-        const inReview = documents.some(status => status === "pending" || !status);
+        if (documents.length === 0) {
+            return { allVerified: false, hasFailed: false, inReview: true };
+        }
+
+        const allVerified = documents.every(doc => doc.smileIdStatus === "verified");
+        const hasFailed = documents.some(doc => doc.smileIdStatus === "failed");
+        const inReview = documents.some(doc => doc.smileIdStatus === "pending" || !doc.smileIdStatus);
 
         return { allVerified, hasFailed, inReview };
     };
@@ -272,50 +272,23 @@ export function BusinessProfileView() {
 
                                         {/* Document Status List */}
                                         <div className="space-y-2 mb-4">
-                                            <div className="flex items-center justify-between text-xs">
-                                                <span>Memorandum & Articles</span>
-                                                <Badge className={`text-xs ${sender?.businessMemorandumAndArticlesOfAssociationSmileIdStatus === 'verified'
-                                                    ? 'bg-green-100 text-green-700'
-                                                    : sender?.businessMemorandumAndArticlesOfAssociationSmileIdStatus === 'failed'
-                                                        ? 'bg-red-100 text-red-700'
-                                                        : 'bg-yellow-100 text-yellow-700'
-                                                    }`}>
-                                                    {sender?.businessMemorandumAndArticlesOfAssociationSmileIdStatus || 'Pending'}
-                                                </Badge>
-                                            </div>
-                                            <div className="flex items-center justify-between text-xs">
-                                                <span>Certificate of Incorporation</span>
-                                                <Badge className={`text-xs ${sender?.businessCertificateOfIncorporationSmileIdStatus === 'verified'
-                                                    ? 'bg-green-100 text-green-700'
-                                                    : sender?.businessCertificateOfIncorporationSmileIdStatus === 'failed'
-                                                        ? 'bg-red-100 text-red-700'
-                                                        : 'bg-yellow-100 text-yellow-700'
-                                                    }`}>
-                                                    {sender?.businessCertificateOfIncorporationSmileIdStatus || 'Pending'}
-                                                </Badge>
-                                            </div>
-                                            <div className="flex items-center justify-between text-xs">
-                                                <span>Status Report</span>
-                                                <Badge className={`text-xs ${sender?.businessCertificateOfIncorporationStatusReportSmileIdStatus === 'verified'
-                                                    ? 'bg-green-100 text-green-700'
-                                                    : sender?.businessCertificateOfIncorporationStatusReportSmileIdStatus === 'failed'
-                                                        ? 'bg-red-100 text-red-700'
-                                                        : 'bg-yellow-100 text-yellow-700'
-                                                    }`}>
-                                                    {sender?.businessCertificateOfIncorporationStatusReportSmileIdStatus || 'Pending'}
-                                                </Badge>
-                                            </div>
-                                            <div className="flex items-center justify-between text-xs">
-                                                <span>Proof of Address</span>
-                                                <Badge className={`text-xs ${sender?.businessProofOfAddressSmileIdStatus === 'verified'
-                                                    ? 'bg-green-100 text-green-700'
-                                                    : sender?.businessProofOfAddressSmileIdStatus === 'failed'
-                                                        ? 'bg-red-100 text-red-700'
-                                                        : 'bg-yellow-100 text-yellow-700'
-                                                    }`}>
-                                                    {sender?.businessProofOfAddressSmileIdStatus || 'Pending'}
-                                                </Badge>
-                                            </div>
+                                            {sender?.documents?.map((doc, index) => (
+                                                <div key={index} className="flex items-center justify-between text-xs">
+                                                    <span>{doc.which?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
+                                                    <Badge className={`text-xs ${doc.smileIdStatus === 'verified'
+                                                        ? 'bg-green-100 text-green-700'
+                                                        : doc.smileIdStatus === 'failed'
+                                                            ? 'bg-red-100 text-red-700'
+                                                            : 'bg-yellow-100 text-yellow-700'
+                                                        }`}>
+                                                        {doc.smileIdStatus || 'Pending'}
+                                                    </Badge>
+                                                </div>
+                                            )) || (
+                                                    <div className="text-center py-4 text-gray-500 text-xs">
+                                                        No documents uploaded yet
+                                                    </div>
+                                                )}
                                         </div>
 
                                         {hasFailed && (

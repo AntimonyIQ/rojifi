@@ -39,6 +39,7 @@ import ResetPasswordPage from "./v1/app/reset-password/page";
 import VerifyEmailPage from "./v1/app/verify-email/page";
 import SignupPage from "./v1/app/signup/[id]/page";
 import BusinessDetailsPage from "./v1/app/signup/[id]/business-details/page";
+import BusinessFinancialsPage from "./v1/app/signup/[id]/business-financials/page";
 import KYCKYBVerificationPage from "./v1/app/signup/[id]/verification/page";
 import InvitationPage from "./v1/app/invitation/[id]/page";
 import FaqPage from "./v1/app/faq/page";
@@ -134,6 +135,7 @@ function App() {
         { path: "/verify-email", element: <VerifyEmailPage /> },
         { path: "/signup/:id/verification", element: <KYCKYBVerificationPage /> },
         { path: "/signup/:id/business-details", element: <BusinessDetailsPage /> },
+        { path: "/signup/:id/business-financials", element: <BusinessFinancialsPage /> },
         { path: "/signup/:id/director", element: <DirectorPage /> },
         { path: "/signup/:id", element: <SignupPage /> },
         { path: "/invitation/:id", element: <InvitationPage /> },

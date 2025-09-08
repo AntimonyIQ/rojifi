@@ -31,6 +31,18 @@ const logoVariants: Variants = {
     },
 }
 
+export interface IFormData {
+    firstName: string,
+    lastName: string,
+    middleName: string,
+    businessName: string,
+    email: string,
+    password: string,
+    confirmPassword: string,
+    agreeToTerms: boolean,
+    agreeToMarketing: boolean,
+}
+
 export function SignupForm() {
     const [showPassword, setShowPassword] = useState(false);
     const [showOtpModal, setShowOtpModal] = useState(false);
@@ -47,7 +59,7 @@ export function SignupForm() {
         hasSpecial: false
     })
     const [isPasswordMatching, setIsPasswordMatching] = useState(true)
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<IFormData>({
         firstName: "",
         lastName: "",
         middleName: "",
@@ -169,7 +181,11 @@ export function SignupForm() {
                 },
                 body: JSON.stringify({
                     rojifiId: id,
-                    password: formData.password
+                    password: formData.password,
+                    businessName: formData.businessName,
+                    firstName: formData.firstName,
+                    lastName: formData.lastName,
+                    middleName: formData.middleName,
                 })
             });
             const data: IResponse = await res.json();
@@ -291,8 +307,8 @@ export function SignupForm() {
                                             className="h-12"
                                             placeholder="First name"
                                             value={formData.firstName}
-                                            disabled={true}
-                                            readOnly={true}
+                                            disabled={loading}
+                                            readOnly={loading}
                                             onChange={(e) => handleInputChange("firstName", e.target.value)}
                                         />
                                     </div>
@@ -311,8 +327,8 @@ export function SignupForm() {
                                             className="h-12"
                                             placeholder="Last name"
                                             value={formData.lastName}
-                                            disabled={true}
-                                            readOnly={true}
+                                            disabled={loading}
+                                            readOnly={loading}
                                             onChange={(e) => handleInputChange("lastName", e.target.value)}
                                         />
                                     </div>
@@ -331,8 +347,8 @@ export function SignupForm() {
                                         autoComplete="family-name"
                                         className="h-12"
                                         placeholder="Other"
-                                        disabled={true}
-                                        readOnly={true}
+                                        disabled={loading}
+                                        readOnly={loading}
                                         value={formData.middleName}
                                         onChange={(e) => handleInputChange("middleName", e.target.value)}
                                     />
@@ -374,8 +390,8 @@ export function SignupForm() {
                                         className="h-12"
                                         placeholder="Enter your business name"
                                         value={formData.businessName}
-                                        disabled={true}
-                                        readOnly={true}
+                                        disabled={loading}
+                                        readOnly={loading}
                                         onChange={(_e) => { } /* handleInputChange("email", e.target.value) */}
                                     />
                                 </div>
