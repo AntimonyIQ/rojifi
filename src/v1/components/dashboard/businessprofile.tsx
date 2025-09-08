@@ -2,14 +2,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CheckCircle2, Files, MapPin, UsersIcon, Building, Calendar, Globe, Phone, Mail, Shield, Award, Clock, ArrowRight, Download, DollarSign, TrendingUp, Users, Eye } from "lucide-react";
+import { Files, MapPin, UsersIcon, Building, Calendar, Globe, Phone, Mail, Shield, Award, Clock, ArrowRight, Download, DollarSign, TrendingUp, Users, Eye, ChevronLeft, ChevronRight, User } from "lucide-react";
 import Loading from "../loading";
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
 import { Card, CardContent } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { motion } from "framer-motion";
-import { ISender } from "@/v1/interface/interface";
+import { ISender, IDirectorAndShareholder } from "@/v1/interface/interface";
 import { session, SessionData } from "@/v1/session/session";
 import { Link, useParams } from "wouter";
 
@@ -24,11 +24,80 @@ export function BusinessProfileView() {
     const [sender, setSender] = useState<ISender | null>(null);
     const sd: SessionData = session.getUserData();
     const { wallet } = useParams();
+    console.log("Wallet param:", wallet);
 
     const [_currentPage, setCurrentPage] = useState(1);
     const [statusFilter, setStatusFilter] = useState("KYC");
 
+    // Directors & Shareholders navigation state
+    const [currentDirectorIndex, setCurrentDirectorIndex] = useState(0);
+
     const statusTabs = Object.values(Tabs);
+
+    // Simulate Directors & Shareholders data (replace with actual data when available)
+    const simulatedDirectorsAndShareholders: IDirectorAndShareholder[] = [
+        {
+            senderId: "sender123",
+            firstName: "John",
+            lastName: "Smith",
+            middleName: "Michael",
+            email: "john.smith@company.com",
+            jobTitle: "Chief Executive Officer",
+            role: "Director and Shareholder",
+            isDirector: true,
+            isShareholder: true,
+            shareholderPercentage: 45,
+            dateOfBirth: new Date("1980-05-15"),
+            nationality: "United States",
+            phoneCode: "1",
+            phoneNumber: "5551234567",
+            idType: "passport",
+            idNumber: "P123456789",
+            issuedCountry: "United States",
+            issueDate: new Date("2020-01-15"),
+            expiryDate: new Date("2030-01-15"),
+            streetAddress: "123 Business Ave",
+            city: "New York",
+            state: "NY",
+            postalCode: "10001",
+            country: "United States",
+            idDocumentVerified: true,
+            proofOfAddressVerified: true
+        },
+        {
+            senderId: "sender123",
+            firstName: "Sarah",
+            lastName: "Johnson",
+            middleName: "Elizabeth",
+            email: "sarah.johnson@company.com",
+            jobTitle: "Chief Financial Officer",
+            role: "Director and Shareholder",
+            isDirector: true,
+            isShareholder: true,
+            shareholderPercentage: 35,
+            dateOfBirth: new Date("1985-08-22"),
+            nationality: "United Kingdom",
+            phoneCode: "44",
+            phoneNumber: "7700123456",
+            idType: "drivers_license",
+            idNumber: "DL987654321",
+            issuedCountry: "United Kingdom",
+            issueDate: new Date("2021-03-10"),
+            expiryDate: new Date("2031-03-10"),
+            streetAddress: "456 Finance Street",
+            city: "London",
+            state: "Greater London",
+            postalCode: "SW1A 1AA",
+            country: "United Kingdom",
+            idDocumentVerified: true,
+            proofOfAddressVerified: false
+        }
+    ];
+
+    // Use actual data if available, otherwise use simulated data
+    const directorsAndShareholders = sender?.directorsAndShareholders?.length
+        ? sender.directorsAndShareholders
+        : simulatedDirectorsAndShareholders;
 
     useEffect(() => {
         if (sd) {
@@ -37,6 +106,26 @@ export function BusinessProfileView() {
             setLoading(false);
         }
     }, [sd]);
+
+    // Helper function to check document status
+    const getDocumentStatuses = () => {
+        if (!sender) return { allVerified: false, hasFailed: false, inReview: false };
+
+        const documents = [
+            sender.businessMemorandumAndArticlesOfAssociationSmileIdStatus,
+            sender.businessCertificateOfIncorporationSmileIdStatus,
+            sender.businessCertificateOfIncorporationStatusReportSmileIdStatus,
+            sender.businessProofOfAddressSmileIdStatus
+        ];
+
+        const allVerified = documents.every(status => status === "verified");
+        const hasFailed = documents.some(status => status === "failed");
+        const inReview = documents.some(status => status === "pending" || !status);
+
+        return { allVerified, hasFailed, inReview };
+    };
+
+    const { hasFailed, inReview } = getDocumentStatuses();
 
     const getStatusColor = (status: string) => {
         switch (status?.toLowerCase()) {
@@ -133,67 +222,178 @@ export function BusinessProfileView() {
                             <CardContent className="p-8">
                                 {/* Header */}
                                 <div className="text-center mb-8">
-                                    <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <div className={`w-16 h-16 ${hasFailed ? 'bg-red-600' : 'bg-yellow-600'} rounded-full flex items-center justify-center mx-auto mb-4`}>
                                         <Shield className="h-8 w-8 text-white" />
                                     </div>
-                                    <h2 className="text-3xl font-bold text-gray-900 mb-2">KYC Verification Required</h2>
+                                    <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                                        {hasFailed ? 'KYC Verification Issues' : 'KYC Verification In Review'}
+                                    </h2>
                                     <p className="text-gray-600 max-w-md mx-auto">
-                                        Complete your Business KYC verification to unlock all platform features and submit for approval
+                                        {hasFailed
+                                            ? 'Some of your submitted documents have verification issues that need to be resolved'
+                                            : 'Your KYC documents are currently being reviewed. We will notify you once the review is complete'
+                                        }
                                     </p>
                                 </div>
 
-                                {/* Verification Steps */}
-                                <div className="grid md:grid-cols-3 gap-6 mb-8">
+                                {/* Verification Steps - Row Layout */}
+                                <div className="grid md:grid-cols-2 gap-8 mb-8">
+                                    {/* Business Documents Section */}
                                     <motion.div
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: 0.3 }}
-                                        className="text-center p-6 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200"
+                                        className={`p-6 rounded-xl border-2 ${hasFailed
+                                            ? 'bg-gradient-to-br from-red-50 to-red-100 border-red-200'
+                                            : inReview
+                                                ? 'bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-200'
+                                                : 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-200'
+                                            }`}
                                     >
-                                        <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                                            <Files className="h-6 w-6 text-white" />
+                                        <div className="flex items-center justify-between mb-4">
+                                            <div className={`w-12 h-12 ${hasFailed ? 'bg-red-600' : inReview ? 'bg-yellow-600' : 'bg-green-600'
+                                                } rounded-full flex items-center justify-center`}>
+                                                <Files className="h-6 w-6 text-white" />
+                                            </div>
+                                            <Badge className={
+                                                hasFailed
+                                                    ? 'bg-red-100 text-red-800 border-red-200'
+                                                    : inReview
+                                                        ? 'bg-yellow-100 text-yellow-800 border-yellow-200'
+                                                        : 'bg-green-100 text-green-800 border-green-200'
+                                            }>
+                                                {hasFailed ? 'Failed' : inReview ? 'In Review' : 'Verified'}
+                                            </Badge>
                                         </div>
-                                        <h3 className="font-bold text-lg text-gray-900 mb-2">Business Documents</h3>
-                                        <p className="text-sm text-gray-600">Upload required business registration and incorporation documents</p>
+                                        <h3 className="font-bold text-lg text-gray-900 mb-3">Business Documents</h3>
+                                        <p className="text-sm text-gray-600 mb-4">
+                                            Upload required business registration and incorporation documents, business address with recent utility bill or bank statement
+                                        </p>
+
+                                        {/* Document Status List */}
+                                        <div className="space-y-2 mb-4">
+                                            <div className="flex items-center justify-between text-xs">
+                                                <span>Memorandum & Articles</span>
+                                                <Badge className={`text-xs ${sender?.businessMemorandumAndArticlesOfAssociationSmileIdStatus === 'verified'
+                                                    ? 'bg-green-100 text-green-700'
+                                                    : sender?.businessMemorandumAndArticlesOfAssociationSmileIdStatus === 'failed'
+                                                        ? 'bg-red-100 text-red-700'
+                                                        : 'bg-yellow-100 text-yellow-700'
+                                                    }`}>
+                                                    {sender?.businessMemorandumAndArticlesOfAssociationSmileIdStatus || 'Pending'}
+                                                </Badge>
+                                            </div>
+                                            <div className="flex items-center justify-between text-xs">
+                                                <span>Certificate of Incorporation</span>
+                                                <Badge className={`text-xs ${sender?.businessCertificateOfIncorporationSmileIdStatus === 'verified'
+                                                    ? 'bg-green-100 text-green-700'
+                                                    : sender?.businessCertificateOfIncorporationSmileIdStatus === 'failed'
+                                                        ? 'bg-red-100 text-red-700'
+                                                        : 'bg-yellow-100 text-yellow-700'
+                                                    }`}>
+                                                    {sender?.businessCertificateOfIncorporationSmileIdStatus || 'Pending'}
+                                                </Badge>
+                                            </div>
+                                            <div className="flex items-center justify-between text-xs">
+                                                <span>Status Report</span>
+                                                <Badge className={`text-xs ${sender?.businessCertificateOfIncorporationStatusReportSmileIdStatus === 'verified'
+                                                    ? 'bg-green-100 text-green-700'
+                                                    : sender?.businessCertificateOfIncorporationStatusReportSmileIdStatus === 'failed'
+                                                        ? 'bg-red-100 text-red-700'
+                                                        : 'bg-yellow-100 text-yellow-700'
+                                                    }`}>
+                                                    {sender?.businessCertificateOfIncorporationStatusReportSmileIdStatus || 'Pending'}
+                                                </Badge>
+                                            </div>
+                                            <div className="flex items-center justify-between text-xs">
+                                                <span>Proof of Address</span>
+                                                <Badge className={`text-xs ${sender?.businessProofOfAddressSmileIdStatus === 'verified'
+                                                    ? 'bg-green-100 text-green-700'
+                                                    : sender?.businessProofOfAddressSmileIdStatus === 'failed'
+                                                        ? 'bg-red-100 text-red-700'
+                                                        : 'bg-yellow-100 text-yellow-700'
+                                                    }`}>
+                                                    {sender?.businessProofOfAddressSmileIdStatus || 'Pending'}
+                                                </Badge>
+                                            </div>
+                                        </div>
+
+                                        {hasFailed && (
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                className="w-full text-red-600 border-red-300 hover:bg-red-50"
+                                            >
+                                                <Eye className="mr-2 h-4 w-4" />
+                                                Review Issues
+                                            </Button>
+                                        )}
                                     </motion.div>
 
+                                    {/* Directors & Shareholders Section */}
                                     <motion.div
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: 0.4 }}
-                                        className="text-center p-6 rounded-xl bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200"
+                                        className={`p-6 rounded-xl border-2 ${directorsAndShareholders.length > 0
+                                            ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-200'
+                                            : 'bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200'
+                                            }`}
                                     >
-                                        <div className="w-12 h-12 bg-pink-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                                            <UsersIcon className="h-6 w-6 text-white" />
+                                        <div className="flex items-center justify-between mb-4">
+                                            <div className={`w-12 h-12 ${directorsAndShareholders.length > 0 ? 'bg-green-600' : 'bg-gray-400'
+                                                } rounded-full flex items-center justify-center`}>
+                                                <UsersIcon className="h-6 w-6 text-white" />
+                                            </div>
+                                            <Badge className={
+                                                directorsAndShareholders.length > 0
+                                                    ? 'bg-green-100 text-green-800 border-green-200'
+                                                    : 'bg-gray-100 text-gray-800 border-gray-200'
+                                            }>
+                                                {directorsAndShareholders.length > 0 ? 'Complete' : 'Pending'}
+                                            </Badge>
                                         </div>
-                                        <h3 className="font-bold text-lg text-gray-900 mb-2">Directors & Shareholders</h3>
-                                        <p className="text-sm text-gray-600">Add and manage all company directors and shareholders information</p>
-                                    </motion.div>
+                                        <h3 className="font-bold text-lg text-gray-900 mb-3">Directors & Shareholders</h3>
+                                        <p className="text-sm text-gray-600 mb-4">
+                                            Add and manage all company directors and shareholders information, address with recent utility bill or bank statement
+                                        </p>
 
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: 0.5 }}
-                                        className="text-center p-6 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200"
-                                    >
-                                        <div className="w-12 h-12 bg-teal-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                                            <MapPin className="h-6 w-6 text-white" />
+                                        <div className="space-y-2 mb-4">
+                                            <div className="flex items-center justify-between text-xs">
+                                                <span>Directors & Shareholders Added</span>
+                                                <Badge className="text-xs bg-blue-100 text-blue-700">
+                                                    {directorsAndShareholders.length} Added
+                                                </Badge>
+                                            </div>
                                         </div>
-                                        <h3 className="font-bold text-lg text-gray-900 mb-2">Business Address</h3>
-                                        <p className="text-sm text-gray-600">Confirm business address with recent utility bill or bank statement</p>
+
+                                        {directorsAndShareholders.length === 0 && (
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                className="w-full text-blue-600 border-blue-300 hover:bg-blue-50"
+                                            >
+                                                <UsersIcon className="mr-2 h-4 w-4" />
+                                                Add Directors & Shareholders
+                                            </Button>
+                                        )}
                                     </motion.div>
                                 </div>
 
-                                {/* Action Button */}
+                                {/* Status Message */}
                                 <div className="text-center">
-                                    <Button
-                                        size="lg"
-                                        className="px-8 py-4 h-auto  text-white font-semibold rounded-xl shadow-lg"
-                                    >
-                                        <CheckCircle2 className="mr-2 h-5 w-5" />
-                                        Start KYC Verification
-                                        <ArrowRight className="ml-2 h-5 w-5" />
-                                    </Button>
+                                    <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full ${hasFailed
+                                        ? 'bg-red-100 text-red-800'
+                                        : 'bg-yellow-100 text-yellow-800'
+                                        }`}>
+                                        <Clock className="h-4 w-4" />
+                                        <span className="text-sm font-medium">
+                                            {hasFailed
+                                                ? 'Action required - Please review and resubmit documents'
+                                                : 'Review in progress - We will notify you once complete'
+                                            }
+                                        </span>
+                                    </div>
                                 </div>
                             </CardContent>
                         </Card>
@@ -640,6 +840,7 @@ export function BusinessProfileView() {
                         </Card>
 
                         {/* Risk & Compliance Card */}
+                        {/*
                         <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
                             <CardContent className="p-8">
                                 <div className="flex items-center gap-4 mb-6">
@@ -685,6 +886,7 @@ export function BusinessProfileView() {
                                 </div>
                             </CardContent>
                         </Card>
+                        */}
 
                         {/* Services & Sources Card */}
                         <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
@@ -703,7 +905,7 @@ export function BusinessProfileView() {
                                     <div className="space-y-2">
                                         <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
                                             <Building className="h-4 w-4 text-purple-600" />
-                                            Requested Nilos Services
+                                            Requested Services
                                         </Label>
                                         <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
                                             <div className="flex flex-wrap gap-2">
@@ -743,7 +945,7 @@ export function BusinessProfileView() {
                                     <div className="space-y-2">
                                         <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
                                             <TrendingUp className="h-4 w-4 text-purple-600" />
-                                            Anticipated Source of Funds on Nilos
+                                            Anticipated Source of Funds
                                         </Label>
                                         <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
                                             <div className="flex flex-wrap gap-2">
@@ -764,6 +966,7 @@ export function BusinessProfileView() {
                         </Card>
 
                         {/* Compliance Declarations Card */}
+                        {/*
                         <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
                             <CardContent className="p-8">
                                 <div className="flex items-center gap-4 mb-6">
@@ -827,6 +1030,263 @@ export function BusinessProfileView() {
                                 </div>
                             </CardContent>
                         </Card>
+                         */}
+
+                        {/* Directors & Shareholders Card */}
+                        <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
+                            <CardContent className="p-8">
+                                {/* Header */}
+                                <div className="flex items-center justify-between mb-6">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 bg-indigo-600 rounded-full flex items-center justify-center">
+                                            <Users className="h-6 w-6 text-white" />
+                                        </div>
+                                        <div>
+                                            <h2 className="text-2xl font-bold text-gray-900">Directors & Shareholders</h2>
+                                            <p className="text-gray-600">Company leadership and ownership structure</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Badge variant="secondary" className="px-3 py-1">
+                                            {directorsAndShareholders.length} {directorsAndShareholders.length === 1 ? 'Person' : 'People'}
+                                        </Badge>
+                                    </div>
+                                </div>
+
+                                {directorsAndShareholders.length > 0 ? (
+                                    <>
+                                        {/* Progress Indicator */}
+                                        <div className="mb-6">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <p className="text-sm font-medium text-gray-700">
+                                                    {currentDirectorIndex + 1} of {directorsAndShareholders.length}
+                                                </p>
+                                                <p className="text-sm text-gray-500">
+                                                    {directorsAndShareholders[currentDirectorIndex]?.firstName} {directorsAndShareholders[currentDirectorIndex]?.lastName}
+                                                </p>
+                                            </div>
+                                            <div className="w-full bg-gray-200 rounded-full h-2">
+                                                <div
+                                                    className="bg-indigo-600 h-2 rounded-full transition-all duration-300 ease-in-out"
+                                                    style={{ width: `${((currentDirectorIndex + 1) / directorsAndShareholders.length) * 100}%` }}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Current Director/Shareholder Details */}
+                                        <motion.div
+                                            key={currentDirectorIndex}
+                                            initial={{ opacity: 0, x: 20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ duration: 0.3 }}
+                                            className="space-y-6"
+                                        >
+                                            {/* Personal Information */}
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <div className="space-y-2">
+                                                    <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                                        <User className="h-4 w-4 text-indigo-600" />
+                                                        Full Name
+                                                    </Label>
+                                                    <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border">
+                                                        <p className="font-semibold text-gray-900">
+                                                            {`${directorsAndShareholders[currentDirectorIndex]?.firstName} ${directorsAndShareholders[currentDirectorIndex]?.middleName ? directorsAndShareholders[currentDirectorIndex]?.middleName + ' ' : ''}${directorsAndShareholders[currentDirectorIndex]?.lastName}`}
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-2">
+                                                    <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                                        <Mail className="h-4 w-4 text-indigo-600" />
+                                                        Email Address
+                                                    </Label>
+                                                    <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border">
+                                                        <p className="text-gray-900">{directorsAndShareholders[currentDirectorIndex]?.email}</p>
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-2">
+                                                    <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                                        <Building className="h-4 w-4 text-indigo-600" />
+                                                        Role & Position
+                                                    </Label>
+                                                    <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border">
+                                                        <p className="font-semibold text-gray-900">{directorsAndShareholders[currentDirectorIndex]?.role}</p>
+                                                        {directorsAndShareholders[currentDirectorIndex]?.jobTitle && (
+                                                            <p className="text-sm text-gray-600 mt-1">{directorsAndShareholders[currentDirectorIndex]?.jobTitle}</p>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-2">
+                                                    <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                                        <TrendingUp className="h-4 w-4 text-indigo-600" />
+                                                        Ownership
+                                                    </Label>
+                                                    <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border">
+                                                        <p className="font-semibold text-gray-900">
+                                                            {directorsAndShareholders[currentDirectorIndex]?.isShareholder
+                                                                ? `${directorsAndShareholders[currentDirectorIndex]?.shareholderPercentage}% shareholding`
+                                                                : 'No shareholding'
+                                                            }
+                                                        </p>
+                                                        <div className="flex gap-2 mt-2">
+                                                            {directorsAndShareholders[currentDirectorIndex]?.isDirector && (
+                                                                <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-800">Director</Badge>
+                                                            )}
+                                                            {directorsAndShareholders[currentDirectorIndex]?.isShareholder && (
+                                                                <Badge variant="secondary" className="text-xs bg-green-100 text-green-800">Shareholder</Badge>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-2">
+                                                    <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                                        <Phone className="h-4 w-4 text-indigo-600" />
+                                                        Phone Number
+                                                    </Label>
+                                                    <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border">
+                                                        <p className="text-gray-900">+{directorsAndShareholders[currentDirectorIndex]?.phoneCode} {directorsAndShareholders[currentDirectorIndex]?.phoneNumber}</p>
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-2">
+                                                    <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                                        <Globe className="h-4 w-4 text-indigo-600" />
+                                                        Nationality
+                                                    </Label>
+                                                    <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border">
+                                                        <p className="text-gray-900">{directorsAndShareholders[currentDirectorIndex]?.nationality}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Address Information */}
+                                            <div className="space-y-4">
+                                                <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Address Information</h3>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                    <div className="space-y-2">
+                                                        <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                                            <MapPin className="h-4 w-4 text-indigo-600" />
+                                                            Street Address
+                                                        </Label>
+                                                        <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border">
+                                                            <p className="text-gray-900">{directorsAndShareholders[currentDirectorIndex]?.streetAddress}</p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="space-y-2">
+                                                        <Label className="text-sm font-semibold text-gray-700">City & Postal Code</Label>
+                                                        <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border">
+                                                            <p className="text-gray-900">{directorsAndShareholders[currentDirectorIndex]?.city}, {directorsAndShareholders[currentDirectorIndex]?.postalCode}</p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="space-y-2">
+                                                        <Label className="text-sm font-semibold text-gray-700">State/Province</Label>
+                                                        <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border">
+                                                            <p className="text-gray-900">{directorsAndShareholders[currentDirectorIndex]?.state}</p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="space-y-2">
+                                                        <Label className="text-sm font-semibold text-gray-700">Country</Label>
+                                                        <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border">
+                                                            <p className="text-gray-900">{directorsAndShareholders[currentDirectorIndex]?.country}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Verification Status */}
+                                            <div className="space-y-4">
+                                                <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Verification Status</h3>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                    <div className="space-y-2">
+                                                        <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                                            <Shield className="h-4 w-4 text-indigo-600" />
+                                                            ID Document
+                                                        </Label>
+                                                        <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border">
+                                                            <div className="flex items-center gap-2">
+                                                                <Badge className={directorsAndShareholders[currentDirectorIndex]?.idDocumentVerified ? 'bg-green-100 text-green-800 border-green-200' : 'bg-yellow-100 text-yellow-800 border-yellow-200'}>
+                                                                    {directorsAndShareholders[currentDirectorIndex]?.idDocumentVerified ? 'Verified' : 'Pending'}
+                                                                </Badge>
+                                                                <span className="text-sm text-gray-600">
+                                                                    {directorsAndShareholders[currentDirectorIndex]?.idType === 'passport' ? 'Passport' : 'Driver\'s License'}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="space-y-2">
+                                                        <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                                            <MapPin className="h-4 w-4 text-indigo-600" />
+                                                            Proof of Address
+                                                        </Label>
+                                                        <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border">
+                                                            <Badge className={directorsAndShareholders[currentDirectorIndex]?.proofOfAddressVerified ? 'bg-green-100 text-green-800 border-green-200' : 'bg-yellow-100 text-yellow-800 border-yellow-200'}>
+                                                                {directorsAndShareholders[currentDirectorIndex]?.proofOfAddressVerified ? 'Verified' : 'Pending'}
+                                                            </Badge>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </motion.div>
+
+                                        {/* Navigation Buttons */}
+                                        <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-200">
+                                            <Button
+                                                variant="outline"
+                                                onClick={() => setCurrentDirectorIndex(Math.max(0, currentDirectorIndex - 1))}
+                                                disabled={currentDirectorIndex === 0}
+                                                className="flex items-center gap-2"
+                                            >
+                                                <ChevronLeft className="h-4 w-4" />
+                                                Previous
+                                            </Button>
+
+                                            <div className="flex gap-2">
+                                                {directorsAndShareholders.map((_, index) => (
+                                                    <button
+                                                        key={index}
+                                                        onClick={() => setCurrentDirectorIndex(index)}
+                                                        className={`w-3 h-3 rounded-full transition-all ${index === currentDirectorIndex
+                                                            ? 'bg-indigo-600 scale-125'
+                                                            : 'bg-gray-300 hover:bg-gray-400'
+                                                            }`}
+                                                    />
+                                                ))}
+                                            </div>
+
+                                            <Button
+                                                variant="outline"
+                                                onClick={() => setCurrentDirectorIndex(Math.min(directorsAndShareholders.length - 1, currentDirectorIndex + 1))}
+                                                disabled={currentDirectorIndex === directorsAndShareholders.length - 1}
+                                                className="flex items-center gap-2"
+                                            >
+                                                Next
+                                                <ChevronRight className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="text-center py-12">
+                                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <Users className="h-8 w-8 text-gray-400" />
+                                        </div>
+                                        <h3 className="text-lg font-semibold text-gray-900 mb-2">No Directors or Shareholders</h3>
+                                        <p className="text-gray-600 mb-6">Add directors and shareholders to complete your business profile.</p>
+                                        <Button className="px-6 py-3 h-auto">
+                                            <Users className="mr-2 h-4 w-4" />
+                                            Add Directors & Shareholders
+                                        </Button>
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+
                     </motion.div>
                 )}
             </div>

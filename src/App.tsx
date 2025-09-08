@@ -1,11 +1,13 @@
 import { Route, Switch } from "wouter";
 
+import React from "react";
 import NotFound from "@/pages/not-found";
 import { AnimatePresence } from "framer-motion";
 import { ProtectedRoute } from "./app/ProtectedRoute";
 import { RedirectIfAuthenticated } from "./app/RedirectIfAuthenticated";
 import LoginPage from "./v1/app/login/page";
 import { DashboardLayout } from "./v1/components/dashboard/dashboard-layout";
+import { VerificationInReview } from "./v1/components/dashboard/verification-in-review";
 import Home from "./v1/app/page";
 import ContactPage from "./v1/app/contactus/page";
 import DashboardPage from "./v1/app/dashboard/[wallet]/page";
@@ -35,13 +37,13 @@ import PrivacyPage from "./v1/app/privacy/page";
 import RequestAccessPage from "./v1/app/request-access/page";
 import ResetPasswordPage from "./v1/app/reset-password/page";
 import VerifyEmailPage from "./v1/app/verify-email/page";
-import React from "react";
 import SignupPage from "./v1/app/signup/[id]/page";
 import BusinessDetailsPage from "./v1/app/signup/[id]/business-details/page";
 import KYCKYBVerificationPage from "./v1/app/signup/[id]/verification/page";
 import InvitationPage from "./v1/app/invitation/[id]/page";
 import FaqPage from "./v1/app/faq/page";
 import DirectorPage from "./v1/app/signup/[id]/director/page";
+import { session, SessionData } from "./v1/session/session";
 // ...existing code...
 
 function AppRoute({
@@ -51,12 +53,64 @@ function AppRoute({
     path: string;
     page: React.ComponentType;
 }) {
+    const sd: SessionData = session.getUserData();
+
+    // State 1: No sender data - show normal page
+    if (!sd || !sd.sender) {
+        return (
+            <ProtectedRoute path={path}>
+                <DashboardLayout>
+                    <Page />
+                </DashboardLayout>
+            </ProtectedRoute>
+        );
+    }
+
+    const isVerificationComplete = sd.sender.businessVerificationCompleted;
+
+    // State 2: Verification incomplete
+    if (!isVerificationComplete) {
+        // Exception: Business profile page should still show normally
+        if (path === "/dashboard/:wallet/businessprofile") {
+            return (
+                <Route path={path}>
+                    {() => (
+                        <ProtectedRoute path={path}>
+                            <DashboardLayout>
+                                <BusinessProfilePage />
+                            </DashboardLayout>
+                        </ProtectedRoute>
+                    )}
+                </Route>
+            );
+        }
+
+        // All other routes show verification in review component
+        // Render within Route component so useParams works correctly
+        return (
+            <Route path={path}>
+                {() => (
+                    <ProtectedRoute path={path}>
+                        <DashboardLayout>
+                            <VerificationInReview />
+                        </DashboardLayout>
+                    </ProtectedRoute>
+                )}
+            </Route>
+        );
+    }
+
+    // State 3: Verification complete - show normal pages
     return (
-        <ProtectedRoute path={path}>
-            <DashboardLayout>
-                <Page />
-            </DashboardLayout>
-        </ProtectedRoute>
+        <Route path={path}>
+            {() => (
+                <ProtectedRoute path={path}>
+                    <DashboardLayout>
+                        <Page />
+                    </DashboardLayout>
+                </ProtectedRoute>
+            )}
+        </Route>
     );
 }
 
