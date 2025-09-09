@@ -427,11 +427,11 @@ export interface ISender {
 
     documents: Array<ISenderDocument>;
 
-    // Nilos integration
-    nilosStatus: "pending" | "approved" | "rejected" | "under_review";
-    nilosId: string | null;
-    nilosApprovedAt: Date | null;
-    nilosRejectedAt: Date | null;
+    // Dunamis integration
+    dunamisStatus: "pending" | "approved" | "rejected" | "under_review";
+    dunamisId: string | null;
+    dunamisApprovedAt: Date | null;
+    dunamisRejectedAt: Date | null;
 
     status: SenderStatus;
 
@@ -467,9 +467,9 @@ export interface ISender {
     additionalDueDiligenceConducted?: string;
 
     // Multi-select arrays
-    requestedNilosServices?: string[];
+    requestedDunamisServices?: string[];
     sourceOfWealth?: string[];
-    anticipatedSourceOfFundsOnNilos?: string[];
+    anticipatedSourceOfFundsOnDunamis?: string[];
 
     // Boolean compliance fields
     actualOperationsAndRegisteredAddressesMatch?: boolean;

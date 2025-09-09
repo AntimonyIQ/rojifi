@@ -114,7 +114,7 @@ export function BusinessFinancialsForm() {
 
         // Multi-select arrays
         sourceOfWealth: [] as string[],
-        anticipatedSourceOfFundsOnNilos: [] as string[],
+        anticipatedSourceOfFundsOnDunamis: [] as string[],
 
         // Boolean fields
         companyProvideRegulatedFinancialServices: null as boolean | null,
@@ -165,7 +165,7 @@ export function BusinessFinancialsForm() {
         return (
             formData.shareCapital.trim() !== "" &&
             formData.sourceOfWealth.length > 0 &&
-            formData.anticipatedSourceOfFundsOnNilos.length > 0 &&
+            formData.anticipatedSourceOfFundsOnDunamis.length > 0 &&
             formData.companyProvideRegulatedFinancialServices !== null &&
             formData.directorOrBeneficialOwnerIsPEPOrUSPerson !== null
         )
@@ -226,7 +226,7 @@ export function BusinessFinancialsForm() {
                     expectedMonthlyInboundFiatPayments: parseInt(formData.expectedMonthlyInboundFiatPayments) || 0,
                     expectedMonthlyOutboundFiatPayments: parseInt(formData.expectedMonthlyOutboundFiatPayments) || 0,
                     sourceOfWealth: formData.sourceOfWealth,
-                    anticipatedSourceOfFundsOnNilos: formData.anticipatedSourceOfFundsOnNilos,
+                    anticipatedSourceOfFundsOnDunamis: formData.anticipatedSourceOfFundsOnDunamis,
                     companyProvideRegulatedFinancialServices: formData.companyProvideRegulatedFinancialServices || false,
                     directorOrBeneficialOwnerIsPEPOrUSPerson: formData.directorOrBeneficialOwnerIsPEPOrUSPerson || false
                 },
@@ -500,9 +500,9 @@ export function BusinessFinancialsForm() {
                                         <div key={source.value} className="flex items-center space-x-2">
                                             <Checkbox
                                                 id={`anticipated-${source.value}`}
-                                                checked={formData.anticipatedSourceOfFundsOnNilos.includes(source.value)}
+                                                checked={formData.anticipatedSourceOfFundsOnDunamis.includes(source.value)}
                                                 onCheckedChange={(checked) =>
-                                                    handleMultiSelectChange("anticipatedSourceOfFundsOnNilos", source.value, checked as boolean)
+                                                    handleMultiSelectChange("anticipatedSourceOfFundsOnDunamis", source.value, checked as boolean)
                                                 }
                                                 disabled={loading}
                                             />

@@ -820,8 +820,8 @@ export function BusinessProfileView() {
                                         </Label>
                                         <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
                                             <div className="flex flex-wrap gap-2">
-                                                {sender?.requestedNilosServices && sender.requestedNilosServices.length > 0 ? (
-                                                    sender.requestedNilosServices.map((service, index) => (
+                                                {sender?.requestedDunamisServices && sender.requestedDunamisServices.length > 0 ? (
+                                                    sender.requestedDunamisServices.map((service, index) => (
                                                         <Badge key={index} variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
                                                             {service.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                                                         </Badge>
@@ -860,8 +860,8 @@ export function BusinessProfileView() {
                                         </Label>
                                         <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
                                             <div className="flex flex-wrap gap-2">
-                                                {sender?.anticipatedSourceOfFundsOnNilos && sender.anticipatedSourceOfFundsOnNilos.length > 0 ? (
-                                                    sender.anticipatedSourceOfFundsOnNilos.map((source, index) => (
+                                                {sender?.anticipatedSourceOfFundsOnDunamis && sender.anticipatedSourceOfFundsOnDunamis.length > 0 ? (
+                                                    sender.anticipatedSourceOfFundsOnDunamis.map((source, index) => (
                                                         <Badge key={index} variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
                                                             {source.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                                                         </Badge>

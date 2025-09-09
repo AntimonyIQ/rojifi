@@ -91,9 +91,9 @@ export default function EditSenderPage() {
                     expectedMonthlyOutboundFiatPayments: formData.expectedMonthlyOutboundFiatPayments,
                     riskLevel: formData.riskLevel,
                     additionalDueDiligenceConducted: formData.additionalDueDiligenceConducted,
-                    requestedNilosServices: formData.requestedNilosServices,
+                    requestedDunamisServices: formData.requestedDunamisServices,
                     sourceOfWealth: formData.sourceOfWealth,
-                    anticipatedSourceOfFundsOnNilos: formData.anticipatedSourceOfFundsOnNilos,
+                    anticipatedSourceOfFundsOnDunamis: formData.anticipatedSourceOfFundsOnDunamis,
                     actualOperationsAndRegisteredAddressesMatch: formData.actualOperationsAndRegisteredAddressesMatch,
                     companyProvideRegulatedFinancialServices: formData.companyProvideRegulatedFinancialServices,
                     directorOrBeneficialOwnerIsPEPOrUSPerson: formData.directorOrBeneficialOwnerIsPEPOrUSPerson
