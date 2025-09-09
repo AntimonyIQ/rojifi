@@ -35,64 +35,7 @@ export function BusinessProfileView() {
     const statusTabs = Object.values(Tabs);
 
     // Simulate Directors & Shareholders data (replace with actual data when available)
-    const simulatedDirectorsAndShareholders: IDirectorAndShareholder[] = [
-        {
-            senderId: "sender123",
-            firstName: "John",
-            lastName: "Smith",
-            middleName: "Michael",
-            email: "john.smith@company.com",
-            jobTitle: "Chief Executive Officer",
-            role: "Director and Shareholder",
-            isDirector: true,
-            isShareholder: true,
-            shareholderPercentage: 45,
-            dateOfBirth: new Date("1980-05-15"),
-            nationality: "United States",
-            phoneCode: "1",
-            phoneNumber: "5551234567",
-            idType: "passport",
-            idNumber: "P123456789",
-            issuedCountry: "United States",
-            issueDate: new Date("2020-01-15"),
-            expiryDate: new Date("2030-01-15"),
-            streetAddress: "123 Business Ave",
-            city: "New York",
-            state: "NY",
-            postalCode: "10001",
-            country: "United States",
-            idDocumentVerified: true,
-            proofOfAddressVerified: true
-        },
-        {
-            senderId: "sender123",
-            firstName: "Sarah",
-            lastName: "Johnson",
-            middleName: "Elizabeth",
-            email: "sarah.johnson@company.com",
-            jobTitle: "Chief Financial Officer",
-            role: "Director and Shareholder",
-            isDirector: true,
-            isShareholder: true,
-            shareholderPercentage: 35,
-            dateOfBirth: new Date("1985-08-22"),
-            nationality: "United Kingdom",
-            phoneCode: "44",
-            phoneNumber: "7700123456",
-            idType: "drivers_license",
-            idNumber: "DL987654321",
-            issuedCountry: "United Kingdom",
-            issueDate: new Date("2021-03-10"),
-            expiryDate: new Date("2031-03-10"),
-            streetAddress: "456 Finance Street",
-            city: "London",
-            state: "Greater London",
-            postalCode: "SW1A 1AA",
-            country: "United Kingdom",
-            idDocumentVerified: true,
-            proofOfAddressVerified: false
-        }
-    ];
+    const simulatedDirectorsAndShareholders: IDirectorAndShareholder[] = [];
 
     // Use actual data if available, otherwise use simulated data
     const directorsAndShareholders = sender?.directorsAndShareholders?.length

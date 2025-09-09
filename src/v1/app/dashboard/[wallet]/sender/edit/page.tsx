@@ -52,12 +52,7 @@ export default function EditSenderPage() {
         if (sd?.sender) {
             setSender(sd.sender);
             setFormData(sd.sender);
-            setDocumentUrls({
-                businessMemorandumAndArticlesOfAssociationKyc: sd.sender.businessMemorandumAndArticlesOfAssociationKyc || '',
-                businessCertificateOfIncorporationKyc: sd.sender.businessCertificateOfIncorporationKyc || '',
-                businessCertificateOfIncorporationStatusReportKyc: sd.sender.businessCertificateOfIncorporationStatusReportKyc || '',
-                businessProofOfAddressKyc: sd.sender.businessProofOfAddressKyc || ''
-            });
+            setDocumentUrls({});
             setLoading(false);
         }
     }, [sd]);
