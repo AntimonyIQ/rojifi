@@ -31,6 +31,11 @@ export interface IRequestAccess {
     approvedAt: Date | null;
     deletedAt: Date | null;
     archivedAt: Date | null;
+    offRampService: boolean;
+    fiatService: boolean;
+    virtualCardService: boolean;
+    otcdeskService: boolean;
+    apiIntegrationService: boolean;
     metadata: Record<string, any>;
 }
 

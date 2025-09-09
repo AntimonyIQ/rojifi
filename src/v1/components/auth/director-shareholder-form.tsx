@@ -106,7 +106,7 @@ export function DirectorShareholderForm() {
 
     const loadData = async () => {
         try {
-            setLoading(true);
+            setIsLoading(true);
             const res = await fetch(`${Defaults.API_BASE_URL}/requestaccess/approved/${id}`, {
                 method: 'GET',
                 headers: {
@@ -121,13 +121,12 @@ export function DirectorShareholderForm() {
             if (data.status === Status.SUCCESS) {
                 if (!data.handshake) throw new Error('Unable to process response right now, please try again.');
                 // User is authorized, continue
-
             }
         } catch (error: any) {
             setError(error.message || "Failed to verify authorization");
             setIsNotApprove(true);
         } finally {
-            setLoading(false);
+            setIsLoading(false);
         }
     }
 
@@ -338,9 +337,9 @@ export function DirectorShareholderForm() {
             }
         }
 
-        setIsLoading(true)
-
         try {
+            setLoading(true)
+
             const submitData = forms.map(form => ({
                 senderId: id,
                 firstName: form.firstName,
@@ -375,7 +374,6 @@ export function DirectorShareholderForm() {
                 method: 'POST',
                 headers: {
                     ...Defaults.HEADERS,
-                    "Content-Type": "application/json",
                     'x-rojifi-handshake': sd.client.publicKey,
                     'x-rojifi-deviceid': sd.deviceid,
                 },
@@ -395,11 +393,11 @@ export function DirectorShareholderForm() {
         } catch (err: any) {
             setError(err.message || "Failed to submit information")
         } finally {
-            setIsLoading(false)
+            setLoading(false)
         }
     }
 
-    if (loading || isLoading) {
+    if (isLoading) {
         return (
             <div className="fixed top-0 bottom-0 left-0 right-0 z-50 flex items-center justify-center bg-white">
                 <div className="flex min-h-screen items-center justify-center bg-background">
@@ -515,6 +513,7 @@ export function DirectorShareholderForm() {
                                             <PopoverContent className="w-auto p-0" align="start">
                                                 <Calendar
                                                     mode="single"
+                                                    captionLayout="dropdown"
                                                     selected={selectionData.dateOfBirth}
                                                     onSelect={(date) => setSelectionData(prev => ({ ...prev, dateOfBirth: date }))}
                                                     disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
@@ -579,11 +578,10 @@ export function DirectorShareholderForm() {
                                         </Button>
                                         <Button
                                             onClick={handleSubmit}
-                                            disabled={isLoading}
+                                            disabled={loading}
                                             className="flex-1 h-12 bg-primary hover:bg-primary/90 text-white"
                                         >
-                                            {isLoading ? "Submitting..." : "Submit All"}
-                                            <ArrowRight className="ml-2 h-4 w-4" />
+                                            {loading ? "Submitting..." : "Submit"}
                                         </Button>
                                     </div>
 
@@ -898,8 +896,12 @@ function DirectorShareholderFormCard({
                                 handleFieldChange('shareholderPercentage', value)
                             }
                         }}
+                        autoComplete="off"
+                        autoCorrect="off"
+                        spellCheck="false"
+                        title="Enter a number between 0.01 and 100"
                         onBlur={(e) => handleFieldBlur('shareholderPercentage', e.target.value)}
-                        placeholder="25"
+                        placeholder=""
                     />
                     {getFieldError('shareholderPercentage') && (
                         <p className="text-red-500 text-xs mt-1">{getFieldError('shareholderPercentage')}</p>
@@ -1017,6 +1019,7 @@ function DirectorShareholderFormCard({
                             <PopoverContent className="w-auto p-0" align="start">
                                 <Calendar
                                     mode="single"
+                                    captionLayout="dropdown"
                                     selected={form.dateOfBirth}
                                     onSelect={(date) => {
                                         onFormChange(index, 'dateOfBirth', date)
@@ -1196,6 +1199,7 @@ function DirectorShareholderFormCard({
                         <PopoverContent className="w-auto p-0" align="start">
                             <Calendar
                                 mode="single"
+                                captionLayout="dropdown"
                                 selected={form.issueDate}
                                 onSelect={(date) => {
                                     onFormChange(index, 'issueDate', date)
@@ -1230,6 +1234,7 @@ function DirectorShareholderFormCard({
                         <PopoverContent className="w-auto p-0" align="start">
                             <Calendar
                                 mode="single"
+                                captionLayout="dropdown"
                                 selected={form.expiryDate}
                                 onSelect={(date) => {
                                     onFormChange(index, 'expiryDate', date)

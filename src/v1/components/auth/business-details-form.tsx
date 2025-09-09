@@ -1,5 +1,5 @@
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/v1/components/ui/button"
 import { Input } from "@/v1/components/ui/input"
 import { Label } from "@/v1/components/ui/label"
@@ -77,33 +77,24 @@ const legalForms = [
     { value: "SNC", label: "SNC (General Partnership)" },
     { value: "LLC", label: "LLC (Limited Liability Company)" },
     { value: "Corporation", label: "Corporation" },
-    { value: "Partnership", label: "Partnership" },
-    { value: "Sole_Proprietorship", label: "Sole Proprietorship" },
+    { value: "Partnership", label: "Partnership, Business Name" },
+    { value: "Sole_Proprietorship", label: "Sole Proprietorship, Business Name" },
     { value: "LTD", label: "LTD (Private Limited Company)" },
-    { value: "PLC", label: "PLC (Public Limited Company)" }
+    { value: "PLC", label: "PLC (Public Limited Company)" },
+    { value: "OTHERS", label: "Others" },
 ]
-
-/*
-const companyStatuses = [
-    { value: "live", label: "Live" },
-    { value: "closed", label: "Closed" },
-    { value: "not_reported", label: "Not Reported" }
-]
-*/
 
 export function BusinessDetailsForm() {
     const [error, setError] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
     const [isNotApprove, setIsNotApprove] = useState(false)
+    const errorRef = useRef<HTMLDivElement>(null)
 
-    // Popover states
     const [countryPopover, setCountryPopover] = useState(false)
     const [activityPopover, setActivityPopover] = useState(false)
     const [legalFormPopover, setLegalFormPopover] = useState(false)
-    // const [statusPopover, setStatusPopover] = useState(false)
     const [registrationDatePopover, setRegistrationDatePopover] = useState(false)
-    // const [onboardingDatePopover, setOnboardingDatePopover] = useState(false)
 
     const [formData, setFormData] = useState({
         // Company basic info
@@ -130,7 +121,6 @@ export function BusinessDetailsForm() {
     const { id } = useParams()
     const sd: SessionData = session.getUserData()
 
-    // Load and verify user authorization
     useEffect(() => {
         loadData();
     }, []);
@@ -169,7 +159,6 @@ export function BusinessDetailsForm() {
         }
     }
 
-    // Check if all required fields are filled
     const isFormValid = () => {
         return (
             formData.name.trim() !== "" &&
@@ -181,7 +170,7 @@ export function BusinessDetailsForm() {
             formData.city.trim() !== "" &&
             formData.state.trim() !== "" &&
             formData.postalCode.trim() !== "" &&
-            formData.tradingName.trim() !== "" &&
+            // formData.tradingName.trim() !== "" &&
             formData.registrationDate !== undefined
         )
     }
@@ -221,12 +210,20 @@ export function BusinessDetailsForm() {
         setError(null)
     }
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
+        e.stopPropagation()
         setError(null)
 
         if (!isFormValid()) {
             setError("Please fill in all required fields")
+            // Auto-scroll to error message
+            setTimeout(() => {
+                errorRef.current?.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                })
+            }, 100)
             return
         }
 
@@ -252,13 +249,12 @@ export function BusinessDetailsForm() {
                         country: formData.country,
                         postalCode: formData.postalCode
                     },
-                    status: "live"
                 },
                 tradingName: formData.tradingName
             }
 
             // API call to save business details
-            const res = await fetch(`${Defaults.API_BASE_URL}/auth/business-details`, {
+            const res = await fetch(`${Defaults.API_BASE_URL}/auth/business`, {
                 method: 'POST',
                 headers: {
                     ...Defaults.HEADERS,
@@ -276,16 +272,23 @@ export function BusinessDetailsForm() {
             if (data.status === Status.ERROR) throw new Error(data.message || data.error)
             if (data.status === Status.SUCCESS) {
                 toast.success("Business details saved successfully!")
-                window.location.href = `/signup/${id}/business-financials`
+                window.location.href = `/signup/${id}/business-financials`;
             }
         } catch (err: any) {
             setError(err.message || "Failed to save business details")
+            // Auto-scroll to error message
+            setTimeout(() => {
+                errorRef.current?.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                })
+            }, 100)
         } finally {
             setLoading(false)
         }
     }
 
-    if (loading || isLoading) {
+    if (isLoading) {
         return (
             <div className="fixed top-0 bottom-0 left-0 right-0 z-50 flex items-center justify-center bg-white">
                 <div className="flex min-h-screen items-center justify-center bg-background">
@@ -340,7 +343,9 @@ export function BusinessDetailsForm() {
 
                         <form className="space-y-6" onSubmit={handleSubmit}>
                             {error && (
-                                <p className="text-red-500 text-sm text-center">{error}</p>
+                                <div ref={errorRef} className="text-red-500 text-sm text-center p-3 bg-red-50 rounded-md border border-red-200">
+                                    {error}
+                                </div>
                             )}
 
                             {/* Company Basic Info */}
@@ -365,7 +370,7 @@ export function BusinessDetailsForm() {
 
                                 <div>
                                     <Label htmlFor="tradingName" className="block text-sm font-medium text-gray-700 mb-2">
-                                        Trading Name <span className="text-red-500">*</span>
+                                        Trading Name (If different from company name)
                                     </Label>
                                     <Input
                                         id="tradingName"
@@ -381,7 +386,7 @@ export function BusinessDetailsForm() {
 
                                 <div>
                                     <Label htmlFor="registrationNumber" className="block text-sm font-medium text-gray-700 mb-2">
-                                        Registration Number <span className="text-red-500">*</span>
+                                        Company Registration Number <span className="text-red-500">*</span>
                                     </Label>
                                     <Input
                                         id="registrationNumber"
@@ -402,7 +407,7 @@ export function BusinessDetailsForm() {
                                     <Input
                                         id="website"
                                         name="website"
-                                        type="url"
+                                        type="text"
                                         className="h-12"
                                         placeholder="https://www.company.com"
                                         value={formData.website}
@@ -437,7 +442,7 @@ export function BusinessDetailsForm() {
                                                     <CommandEmpty>No legal form found.</CommandEmpty>
                                                     <CommandGroup>
                                                         {legalForms
-                                                            .filter(form => ['Partnership', 'Sole_Proprietorship', 'LTD'].includes(form.value))
+                                                            .filter(form => ['Partnership', 'Sole_Proprietorship', 'LTD', 'OTHERS'].includes(form.value))
                                                             .map((form) => (
                                                                 <CommandItem
                                                                     key={form.value}
@@ -569,7 +574,7 @@ export function BusinessDetailsForm() {
                                 <div className="grid grid-cols-1 gap-4">
                                     <div>
                                         <Label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Registration Date <span className="text-red-500">*</span>
+                                            Company Registration Date <span className="text-red-500">*</span>
                                         </Label>
                                         <Popover open={registrationDatePopover} onOpenChange={setRegistrationDatePopover}>
                                             <PopoverTrigger asChild>
@@ -798,7 +803,7 @@ export function BusinessDetailsForm() {
                                 className="w-full h-12 bg-primary text-white hover:bg-primary/90"
                                 disabled={loading || !isFormValid()}
                             >
-                                {loading ? "Saving..." : "Continue to Financial Details"}
+                                {loading ? "Saving..." : "Continue"}
                             </Button>
 
                             <div className="text-center text-sm text-gray-600">

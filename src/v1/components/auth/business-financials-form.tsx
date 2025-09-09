@@ -4,19 +4,21 @@ import { Button } from "@/v1/components/ui/button"
 import { Input } from "@/v1/components/ui/input"
 import { Label } from "@/v1/components/ui/label"
 import { Checkbox } from "@/v1/components/ui/checkbox"
-import { X, ChevronsUpDownIcon, CheckIcon, AlertCircle, ArrowUpRight } from "lucide-react"
+import { X, AlertCircle, ArrowUpRight, ChevronDownIcon, CheckIcon } from "lucide-react"
 import { Logo } from "@/v1/components/logo"
-import { Textarea } from "../ui/textarea"
 import { session, SessionData } from "@/v1/session/session"
 import { toast } from "sonner"
 import Defaults from "@/v1/defaults/defaults"
-import { IResponse } from "@/v1/interface/interface"
+import { IRequestAccess, IResponse } from "@/v1/interface/interface"
+import { Status } from "@/v1/enums/enums"
+import { Link, useParams } from "wouter"
+import GlobeWrapper from "../globe"
+import { Carousel, carouselItems } from "../carousel"
+import { motion, Variants } from "framer-motion"
 import { cn } from "@/v1/lib/utils"
 import {
     Command,
-    CommandEmpty,
     CommandGroup,
-    CommandInput,
     CommandItem,
     CommandList,
 } from "@/v1/components/ui/command"
@@ -25,11 +27,6 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/v1/components/ui/popover"
-import { Status } from "@/v1/enums/enums"
-import { Link, useParams } from "wouter"
-import GlobeWrapper from "../globe"
-import { Carousel, carouselItems } from "../carousel"
-import { motion, Variants } from "framer-motion"
 
 const logoVariants: Variants = {
     animate: {
@@ -43,6 +40,7 @@ const logoVariants: Variants = {
     },
 }
 
+/*
 const requestedServices = [
     { value: "fx_crossborder_payments", label: "FX Cross-border Payments" },
     { value: "virtual_ibans", label: "Virtual IBANs" },
@@ -51,6 +49,8 @@ const requestedServices = [
     { value: "treasury_management", label: "Treasury Management" },
     { value: "compliance_services", label: "Compliance Services" }
 ]
+
+*/
 
 const sourceOfWealthOptions = [
     { value: "sales_revenue_business_earnings", label: "Sales Revenue/Business Earnings" },
@@ -77,10 +77,17 @@ const anticipatedSourceOptions = [
     { value: "other", label: "Other" }
 ]
 
+/*
 const riskLevels = [
     { value: "low_risk", label: "Low Risk" },
     { value: "medium_risk", label: "Medium Risk" },
     { value: "high_risk", label: "High Risk" }
+]
+*/
+
+const yesNoOptions = [
+    { value: true, label: "Yes" },
+    { value: false, label: "No" }
 ]
 
 export function BusinessFinancialsForm() {
@@ -90,7 +97,9 @@ export function BusinessFinancialsForm() {
     const [isNotApprove, setIsNotApprove] = useState(false)
 
     // Popover states
-    const [riskLevelPopover, setRiskLevelPopover] = useState(false)
+    const [regulatedServicesPopover, setRegulatedServicesPopover] = useState(false)
+    const [pepPersonPopover, setPepPersonPopover] = useState(false)
+    const [offRampService, setOffRampService] = useState<boolean>(false)
 
     const [formData, setFormData] = useState({
         // Financial info
@@ -102,19 +111,13 @@ export function BusinessFinancialsForm() {
         expectedMonthlyInboundFiatPayments: "",
         expectedMonthlyOutboundFiatPayments: "",
 
-        // Risk and compliance
-        riskLevel: "",
-        additionalDueDiligenceConducted: "",
-
         // Multi-select arrays
         sourceOfWealth: [] as string[],
         anticipatedSourceOfFundsOnNilos: [] as string[],
 
         // Boolean fields
-        actualOperationsAndRegisteredAddressesMatch: false,
-        companyProvideRegulatedFinancialServices: false,
-        directorOrBeneficialOwnerIsPEPOrUSPerson: false,
-        immediateApprove: false
+        companyProvideRegulatedFinancialServices: null as boolean | null,
+        directorOrBeneficialOwnerIsPEPOrUSPerson: null as boolean | null,
     })
 
     const { id } = useParams()
@@ -141,8 +144,8 @@ export function BusinessFinancialsForm() {
             if (data.status === Status.ERROR) throw new Error(data.message || data.error);
             if (data.status === Status.SUCCESS) {
                 if (!data.handshake) throw new Error('Unable to process response right now, please try again.');
-                // User is authorized, continue
-                setIsLoading(false);
+                const parseData: IRequestAccess = Defaults.PARSE_DATA(data.data, sd.client.privateKey, data.handshake);
+                setOffRampService(!!parseData.offRampService);
             }
         } catch (error: any) {
             setError(error.message || "Failed to verify authorization");
@@ -159,9 +162,10 @@ export function BusinessFinancialsForm() {
     const isFormValid = () => {
         return (
             formData.shareCapital.trim() !== "" &&
-            formData.riskLevel.trim() !== "" &&
             formData.sourceOfWealth.length > 0 &&
-            formData.anticipatedSourceOfFundsOnNilos.length > 0
+            formData.anticipatedSourceOfFundsOnNilos.length > 0 &&
+            formData.companyProvideRegulatedFinancialServices !== null &&
+            formData.directorOrBeneficialOwnerIsPEPOrUSPerson !== null
         )
     }
 
@@ -179,9 +183,6 @@ export function BusinessFinancialsForm() {
                 case "expectedMonthlyOutboundFiatPayments":
                     // Allow only numbers and remove any non-digit characters
                     sanitizedValue = value.replace(/[^0-9]/g, "")
-                    break
-                case "additionalDueDiligenceConducted":
-                    sanitizedValue = value.replace(/[^a-zA-Z0-9\s\-_,.]/g, "")
                     break
             }
         }
@@ -213,26 +214,24 @@ export function BusinessFinancialsForm() {
         setLoading(true)
 
         try {
-            const financialData = {
-                shareCapital: parseInt(formData.shareCapital) || 0,
-                lastYearTurnover: parseInt(formData.lastYearTurnover) || 0,
-                companyAssets: parseInt(formData.companyAssets) || 0,
-                expectedMonthlyInboundCryptoPayments: parseInt(formData.expectedMonthlyInboundCryptoPayments) || 0,
-                expectedMonthlyOutboundCryptoPayments: parseInt(formData.expectedMonthlyOutboundCryptoPayments) || 0,
-                expectedMonthlyInboundFiatPayments: parseInt(formData.expectedMonthlyInboundFiatPayments) || 0,
-                expectedMonthlyOutboundFiatPayments: parseInt(formData.expectedMonthlyOutboundFiatPayments) || 0,
-                riskLevel: formData.riskLevel,
-                additionalDueDiligenceConducted: formData.additionalDueDiligenceConducted,
-                sourceOfWealth: formData.sourceOfWealth,
-                anticipatedSourceOfFundsOnNilos: formData.anticipatedSourceOfFundsOnNilos,
-                actualOperationsAndRegisteredAddressesMatch: formData.actualOperationsAndRegisteredAddressesMatch,
-                companyProvideRegulatedFinancialServices: formData.companyProvideRegulatedFinancialServices,
-                directorOrBeneficialOwnerIsPEPOrUSPerson: formData.directorOrBeneficialOwnerIsPEPOrUSPerson,
-                immediateApprove: formData.immediateApprove
+            const businessData = {
+                mainCompany: {
+                    shareCapital: parseInt(formData.shareCapital) || 0,
+                    lastYearTurnover: parseInt(formData.lastYearTurnover) || 0,
+                    companyAssets: parseInt(formData.companyAssets) || 0,
+                    expectedMonthlyInboundCryptoPayments: parseInt(formData.expectedMonthlyInboundCryptoPayments) || 0,
+                    expectedMonthlyOutboundCryptoPayments: parseInt(formData.expectedMonthlyOutboundCryptoPayments) || 0,
+                    expectedMonthlyInboundFiatPayments: parseInt(formData.expectedMonthlyInboundFiatPayments) || 0,
+                    expectedMonthlyOutboundFiatPayments: parseInt(formData.expectedMonthlyOutboundFiatPayments) || 0,
+                    sourceOfWealth: formData.sourceOfWealth,
+                    anticipatedSourceOfFundsOnNilos: formData.anticipatedSourceOfFundsOnNilos,
+                    companyProvideRegulatedFinancialServices: formData.companyProvideRegulatedFinancialServices || false,
+                    directorOrBeneficialOwnerIsPEPOrUSPerson: formData.directorOrBeneficialOwnerIsPEPOrUSPerson || false
+                },
             }
 
             // API call to save financial details
-            const res = await fetch(`${Defaults.API_BASE_URL}/auth/business-financials`, {
+            const res = await fetch(`${Defaults.API_BASE_URL}/auth/business`, {
                 method: 'POST',
                 headers: {
                     ...Defaults.HEADERS,
@@ -242,7 +241,7 @@ export function BusinessFinancialsForm() {
                 },
                 body: JSON.stringify({
                     rojifiId: id,
-                    financialData
+                    businessData: businessData
                 })
             })
 
@@ -259,7 +258,7 @@ export function BusinessFinancialsForm() {
         }
     }
 
-    if (loading || isLoading) {
+    if (isLoading) {
         return (
             <div className="fixed top-0 bottom-0 left-0 right-0 z-50 flex items-center justify-center bg-white">
                 <div className="flex min-h-screen items-center justify-center bg-background">
@@ -319,11 +318,11 @@ export function BusinessFinancialsForm() {
 
                             {/* Financial Information */}
                             <div className="space-y-4">
-                                <h3 className="text-lg font-medium text-gray-900">Financial Information ($)</h3>
+                                <h3 className="text-lg font-medium text-gray-900">Financial Information</h3>
 
                                 <div>
                                     <Label htmlFor="shareCapital" className="block text-sm font-medium text-gray-700 mb-2">
-                                        Share Capital <span className="text-red-500">*</span>
+                                        Share Capital <span className="text-gray-400">(Optional)</span>
                                     </Label>
                                     <Input
                                         id="shareCapital"
@@ -339,7 +338,7 @@ export function BusinessFinancialsForm() {
 
                                 <div>
                                     <Label htmlFor="lastYearTurnover" className="block text-sm font-medium text-gray-700 mb-2">
-                                        Last Year Turnover <span className="text-gray-400">(Optional)</span>
+                                        Last Year Turnover <span className="text-red-500">*</span>
                                     </Label>
                                     <Input
                                         id="lastYearTurnover"
@@ -355,7 +354,7 @@ export function BusinessFinancialsForm() {
 
                                 <div>
                                     <Label htmlFor="companyAssets" className="block text-sm font-medium text-gray-700 mb-2">
-                                        Company Assets <span className="text-gray-400">(Optional)</span>
+                                        Company Assets
                                     </Label>
                                     <Input
                                         id="companyAssets"
@@ -369,39 +368,41 @@ export function BusinessFinancialsForm() {
                                     />
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <Label htmlFor="expectedMonthlyInboundCryptoPayments" className="block text-sm font-medium text-gray-700 mb-2">
-                                            Monthly Inbound Crypto <span className="text-gray-400">(Optional)</span>
-                                        </Label>
-                                        <Input
-                                            id="expectedMonthlyInboundCryptoPayments"
-                                            name="expectedMonthlyInboundCryptoPayments"
-                                            type="text"
-                                            className="h-12"
-                                            placeholder="Expected amount"
-                                            value={formatNumber(formData.expectedMonthlyInboundCryptoPayments)}
-                                            disabled={loading}
-                                            onChange={(e) => handleInputChange("expectedMonthlyInboundCryptoPayments", e.target.value.replace(/,/g, ""))}
-                                        />
-                                    </div>
+                                {offRampService && (
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <Label htmlFor="expectedMonthlyInboundCryptoPayments" className="block text-sm font-medium text-gray-700 mb-2">
+                                                Monthly Inbound Crypto <span className="text-gray-400">(Optional)</span>
+                                            </Label>
+                                            <Input
+                                                id="expectedMonthlyInboundCryptoPayments"
+                                                name="expectedMonthlyInboundCryptoPayments"
+                                                type="text"
+                                                className="h-12"
+                                                placeholder="Expected amount"
+                                                value={formatNumber(formData.expectedMonthlyInboundCryptoPayments)}
+                                                disabled={loading}
+                                                onChange={(e) => handleInputChange("expectedMonthlyInboundCryptoPayments", e.target.value.replace(/,/g, ""))}
+                                            />
+                                        </div>
 
-                                    <div>
-                                        <Label htmlFor="expectedMonthlyOutboundCryptoPayments" className="block text-sm font-medium text-gray-700 mb-2">
-                                            Monthly Outbound Crypto <span className="text-gray-400">(Optional)</span>
-                                        </Label>
-                                        <Input
-                                            id="expectedMonthlyOutboundCryptoPayments"
-                                            name="expectedMonthlyOutboundCryptoPayments"
-                                            type="text"
-                                            className="h-12"
-                                            placeholder="Expected amount"
-                                            value={formatNumber(formData.expectedMonthlyOutboundCryptoPayments)}
-                                            disabled={loading}
-                                            onChange={(e) => handleInputChange("expectedMonthlyOutboundCryptoPayments", e.target.value.replace(/,/g, ""))}
-                                        />
+                                        <div>
+                                            <Label htmlFor="expectedMonthlyOutboundCryptoPayments" className="block text-sm font-medium text-gray-700 mb-2">
+                                                Monthly Outbound Crypto <span className="text-gray-400">(Optional)</span>
+                                            </Label>
+                                            <Input
+                                                id="expectedMonthlyOutboundCryptoPayments"
+                                                name="expectedMonthlyOutboundCryptoPayments"
+                                                type="text"
+                                                className="h-12"
+                                                placeholder="Expected amount"
+                                                value={formatNumber(formData.expectedMonthlyOutboundCryptoPayments)}
+                                                disabled={loading}
+                                                onChange={(e) => handleInputChange("expectedMonthlyOutboundCryptoPayments", e.target.value.replace(/,/g, ""))}
+                                            />
+                                        </div>
                                     </div>
-                                </div>
+                                )}
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
@@ -435,76 +436,6 @@ export function BusinessFinancialsForm() {
                                             onChange={(e) => handleInputChange("expectedMonthlyOutboundFiatPayments", e.target.value.replace(/,/g, ""))}
                                         />
                                     </div>
-                                </div>
-                            </div>
-
-                            {/* Risk and Compliance */}
-                            <div className="space-y-4">
-                                <h3 className="text-lg font-medium text-gray-900">Risk and Compliance</h3>
-
-                                <div>
-                                    <Label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Risk Level <span className="text-red-500">*</span>
-                                    </Label>
-                                    <Popover open={riskLevelPopover} onOpenChange={setRiskLevelPopover}>
-                                        <PopoverTrigger asChild>
-                                            <Button
-                                                variant="outline"
-                                                role="combobox"
-                                                aria-expanded={riskLevelPopover}
-                                                className="w-full h-12 justify-between"
-                                                disabled={loading}
-                                            >
-                                                {formData.riskLevel
-                                                    ? riskLevels.find((level) => level.value === formData.riskLevel)?.label
-                                                    : "Select risk level..."}
-                                                <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                            </Button>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-full p-0">
-                                            <Command>
-                                                <CommandInput placeholder="Search risk level..." />
-                                                <CommandList>
-                                                    <CommandEmpty>No risk level found.</CommandEmpty>
-                                                    <CommandGroup>
-                                                        {riskLevels.map((level) => (
-                                                            <CommandItem
-                                                                key={level.value}
-                                                                value={level.value}
-                                                                onSelect={(currentValue) => {
-                                                                    handleInputChange("riskLevel", currentValue)
-                                                                    setRiskLevelPopover(false)
-                                                                }}
-                                                            >
-                                                                <CheckIcon
-                                                                    className={cn(
-                                                                        "mr-2 h-4 w-4",
-                                                                        formData.riskLevel === level.value ? "opacity-100" : "opacity-0"
-                                                                    )}
-                                                                />
-                                                                {level.label}
-                                                            </CommandItem>
-                                                        ))}
-                                                    </CommandGroup>
-                                                </CommandList>
-                                            </Command>
-                                        </PopoverContent>
-                                    </Popover>
-                                </div>
-
-                                <div>
-                                    <Label htmlFor="additionalDueDiligenceConducted" className="block text-sm font-medium text-gray-700 mb-2">
-                                        Additional Due Diligence <span className="text-gray-400">(Optional)</span>
-                                    </Label>
-                                    <Textarea
-                                        id="additionalDueDiligenceConducted"
-                                        name="additionalDueDiligenceConducted"
-                                        className="h-20"
-                                        placeholder="Describe any additional due diligence conducted"
-                                        value={formData.additionalDueDiligenceConducted}
-                                        disabled={loading}
-                                        onChange={(e) => handleInputChange("additionalDueDiligenceConducted", e.target.value)}
-                                    />
                                 </div>
                             </div>
 
@@ -557,60 +488,98 @@ export function BusinessFinancialsForm() {
                                 <h3 className="text-lg font-medium text-gray-900">Compliance</h3>
 
                                 <div className="space-y-4">
-                                    <div className="flex items-center space-x-2">
-                                        <Checkbox
-                                            id="actualOperationsAndRegisteredAddressesMatch"
-                                            checked={formData.actualOperationsAndRegisteredAddressesMatch}
-                                            onCheckedChange={(checked) =>
-                                                handleInputChange("actualOperationsAndRegisteredAddressesMatch", checked as boolean)
-                                            }
-                                            disabled={loading}
-                                        />
-                                        <Label htmlFor="actualOperationsAndRegisteredAddressesMatch" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                            Actual operations and registered addresses match
+                                    <div>
+                                        <Label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Does your company provide regulated financial services?
                                         </Label>
+                                        <Popover open={regulatedServicesPopover} onOpenChange={setRegulatedServicesPopover}>
+                                            <PopoverTrigger asChild>
+                                                <Button
+                                                    variant="outline"
+                                                    role="combobox"
+                                                    className="w-full h-12 justify-between"
+                                                    disabled={loading}
+                                                >
+                                                    {formData.companyProvideRegulatedFinancialServices !== null
+                                                        ? yesNoOptions.find((option) => option.value === formData.companyProvideRegulatedFinancialServices)?.label
+                                                        : "Select answer..."}
+                                                    <ChevronDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                                                <Command>
+                                                    <CommandList>
+                                                        <CommandGroup>
+                                                            {yesNoOptions.map((option) => (
+                                                                <CommandItem
+                                                                    key={option.value.toString()} className="w-full"
+                                                                    value={option.label}
+                                                                    onSelect={() => {
+                                                                        handleInputChange("companyProvideRegulatedFinancialServices", option.value)
+                                                                        setRegulatedServicesPopover(false)
+                                                                    }}
+                                                                >
+                                                                    <CheckIcon
+                                                                        className={cn(
+                                                                            "mr-2 h-4 w-4",
+                                                                            formData.companyProvideRegulatedFinancialServices === option.value ? "opacity-100" : "opacity-0"
+                                                                        )}
+                                                                    />
+                                                                    {option.label}
+                                                                </CommandItem>
+                                                            ))}
+                                                        </CommandGroup>
+                                                    </CommandList>
+                                                </Command>
+                                            </PopoverContent>
+                                        </Popover>
                                     </div>
 
-                                    <div className="flex items-center space-x-2">
-                                        <Checkbox
-                                            id="companyProvideRegulatedFinancialServices"
-                                            checked={formData.companyProvideRegulatedFinancialServices}
-                                            onCheckedChange={(checked) =>
-                                                handleInputChange("companyProvideRegulatedFinancialServices", checked as boolean)
-                                            }
-                                            disabled={loading}
-                                        />
-                                        <Label htmlFor="companyProvideRegulatedFinancialServices" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                            Company provides regulated financial services
+                                    <div>
+                                        <Label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Is any director or beneficial owner a PEP (Politically Exposed Person) or US person?
                                         </Label>
-                                    </div>
-
-                                    <div className="flex items-center space-x-2">
-                                        <Checkbox
-                                            id="directorOrBeneficialOwnerIsPEPOrUSPerson"
-                                            checked={formData.directorOrBeneficialOwnerIsPEPOrUSPerson}
-                                            onCheckedChange={(checked) =>
-                                                handleInputChange("directorOrBeneficialOwnerIsPEPOrUSPerson", checked as boolean)
-                                            }
-                                            disabled={loading}
-                                        />
-                                        <Label htmlFor="directorOrBeneficialOwnerIsPEPOrUSPerson" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                            Director or beneficial owner is PEP or US person
-                                        </Label>
-                                    </div>
-
-                                    <div className="flex items-center space-x-2">
-                                        <Checkbox
-                                            id="immediateApprove"
-                                            checked={formData.immediateApprove}
-                                            onCheckedChange={(checked) =>
-                                                handleInputChange("immediateApprove", checked as boolean)
-                                            }
-                                            disabled={loading}
-                                        />
-                                        <Label htmlFor="immediateApprove" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                            Immediate approve
-                                        </Label>
+                                        <Popover open={pepPersonPopover} onOpenChange={setPepPersonPopover}>
+                                            <PopoverTrigger asChild>
+                                                <Button
+                                                    variant="outline"
+                                                    role="combobox"
+                                                    className="w-full h-12 justify-between"
+                                                    disabled={loading}
+                                                >
+                                                    {formData.directorOrBeneficialOwnerIsPEPOrUSPerson !== null
+                                                        ? yesNoOptions.find((option) => option.value === formData.directorOrBeneficialOwnerIsPEPOrUSPerson)?.label
+                                                        : "Select answer..."}
+                                                    <ChevronDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                                                <Command>
+                                                    <CommandList>
+                                                        <CommandGroup>
+                                                            {yesNoOptions.map((option) => (
+                                                                <CommandItem
+                                                                    key={option.value.toString()}
+                                                                    value={option.label}
+                                                                    onSelect={() => {
+                                                                        handleInputChange("directorOrBeneficialOwnerIsPEPOrUSPerson", option.value)
+                                                                        setPepPersonPopover(false)
+                                                                    }}
+                                                                >
+                                                                    <CheckIcon
+                                                                        className={cn(
+                                                                            "mr-2 h-4 w-4",
+                                                                            formData.directorOrBeneficialOwnerIsPEPOrUSPerson === option.value ? "opacity-100" : "opacity-0"
+                                                                        )}
+                                                                    />
+                                                                    {option.label}
+                                                                </CommandItem>
+                                                            ))}
+                                                        </CommandGroup>
+                                                    </CommandList>
+                                                </Command>
+                                            </PopoverContent>
+                                        </Popover>
                                     </div>
                                 </div>
                             </div>
@@ -620,7 +589,7 @@ export function BusinessFinancialsForm() {
                                 className="w-full h-12 bg-primary text-white hover:bg-primary/90"
                                 disabled={loading || !isFormValid()}
                             >
-                                {loading ? "Saving..." : "Continue to Verification"}
+                                {loading ? "Saving..." : "Continue"}
                             </Button>
 
                             <div className="text-center text-sm text-gray-600">

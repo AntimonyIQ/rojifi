@@ -9,7 +9,7 @@ import { Carousel, carouselItems } from "../carousel"
 import GlobeWrapper from "../globe"
 import Defaults from "@/v1/defaults/defaults"
 import { IResponse } from "@/v1/interface/interface"
-import { Status } from "@/v1/enums/enums"
+import { Status, WhichDocument } from "@/v1/enums/enums"
 import { session, SessionData } from "@/v1/session/session"
 import { toast } from "sonner"
 import { Link, useParams } from "wouter"
@@ -17,8 +17,8 @@ import { motion } from "framer-motion"
 
 export function KYBVerificationForm() {
     const [dragActive, setDragActive] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-    const [loading, setLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [isNotApprove, setIsNotApprove] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [formData, setFormData] = useState<Record<string, File | null>>({
@@ -54,25 +54,27 @@ export function KYBVerificationForm() {
 
     const loadData = async () => {
         try {
-            const response = await fetch(`${Defaults.API_BASE_URL}/requestaccess/approved/${id}`, {
+            const res = await fetch(`${Defaults.API_BASE_URL}/requestaccess/approved/${id}`, {
                 method: 'GET',
                 headers: {
                     ...Defaults.HEADERS,
+                    "Content-Type": "application/json",
                     'x-rojifi-handshake': sd.client.publicKey,
                     'x-rojifi-deviceid': sd.deviceid,
-                }
+                },
             });
+            const data: IResponse = await res.json();
+            if (data.status === Status.ERROR) throw new Error(data.message || data.error);
+            if (data.status === Status.SUCCESS) {
+                if (!data.handshake) throw new Error('Unable to process response right now, please try again.');
+                // User is authorized, continue
 
-            if (!response.ok) {
-                setIsNotApprove(true);
-            } else {
-                setIsNotApprove(false);
             }
         } catch (error) {
             console.error('Error loading data:', error);
             setIsNotApprove(true);
         } finally {
-            setLoading(false);
+            setIsLoading(false);
         }
     };
 
@@ -125,33 +127,95 @@ export function KYBVerificationForm() {
         try {
             // handle server submission here
             setError(null);
-            setIsLoading(true);
+            setLoading(true);
+
+            // Prepare documents array from uploaded URLs
+            const documents = [];
+
+            // CAC Certificate of Incorporation (required)
+            if (uploadedUrls.cacCertOfIncoporation) {
+                documents.push({
+                    which: WhichDocument.CERTIFICATE_INCORPORATION,
+                    name: formData.cacCertOfIncoporation?.name || "CAC Certificate of Incorporation",
+                    type: formData.cacCertOfIncoporation?.type || "application/pdf",
+                    url: uploadedUrls.cacCertOfIncoporation,
+                    size: formData.cacCertOfIncoporation?.size,
+                    isRequired: true
+                });
+            }
+
+            // Memorandum & Articles of Association (optional)
+            if (uploadedUrls.memorandumArticlesOfAssociation) {
+                documents.push({
+                    which: WhichDocument.MEMORANDUM_ARTICLES,
+                    name: formData.memorandumArticlesOfAssociation?.name || "Memorandum & Articles of Association",
+                    type: formData.memorandumArticlesOfAssociation?.type || "application/pdf",
+                    url: uploadedUrls.memorandumArticlesOfAssociation,
+                    size: formData.memorandumArticlesOfAssociation?.size,
+                    isRequired: false
+                });
+            }
+
+            // CAC Status Report (required)
+            if (uploadedUrls.cacStatusReport) {
+                documents.push({
+                    which: WhichDocument.INCORPORATION_STATUS,
+                    name: formData.cacStatusReport?.name || "CAC Status Report",
+                    type: formData.cacStatusReport?.type || "application/pdf",
+                    url: uploadedUrls.cacStatusReport,
+                    size: formData.cacStatusReport?.size,
+                    isRequired: true
+                });
+            }
+
+            // Proof of Address (required)
+            if (uploadedUrls.proofOfAddress) {
+                documents.push({
+                    which: WhichDocument.PROOF_ADDRESS,
+                    name: formData.proofOfAddress?.name || "Proof of Address",
+                    type: formData.proofOfAddress?.type || "application/pdf",
+                    url: uploadedUrls.proofOfAddress,
+                    size: formData.proofOfAddress?.size,
+                    isRequired: true
+                });
+            }
+
+            // Validate required documents
+            const requiredDocs = ['cacCertOfIncoporation', 'cacStatusReport', 'proofOfAddress'];
+            const missingRequired = requiredDocs.filter(docType => !uploadedUrls[docType]);
+
+            if (missingRequired.length > 0) {
+                throw new Error(`Missing required documents: ${missingRequired.join(', ')}`);
+            }
+
+            if (documents.length === 0) {
+                throw new Error("At least one document is required");
+            }
 
             const res = await fetch(`${Defaults.API_BASE_URL}/auth/docs`, {
                 method: 'POST',
                 headers: {
                     ...Defaults.HEADERS,
+                    'Content-Type': 'application/json',
                     'x-rojifi-handshake': sd.client.publicKey,
                     'x-rojifi-deviceid': sd.deviceid,
                 },
                 body: JSON.stringify({
                     rojifiId: id,
-                    cacCertOfIncoporation: uploadedUrls.cacCertOfIncoporation,
-                    memorandumArticlesOfAssociation: uploadedUrls.memorandumArticlesOfAssociation,
-                    cacStatusReport: uploadedUrls.cacStatusReport,
-                    proofOfAddress: uploadedUrls.proofOfAddress,
+                    documents: documents
                 })
             });
+
             const data: IResponse = await res.json();
             if (data.status === Status.ERROR) throw new Error(data.message || data.error);
             if (data.status === Status.SUCCESS) {
                 toast.success("Documents Uploaded Successfully, You will be redirected to login.");
-                window.location.href = "/login";
-            };
+                window.location.href = `/signup/${id}/director`;
+            }
         } catch (err: any) {
-            setError(err.message || "Failed to create account");
+            setError(err.message || "Failed to upload documents");
         } finally {
-            setIsLoading(false);
+            setLoading(false);
         }
     };
 
@@ -205,9 +269,9 @@ export function KYBVerificationForm() {
         }
     }
 
-    const renderUploadField = (fieldKey: string, label: string) => (
+    const renderUploadField = (fieldKey: string, label: string, required: boolean) => (
         <div key={fieldKey}>
-            <Label className="block text-lg font-bold text-gray-700 mb-2">{label}</Label>
+            <Label className="block text-lg font-bold text-gray-700 mb-2">{label} {required && <span className="text-red-500">*</span>}</Label>
             <div
                 className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-colors focus-within:ring-2 focus-within:ring-primary ${dragActive ? "border-primary bg-primary/5" : "border-gray-300"}`}
                 onDragEnter={handleDrag}
@@ -333,7 +397,7 @@ export function KYBVerificationForm() {
         </div>
     );
 
-    if (loading || isLoading) {
+    if (isLoading) {
         return (
             <div className="fixed top-0 bottom-0 left-0 right-0 z-50 flex items-center justify-center bg-white">
                 <div className="flex min-h-screen items-center justify-center bg-background">
@@ -386,14 +450,14 @@ export function KYBVerificationForm() {
 
                         <form className="space-y-6" onSubmit={handleSubmit}>
                             {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-                            {renderUploadField("cacCertOfIncoporation", "CAC Certificate of Incorporation")}
-                            {renderUploadField("memorandumArticlesOfAssociation", "Memorandum & Articles of Association (Memart)")}
-                            {renderUploadField("cacStatusReport", "CAC Status Report")}
-                            {renderUploadField("proofOfAddress", "Business Proof of Address (Recent Utility Bill, Bank Statement, Etc...)")}
+                            {renderUploadField("cacCertOfIncoporation", "CAC Certificate of Incorporation", true)}
+                            {renderUploadField("memorandumArticlesOfAssociation", "Memorandum & Articles of Association (Memart)", false)}
+                            {renderUploadField("cacStatusReport", "CAC Status Report", true)}
+                            {renderUploadField("proofOfAddress", "Business Proof of Address (Recent Utility Bill, Bank Statement, Etc...)", true)}
 
                             <div className="space-y-4">
-                                <Button type="submit" className="w-full h-12 bg-primary hover:bg-primary/90 text-white" disabled={isLoading}>
-                                    {isLoading ? "Submitting..." : "Submit"}
+                                <Button type="submit" className="w-full h-12 bg-primary hover:bg-primary/90 text-white" disabled={loading}>
+                                    {loading ? "Loading..." : "Continue"}
                                 </Button>
                             </div>
 
