@@ -446,7 +446,7 @@ export function RequestAccessForm() {
 
                                 <div>
                                     <Label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
-                                        Last name
+                                        Last name <span className="text-red-500">*</span>
                                     </Label>
                                     <div>
                                         <Input
@@ -455,6 +455,7 @@ export function RequestAccessForm() {
                                             type="text"
                                             autoComplete="family-name"
                                             className="h-12"
+                                            required
                                             placeholder="Last name"
                                             value={formData.lastName}
                                             onChange={(e) => handleInputChange("lastName", e.target.value)}
@@ -465,7 +466,7 @@ export function RequestAccessForm() {
 
                             <div>
                                 <Label htmlFor="middleName" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Other Name <span className="text-red-500">*</span>
+                                    Other Name
                                 </Label>
                                 <div>
                                     <Input

@@ -268,7 +268,7 @@ export function ContactForm() {
 
                             <div>
                                 <Label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Last name
+                                    Last name <span className="text-red-500">*</span>
                                 </Label>
                                 <div>
                                     <Input
