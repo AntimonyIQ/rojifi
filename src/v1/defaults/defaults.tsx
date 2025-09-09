@@ -1,5 +1,5 @@
 import Handshake from "@/v1/hash/handshake";
-import { session, SessionData } from "@/v1/session/session";
+// import { session, SessionData } from "@/v1/session/session";
 
 export default class Defaults {
 
@@ -21,6 +21,10 @@ export default class Defaults {
     };
 
     public static LOGIN_STATUS = () => {
+        /**
+         * 
+         * 
+         * 
         const sd: SessionData = session.getUserData();
         if (!sd || !sd.user || !sd.user.loginLastAt) {
             window.location.href = "/login";
@@ -39,5 +43,7 @@ export default class Defaults {
         }
 
         return true;
+
+        */
     };
 }
