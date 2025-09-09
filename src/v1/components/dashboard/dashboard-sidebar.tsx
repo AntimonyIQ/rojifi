@@ -1,31 +1,12 @@
-"use client"
-
 import type React from "react"
 import { useState, useEffect } from "react"
-import { BarChart3, ArrowLeftRight, Settings, LogOut, X, CreditCard, Coins, Group, ReceiptText, Briefcase, LucideSend, Star, ChevronDown, CheckIcon } from "lucide-react"
+import { BarChart3, ArrowLeftRight, Settings, LogOut, X, CreditCard, Coins, Group, ReceiptText, Briefcase, LucideSend, Star, ChevronDown } from "lucide-react"
 import { Logo } from "@/v1/components/logo"
 import { Button } from "../ui/button"
 import { ISender, IUser } from "@/v1/interface/interface"
 import { session, SessionData } from "@/v1/session/session"
-import Defaults from "@/v1/defaults/defaults"
-import { IResponse } from "@/v1/interface/interface"
-import { cn } from "@/v1/lib/utils"
-import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-} from "@/v1/components/ui/command"
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/v1/components/ui/popover"
-import { Status } from "@/v1/enums/enums"
 import { Badge } from "../ui/badge"
-import { usePathname } from "wouter/use-browser-location"
+import { useLocation, useParams } from "wouter"
 
 interface DashboardSidebarProps {
     open: boolean
@@ -46,20 +27,21 @@ const navigationBase = [
 ]
 
 export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ open, setOpen }) => {
-    const pathname = usePathname()
-    const [senders, setSenders] = useState<Array<ISender>>([])
-    const [popOpen, setPopOpen] = useState<boolean>(false)
-    const [loading, setLoading] = useState<boolean>(true)
+    const [location, navigate] = useLocation();
     const [user, setUser] = useState<IUser | null>(null)
     const [sender, setSender] = useState<ISender | null>(null)
     const [showLogoutDialog, setShowLogoutDialog] = useState(false)
     const sd: SessionData = session.getUserData()
+    const { wallet } = useParams();
 
     useEffect(() => {
-        setUser(sd.user || null)
-        setSender(sd.sender || null)
-        fetchSenders()
-    }, [sd.user, sd.sender])
+        if (sd && sd.user) {
+            setUser(sd.user)
+        }
+        if (sd && sd.sender) {
+            setSender(sd.sender)
+        }
+    }, [])
 
     const handleLogout = () => {
         setShowLogoutDialog(true);
@@ -68,41 +50,11 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ open, setOpe
     const confirmLogout = async () => {
         setShowLogoutDialog(false);
         session.logout();
-        window.location.href = '/login';
+        navigate('/login');
     }
 
     const cancelLogout = () => {
         setShowLogoutDialog(false)
-    }
-
-    const fetchSenders = async () => {
-        try {
-            setLoading(true)
-
-            Defaults.LOGIN_STATUS();
-
-            const res = await fetch(`${Defaults.API_BASE_URL}/sender/all`, {
-                method: 'GET',
-                headers: {
-                    ...Defaults.HEADERS,
-                    "Content-Type": "application/json",
-                    'x-rojifi-handshake': sd.client.publicKey,
-                    'x-rojifi-deviceid': sd.deviceid,
-                    Authorization: `Bearer ${sd.authorization}`,
-                },
-            });
-            const data: IResponse = await res.json();
-            if (data.status === Status.ERROR) throw new Error(data.message || data.error);
-            if (data.status === Status.SUCCESS) {
-                if (!data.handshake) throw new Error('Unable to process login response right now, please try again.');
-                const parseData: Array<ISender> = Defaults.PARSE_DATA(data.data, sd.client.privateKey, data.handshake);
-                setSenders(parseData);
-            }
-        } catch (error: any) {
-            console.error("Error fetching senders:", error)
-        } finally {
-            setLoading(false)
-        }
     }
 
     return (
@@ -160,60 +112,18 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ open, setOpe
                     <nav className="flex-1 px-4 pt-6">
                         <ul className="space-y-2">
                             <li >
-                                <Popover open={popOpen} onOpenChange={() => setPopOpen(!popOpen)}>
-                                    <PopoverTrigger asChild>
-                                        <Button
-                                            variant="outline"
-                                            role="combobox"
-                                            size="md"
-                                            aria-expanded={popOpen}
-                                            className="w-full justify-between"
-                                        >
-                                            <div className="flex flex-row items-center gap-2">
-                                                <Briefcase className="h-4 w-4" />
-                                                {sender?.businessName}
-                                            </div>
-                                            <ChevronDown className="ml-1 h-4 w-4 shrink-0 opacity-50" />
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-full p-0">
-                                        <Command>
-                                            <CommandInput placeholder="Search senders..." />
-                                            <CommandList>
-                                                {loading && <div className="p-2 text-center text-sm text-gray-500">Loading...</div>}
-                                                {!loading && senders.length === 0 && <CommandEmpty>No sender found.</CommandEmpty>}
-                                                {!loading && senders.length > 0 && (
-                                                    <CommandGroup>
-                                                        {senders.map((org) => (
-                                                            <CommandItem
-                                                                key={org.businessName}
-                                                                value={org.businessName}
-                                                                onSelect={(currentValue) => {
-                                                                    const sender: ISender | undefined = senders.find(s => s.businessName === currentValue);
-                                                                    if (sender) {
-                                                                        session.updateSession({
-                                                                            ...sd,
-                                                                            sender: sender
-                                                                        })
-                                                                        setSender(sender);
-                                                                    }
-                                                                }}
-                                                            >
-                                                                <CheckIcon
-                                                                    className={cn(
-                                                                        "mr-2 h-4 w-4",
-                                                                        sender?.businessName === org.businessName ? "opacity-100" : "opacity-0"
-                                                                    )}
-                                                                />
-                                                                {org.businessName}
-                                                            </CommandItem>
-                                                        ))}
-                                                    </CommandGroup>
-                                                )}
-                                            </CommandList>
-                                        </Command>
-                                    </PopoverContent>
-                                </Popover>
+                                <Button
+                                    variant="outline"
+                                    role="combobox"
+                                    size="md"
+                                    className="w-full justify-between"
+                                >
+                                    <div className="flex flex-row items-center gap-2">
+                                        <Briefcase className="h-4 w-4" />
+                                        {sender?.businessName}
+                                    </div>
+                                    <ChevronDown className="ml-1 h-4 w-4 shrink-0 opacity-50" />
+                                </Button>
                             </li>
                         </ul>
                     </nav>
@@ -225,18 +135,18 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ open, setOpe
                         {navigationBase.map((item: { name: string; href: string; icon: any; dashboard: boolean }) => {
                             let href
                             if (item.dashboard) {
-                                const currency = (pathname?.split('/')[2] || 'NGN').toUpperCase()
                                 if (item.name === "Overview") {
-                                    href = `/dashboard/NGN`
+                                    href = `/dashboard/${wallet}`
                                 } else {
-                                    href = `/dashboard/${currency}${item.href ? `/${item.href}` : ''}`
+                                    href = `/dashboard/${wallet}${item.href ? `/${item.href}` : ''}`
                                 }
                             } else {
                                 href = item.href
                             }
+                            // Use the current location (full path) to determine active state
                             const isActive = item.name === "Overview"
-                                ? pathname === href
-                                : pathname === href || pathname?.startsWith(href + '/')
+                                ? location === href
+                                : location === href || location?.startsWith(href + '/')
                             return (
                                 <li key={item.name}>
                                     <a
@@ -244,8 +154,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ open, setOpe
                                         onClick={(e) => {
                                             e.preventDefault();
                                             setOpen(false);
-                                            // Force a full page navigation which can be faster than client-side routing in some cases
-                                            window.location.href = href;
+                                            navigate(href);
                                         }}
                                         className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive
                                             ? "bg-blue-50 text-primary border-l-4 border-primary"

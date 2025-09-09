@@ -131,6 +131,7 @@ export interface IContactUs {
 }
 
 export interface IRequestAccess {
+    _id: string;
     rojifiId: string;
     firstname: string;
     lastname: string;
@@ -158,6 +159,7 @@ export interface IRequestAccess {
 }
 
 export interface IUser {
+    _id: string;
     requestAccessId: IUser | null;
     rojifiId: string;
     username: string;

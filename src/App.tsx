@@ -4,7 +4,7 @@ import React from "react";
 import NotFound from "@/pages/not-found";
 import { AnimatePresence } from "framer-motion";
 import { ProtectedRoute } from "./app/ProtectedRoute";
-import { RedirectIfAuthenticated } from "./app/RedirectIfAuthenticated";
+// import { RedirectIfAuthenticated } from "./app/RedirectIfAuthenticated";
 import LoginPage from "./v1/app/login/page";
 import { DashboardLayout } from "./v1/components/dashboard/dashboard-layout";
 import { VerificationInReview } from "./v1/components/dashboard/verification-in-review";
@@ -56,16 +56,7 @@ function AppRoute({
 }) {
     const sd: SessionData = session.getUserData();
 
-    if (!sd || !sd.sender) {
-        return (
-            <ProtectedRoute path={path}>
-                <DashboardLayout>
-                    <Page />
-                </DashboardLayout>
-            </ProtectedRoute>
-        );
-    }
-
+    /* THIS IS TO ENABLE TESTING: REMOVE COMMENT WHEN DONE
     const isVerificationComplete = sd.sender.businessVerificationCompleted;
 
     if (!isVerificationComplete) {
@@ -95,6 +86,7 @@ function AppRoute({
             </Route>
         );
     }
+    */
 
     // State 3: Verification complete - show normal pages
     return (
@@ -134,14 +126,17 @@ function App() {
         { path: "/signup/:id/director", element: <DirectorPage /> },
         { path: "/signup/:id", element: <SignupPage /> },
         { path: "/invitation/:id", element: <InvitationPage /> },
+        { path: "/login", element: <LoginPage /> },
     ];
 
     return (
         <AnimatePresence mode="wait">
             <Switch>
+                {/*
                 <RedirectIfAuthenticated path="/login">
                     <LoginPage />
                 </RedirectIfAuthenticated>
+                */}
                 <AppRoute path="/dashboard/:wallet/virtualcard" page={VirtualCardPage} />
                 <AppRoute path="/dashboard/:wallet/bankstatement" page={StatementPage} />
                 <AppRoute path="/dashboard/:wallet/beneficiary" page={BeneficiaryPage} />

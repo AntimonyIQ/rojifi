@@ -30,10 +30,11 @@ import { IResponse, ITransaction, IUser, IWallet } from "@/v1/interface/interfac
 import { Fiat, Status, TransactionType } from "@/v1/enums/enums";
 import Defaults from "@/v1/defaults/defaults";
 import { ILoginFormProps } from "../auth/login-form";
-import { usePathname } from "wouter/use-browser-location";
+import { useLocation, useParams } from "wouter";
 
 export function DashboardOverview() {
-    const pathname = usePathname();
+    const { wallet } = useParams();
+    const [_, navigate] = useLocation();
     const [hideBalances, setHideBalances] = useState(false);
     const [isLive, _setIsLive] = useState<boolean>(true);
     const [user, setUser] = useState<IUser | null>(null)
@@ -65,17 +66,8 @@ export function DashboardOverview() {
             setActiveWallet(activeWallet);
         }
 
-        if (!pathname) return;
-        const parts = pathname.split('/');
-        const wallet = (parts[2] || '').toUpperCase();
-
-        const currencyList = Object.values(Fiat);
-        if (currencyList.includes(wallet as Fiat) && wallet !== selectedCurrency) {
-            setSelectedCurrency(wallet as Fiat);
-        } else if (wallet !== selectedCurrency) {
-            setSelectedCurrency(Fiat.NGN);
-        }
-    }, [pathname, selectedCurrency]);
+        setSelectedCurrency(wallet as Fiat);
+    }, [selectedCurrency]);
 
     const chartData = [
         { day: "Sun", value: 60, amount: "$2,500" },
@@ -253,7 +245,7 @@ export function DashboardOverview() {
                                             key={tab.currency}
                                             onClick={(): void => {
                                                 setSelectedCurrency(tab.currency as Fiat);
-                                                window.location.href = `/dashboard/${tab.currency}`;
+                                                navigate(`/dashboard/${tab.currency}`);
                                             }}
                                             className={`px-3 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap flex flex-row items-center gap-1 ${selectedCurrency === tab.currency
                                                 ? "bg-white text-primary shadow-sm"
@@ -407,7 +399,7 @@ export function DashboardOverview() {
                                         <Plus className="h-4 w-4" /> Deposit
                                     </a>
                                     <Button variant="outline" onClick={(): void => {
-                                        window.location.href = `/dashboard/${selectedCurrency}/swap`
+                                        navigate(`/dashboard/${selectedCurrency}/swap`)
                                     }} disabled={!isLive}>
                                         <a href={`/dashboard/${selectedCurrency}/swap`} className="flex flex-row items-center justify-center gap-2">
                                             <Repeat className="h-4 w-4" /> Swap
@@ -422,7 +414,7 @@ export function DashboardOverview() {
                                                 if (selectedCurrency === Fiat.NGN && withdrawEnabled === false) {
                                                     setWithdrawalActivated(true);
                                                 } else {
-                                                    window.location.href = `/dashboard/${selectedCurrency}/withdraw`;
+                                                    navigate(`/dashboard/${selectedCurrency}/withdraw`);
                                                 }
                                             }}>
                                             <Send className="h-4 w-4" /> Withdraw
@@ -482,10 +474,10 @@ export function DashboardOverview() {
                                                             <TableCell className="pl-6">
                                                                 <div className="flex items-center gap-2">
                                                                     <div className={`p-2 rounded-full ${transaction.type === TransactionType.TRANSFER || transaction.type === TransactionType.WITHDRAWAL
-                                                                            ? 'bg-red-100 text-red-600'
-                                                                            : transaction.type === TransactionType.DEPOSIT
-                                                                                ? 'bg-green-100 text-green-600'
-                                                                                : 'bg-blue-100 text-blue-600'
+                                                                        ? 'bg-red-100 text-red-600'
+                                                                        : transaction.type === TransactionType.DEPOSIT
+                                                                            ? 'bg-green-100 text-green-600'
+                                                                            : 'bg-blue-100 text-blue-600'
                                                                         }`}>
                                                                         {transaction.type === TransactionType.TRANSFER || transaction.type === TransactionType.WITHDRAWAL ? (
                                                                             <ArrowUpRight className="h-3 w-3" />
@@ -544,10 +536,10 @@ export function DashboardOverview() {
                                                                                 : "destructive"
                                                                     }
                                                                     className={`text-xs ${transaction.status.toLowerCase() === "successful" || transaction.status.toLowerCase() === "completed"
-                                                                            ? "bg-green-100 text-green-800 hover:bg-green-100"
-                                                                            : transaction.status.toLowerCase() === "pending"
-                                                                                ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-100"
-                                                                                : "bg-red-100 text-red-800 hover:bg-red-100"
+                                                                        ? "bg-green-100 text-green-800 hover:bg-green-100"
+                                                                        : transaction.status.toLowerCase() === "pending"
+                                                                            ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-100"
+                                                                            : "bg-red-100 text-red-800 hover:bg-red-100"
                                                                         }`}
                                                                 >
                                                                     {transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)}

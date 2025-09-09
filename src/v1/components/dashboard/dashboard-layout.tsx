@@ -5,10 +5,9 @@ import { Button } from "@/v1/components/ui/button"
 import { DashboardSidebar } from "./dashboard-sidebar"
 import { BottomNavigation } from "./bottom-navigation"
 import { session, SessionData } from "@/v1/session/session"
-import { ISender, IWallet } from "@/v1/interface/interface"
-import { Fiat } from "@/v1/enums/enums"
-import { usePathname } from "wouter/use-browser-location"
+import { ISender } from "@/v1/interface/interface"
 import { motion } from "framer-motion"
+import { useParams } from "wouter"
 
 interface DashboardLayoutProps {
     children: React.ReactNode
@@ -16,34 +15,16 @@ interface DashboardLayoutProps {
 
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     const [sidebarOpen, setSidebarOpen] = useState(false)
-    const [wallets, setWallets] = useState<Array<IWallet>>([]);
-    const [activeWallet, setActiveWallet] = useState<IWallet | undefined>(undefined);
-    const [selectedCurrency, setSelectedCurrency] = useState<Fiat>(Fiat.NGN);
     const [sender, setSender] = useState<ISender | null>(null);
     const [showKycWarning, setShowKycWarning] = useState(true);
     const sd: SessionData = session.getUserData();
-
-    const pathname = usePathname()
+    const { wallet } = useParams();
 
     useEffect(() => {
         if (sd) {
-            setWallets(sd.wallets);
             setSender(sd.sender);
-
-            // If your route is /dashboard/[wallet], you can use usePathname() to get the current path.
-            // Extract the wallet param from the path.
-            if (!pathname) return
-            // Example: /dashboard/USD/payment
-            const match = pathname.match(/^\/dashboard\/([^\/]+)/)
-            const wallet: Fiat | null = match ? match[1].toUpperCase() as Fiat : null
-            if (wallet && [Fiat.NGN, Fiat.USD, Fiat.EUR, Fiat.GBP].includes(wallet) && wallet !== selectedCurrency) {
-                setSelectedCurrency(wallet)
-            }
-
-            const activeWallet: IWallet | undefined = wallets.find(w => w.currency === selectedCurrency);
-            setActiveWallet(activeWallet);
         }
-    }, [pathname, sender])
+    }, [])
 
     return (
         <div className="h-screen bg-gray-50 flex overflow-hidden relative">
@@ -58,39 +39,15 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                             >
                                 <Menu className="h-5 w-5" />
                             </button>
-                            <div className="text-left hidden">
-                                <div className="flex items-center gap-2 text-sm text-gray-500">
-                                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path
-                                            d="M19 7H5C3.89543 7 3 7.89543 3 9V18C3 19.1046 3.89543 20 5 20H19C20.1046 20 21 19.1046 21 18V9C21 7.89543 20.1046 7 19 7Z"
-                                            stroke="currentColor"
-                                            strokeWidth="2"
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                        />
-                                        <path
-                                            d="M3 10H21"
-                                            stroke="currentColor"
-                                            strokeWidth="2"
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                        />
-                                    </svg>
-                                    Balance
-                                </div>
-                                <div className="text-xl lg:text-2xl font-semibold text-gray-900">
-                                    {activeWallet?.balance || "0.00"}
-                                </div>
-                            </div>
                         </div>
                         <div className="flex items-center gap-2 lg:gap-3">
                             <Button
                                 size="sm"
                                 id="top-button"
                                 className="bg-primary hover:bg-primary/90 text-white flex items-center gap-2">
-                                <a href={`/dashboard/${selectedCurrency}/payment`} className="flex flex-row items-center justify-center gap-2">
+                                <a href={`/dashboard/${wallet}/payment`} className="flex flex-row items-center justify-center gap-2">
                                     <Plus className="h-4 w-4" />
-                                    <span className="hidden sm:inline">Create Payment</span>
+                                    <span className="inline">Create Payment</span>
                                 </a>
                             </Button>
                         </div>
@@ -212,7 +169,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                                                 <Button
                                                     size="sm"
                                                     className="h-7 px-3 bg-orange-600 hover:from-amber-700 hover:to-orange-700 text-white text-xs font-medium shadow-md"
-                                                    onClick={() => window.location.href = `/dashboard/${selectedCurrency}/businessprofile`}
+                                                    onClick={() => window.location.href = `/dashboard/${wallet}/businessprofile`}
                                                 >
                                                     <Shield className="h-3 w-3 mr-1" />
                                                     Start Verification
@@ -222,7 +179,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                                                     variant="ghost"
                                                     size="sm"
                                                     className="h-7 px-2 text-amber-700 hover:text-amber-900 hover:bg-amber-100 text-xs hidden sm:inline-flex"
-                                                    onClick={() => window.location.href = `/dashboard/${selectedCurrency}/businessprofile`}
+                                                    onClick={() => window.location.href = `/dashboard/${wallet}/businessprofile`}
                                                 >
                                                     Review Details
                                                 </Button>
