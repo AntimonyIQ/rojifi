@@ -393,8 +393,6 @@ export function DirectorShareholderForm() {
             if (data.status === Status.ERROR) throw new Error(data.message || data.error)
             if (data.status === Status.SUCCESS) {
                 toast.success("Directors/Shareholders information submitted successfully")
-                // Clear signup progress since this is the final stage
-                session.clearSignupProgress()
                 setShowSuccessModal(true)
             }
         } catch (err: any) {

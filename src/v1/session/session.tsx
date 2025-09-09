@@ -2,13 +2,6 @@ import Handshake from "@/v1/hash/handshake";
 import JWT from "@/v1/hash/jwt";
 import { IHandshakeClient, IPayment, ISender, ITransaction, IUser, IWallet } from "@/v1/interface/interface";
 
-export interface SignupProgress {
-    rojifiId: string;
-    currentStage: 'signup' | 'business-details' | 'business-financials' | 'verification' | 'director';
-    completedStages: string[];
-    timestamp: number;
-}
-
 export interface SessionData {
     user: IUser;
     activeWallet: string;
@@ -20,7 +13,6 @@ export interface SessionData {
     transactions: Array<ITransaction>;
     sender: ISender;
     draftPayment: IPayment;
-    signupProgress?: SignupProgress;
     [key: string]: any;
 }
 
@@ -53,7 +45,6 @@ export default class Session {
             transactions: [],
             sender: this.sender,
             draftPayment: this.draftPayment,
-            signupProgress: undefined
         };
         this.secretKey = secretKey;
         this.loadSession();
@@ -66,14 +57,22 @@ export default class Session {
                 const decodedToken = JWT.decode(storedToken, this.secretKey) as DecodedToken;
                 if (decodedToken && typeof decodedToken === 'object') {
                     const { isLoggedIn, userData, exp } = decodedToken;
-                    this.isLoggedIn = isLoggedIn;
-                    this.userData = userData;
 
                     const currentTime = Math.floor(Date.now() / 1000);
                     if (exp && exp < currentTime) {
                         console.error('Token has expired. Clearing from local storage.');
                         localStorage.removeItem('session');
+                        return;
                     }
+
+                    // Clean up userData to remove any old signupProgress property
+                    const cleanUserData = { ...userData };
+                    if ('signupProgress' in cleanUserData) {
+                        delete cleanUserData.signupProgress;
+                    }
+
+                    this.isLoggedIn = isLoggedIn;
+                    this.userData = cleanUserData;
                 } else {
                     throw new Error('Invalid token data');
                 }
@@ -93,7 +92,7 @@ export default class Session {
 
     public login(userData: SessionData): void {
         this.isLoggedIn = true;
-        this.userData = userData;
+        this.userData = { ...userData, isLoggedIn: true }; // Ensure isLoggedIn is set to true
         this.saveSession();
     }
 
@@ -110,7 +109,6 @@ export default class Session {
             transactions: [],
             sender: this.sender,
             draftPayment: this.draftPayment,
-            signupProgress: undefined
         };
         this.saveSession();
     }
@@ -120,6 +118,8 @@ export default class Session {
     }
 
     public getUserData(): SessionData {
+        // Ensure isLoggedIn is synchronized
+        this.userData.isLoggedIn = this.isLoggedIn;
         return this.userData;
     }
 
@@ -144,79 +144,8 @@ export default class Session {
             console.error('Cannot update session. User is not logged in.');
         }
     }
-
-    // Signup Progress Management Methods
-    public setSignupProgress(rojifiId: string, stage: SignupProgress['currentStage'], completedStages: string[] = []): void {
-        if (!ENABLE_SIGNUP_PROGRESS_TRACKING) return;
-
-        this.userData.signupProgress = {
-            rojifiId,
-            currentStage: stage,
-            completedStages,
-            timestamp: Date.now()
-        };
-        this.saveSession();
-    }
-
-    public updateSignupStage(stage: SignupProgress['currentStage']): void {
-        if (!ENABLE_SIGNUP_PROGRESS_TRACKING || !this.userData.signupProgress) return;
-
-        // Add current stage to completed stages if not already there
-        if (!this.userData.signupProgress.completedStages.includes(this.userData.signupProgress.currentStage)) {
-            this.userData.signupProgress.completedStages.push(this.userData.signupProgress.currentStage);
-        }
-
-        this.userData.signupProgress.currentStage = stage;
-        this.userData.signupProgress.timestamp = Date.now();
-        this.saveSession();
-    }
-
-    public getSignupProgress(): SignupProgress | undefined {
-        if (!ENABLE_SIGNUP_PROGRESS_TRACKING) return undefined;
-        return this.userData.signupProgress;
-    }
-
-    public clearSignupProgress(): void {
-        this.userData.signupProgress = undefined;
-        this.saveSession();
-    }
-
-    public hasSignupProgress(rojifiId?: string): boolean {
-        if (!ENABLE_SIGNUP_PROGRESS_TRACKING || !this.userData.signupProgress) return false;
-
-        if (rojifiId && this.userData.signupProgress.rojifiId !== rojifiId) return false;
-
-        // Check if progress is not too old (e.g., 30 days)
-        const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000;
-        const isRecent = (Date.now() - this.userData.signupProgress.timestamp) < thirtyDaysInMs;
-
-        return isRecent;
-    }
-
-    public getResumeUrl(): string {
-        if (!ENABLE_SIGNUP_PROGRESS_TRACKING || !this.userData.signupProgress) return '/';
-
-        const { rojifiId, currentStage } = this.userData.signupProgress;
-        const stageRoutes = {
-            'signup': `/signup/${rojifiId}`,
-            'business-details': `/signup/${rojifiId}/business-details`,
-            'business-financials': `/signup/${rojifiId}/business-financials`,
-            'verification': `/signup/${rojifiId}/verification`,
-            'director': `/signup/${rojifiId}/director`
-        };
-
-        return stageRoutes[currentStage] || `/signup/${rojifiId}`;
-    }
 }
 
 const secretKey: string = "a054d1f7f839eccf142fbaacedde77a415eee92298188d9734b863b58e1d8809";
-
-// ============================================
-// SIGNUP PROGRESS TRACKING CONFIGURATION
-// ============================================
-// Set to true to enable signup progress tracking and resume functionality
-// Set to false to disable the feature completely
-export const ENABLE_SIGNUP_PROGRESS_TRACKING = false;
-// ============================================
 
 export const session: Session = new Session(secretKey);

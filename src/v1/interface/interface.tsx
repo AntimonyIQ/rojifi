@@ -38,6 +38,8 @@ export interface IRequestAccess {
     apiIntegrationService: boolean;
     metadata: Record<string, any>;
     completed: boolean;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 export interface IResponse<Data = any, Error = any> {
@@ -155,34 +157,38 @@ export interface IRequestAccess {
     metadata: Record<string, any>;
 }
 
-export interface IUser extends IRequestAccess {
+export interface IUser {
+    requestAccessId: IUser | null;
+    rojifiId: string;
     username: string;
+    firstname: string;
+    lastname: string;
+    middlename: string;
+    phoneCode: string;
+    phoneNumber: string;
+    deleted: boolean;
+    deletedAt: Date | null;
+    deletedBy: IUser | null;
+    email: string;
     fullName: string;
     isEmailVerified: boolean;
     key: string;
     phoneNumberHash: string;
     isPhoneNumberVerified: boolean;
+    address: string;
+    city: string;
+    state: string;
+    country: string;
+    postalCode: string;
+    agreement: boolean;
+    weeklyVolume: number;
     dateOfBirth: string;
     pin: string;
+    archived: boolean;
+    archivedAt: Date | null;
     mnemonic: string;
     referralCode: string;
     password: string;
-    //////////////////////////////////
-
-    cacCertOfIncoporation: string,
-    memorandumArticlesOfAssociation: string,
-    cacStatusReport: string,
-    proofOfAddress: string,
-
-    cacCertOfIncoporationIsVerified: boolean,
-    memorandumArticlesOfAssociationIsVerified: boolean,
-    cacStatusReportIsVerified: boolean,
-    proofOfAddressIsVerified: boolean,
-
-    cacCertOfIncoporationVerifiedAt: Date | null,
-    memorandumArticlesOfAssociationVerifiedAt: Date | null,
-    cacStatusReportVerifiedAt: Date | null,
-    proofOfAddressVerifiedAt: Date | null,
 
     requested: {
         otcdesk: RequestStatus;
@@ -220,7 +226,6 @@ export interface IUser extends IRequestAccess {
     passkeyVerifiedAt: Date;
     tier: AccountTier;
     firstDepositConfirmed: boolean;
-    deletedBy: string | null;
     comparePassword(password: string): Promise<boolean>;
     comparePin(pin: string): Promise<boolean>;
     comparePasskey(passkey: string): Promise<boolean>;

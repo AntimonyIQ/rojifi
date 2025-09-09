@@ -56,7 +56,6 @@ function AppRoute({
 }) {
     const sd: SessionData = session.getUserData();
 
-    // State 1: No sender data - show normal page
     if (!sd || !sd.sender) {
         return (
             <ProtectedRoute path={path}>
@@ -69,9 +68,7 @@ function AppRoute({
 
     const isVerificationComplete = sd.sender.businessVerificationCompleted;
 
-    // State 2: Verification incomplete
     if (!isVerificationComplete) {
-        // Exception: Business profile page should still show normally
         if (path === "/dashboard/:wallet/businessprofile") {
             return (
                 <Route path={path}>
@@ -86,8 +83,6 @@ function AppRoute({
             );
         }
 
-        // All other routes show verification in review component
-        // Render within Route component so useParams works correctly
         return (
             <Route path={path}>
                 {() => (

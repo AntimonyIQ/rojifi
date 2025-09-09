@@ -14,7 +14,7 @@ export function RedirectIfAuthenticated({
     if (!match) return null;
 
     if (sd && sd.isLoggedIn) {
-        return <Redirect to="/dashboard" />;
+        return <Redirect to="/dashboard/NGN" />;
     }
 
     return <>{children}</>;
