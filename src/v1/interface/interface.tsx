@@ -251,40 +251,6 @@ export interface IbankWallet {
     updatedAt: Date;
 }
 
-export interface IDirectorAndShareholder {
-    _id?: string;
-    senderId: string;
-    firstName: string;
-    lastName: string;
-    middleName: string;
-    email: string;
-    jobTitle?: string;
-    role: string;
-    isDirector: boolean;
-    isShareholder: boolean;
-    shareholderPercentage?: number;
-    dateOfBirth: Date;
-    nationality: string;
-    phoneCode: string;
-    phoneNumber: string;
-    idType: "passport" | "drivers_license";
-    idNumber: string;
-    issuedCountry: string;
-    issueDate: Date;
-    expiryDate: Date;
-    streetAddress: string;
-    city: string;
-    state: string;
-    postalCode: string;
-    country: string;
-    idDocument?: string; // URL to uploaded ID document
-    proofOfAddress?: string; // URL to uploaded proof of address
-    idDocumentVerified?: boolean;
-    proofOfAddressVerified?: boolean;
-    createdAt?: Date;
-    updatedAt?: Date;
-};
-
 export interface ITeamMember {
     rojifiId: string;
     userId?: string;
@@ -343,8 +309,30 @@ export interface IDirectorAndShareholder {
     state: string;
     postalCode: string;
     country: string;
-    idDocument?: string; // URL to uploaded ID document
-    proofOfAddress?: string; // URL to uploaded proof of address
+    idDocument: {
+        name: string;
+        type: string; // file type (pdf, jpg, png, etc.)
+        url: string;
+        size?: number;
+        uploadedAt: Date;
+        // SmileID verification with tracking IDs
+        smileIdStatus: "verified" | "rejected" | "under_review" | "not_submitted";
+        smileIdVerifiedAt: Date | null;
+        smileIdJobId: string | null;
+        smileIdUploadId: string | null;
+    };
+    proofOfAddress: {
+        name: string;
+        type: string; // file type (pdf, jpg, png, etc.)
+        url: string;
+        size?: number;
+        uploadedAt: Date;
+        // SmileID verification with tracking IDs
+        smileIdStatus: "verified" | "rejected" | "under_review" | "not_submitted";
+        smileIdVerifiedAt: Date | null;
+        smileIdJobId: string | null;
+        smileIdUploadId: string | null;
+    };
     idDocumentVerified?: boolean;
     proofOfAddressVerified?: boolean;
     createdAt?: Date;

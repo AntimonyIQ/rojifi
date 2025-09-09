@@ -1,9 +1,8 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import { Button } from "@/v1/components/ui/button"
 import { Label } from "@/v1/components/ui/label"
-import { X, Plus, Check, ExternalLink, AlertCircle, ArrowUpRight } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/v1/components/ui/dialog"
+import { X, Plus, Check, AlertCircle, ArrowUpRight, Trash2, Eye } from "lucide-react"
 import { Logo } from "@/v1/components/logo"
 import { Carousel, carouselItems } from "../carousel"
 import GlobeWrapper from "../globe"
@@ -47,6 +46,18 @@ export function KYBVerificationForm() {
         memorandumArticlesOfAssociation: null,
         cacStatusReport: null,
         proofOfAddress: null,
+    });
+    // file viewer modal state
+    const [fileViewerState, setFileViewerState] = useState<{
+        isOpen: boolean;
+        file: File | null;
+        fieldKey: string;
+        label: string;
+    }>({
+        isOpen: false,
+        file: null,
+        fieldKey: '',
+        label: ''
     });
     const sd: SessionData = session.getUserData();
 
@@ -269,6 +280,148 @@ export function KYBVerificationForm() {
         }
     }
 
+    // File Viewer Modal Component
+    const FileViewerModal = ({ file, isOpen, onClose, onDelete, label }: {
+        file: File | null;
+        isOpen: boolean;
+        onClose: () => void;
+        onDelete: () => void;
+        label: string;
+    }) => {
+        const [fileUrl, setFileUrl] = useState<string | null>(null);
+
+        useEffect(() => {
+            if (file && isOpen) {
+                const url = URL.createObjectURL(file);
+                setFileUrl(url);
+
+                // Cleanup function to revoke the object URL
+                return () => {
+                    URL.revokeObjectURL(url);
+                    setFileUrl(null);
+                };
+            }
+        }, [file, isOpen]);
+
+        const handleDelete = () => {
+            onDelete();
+            onClose();
+        };
+
+        const renderFileContent = () => {
+            if (!file || !fileUrl) {
+                return (
+                    <div className="flex items-center justify-center h-full">
+                        <p className="text-gray-500">No file to display</p>
+                    </div>
+                );
+            }
+
+            const fileType = file.type.toLowerCase();
+            const fileName = file.name;
+
+            // Handle images
+            if (fileType.startsWith('image/')) {
+                return (
+                    <img
+                        src={fileUrl}
+                        alt={fileName}
+                        className="max-w-full max-h-full object-contain mx-auto"
+                    />
+                );
+            }
+
+            // Handle PDFs using browser's built-in PDF viewer
+            if (fileType === 'application/pdf') {
+                return (
+                    <iframe
+                        src={fileUrl}
+                        className="w-full h-full border-0"
+                        title={fileName ?? "pdf-preview"}
+                    />
+                );
+            }
+
+            // Handle other documents - show download option
+            if (fileType.includes('document') ||
+                fileType.includes('spreadsheet') ||
+                fileType.includes('presentation')) {
+
+                return (
+                    <div className="flex flex-col items-center justify-center h-full space-y-4">
+                        <div className="text-6xl text-blue-500">📄</div>
+                        <div className="text-center">
+                            <p className="text-lg font-medium text-gray-700">{fileName}</p>
+                            <p className="text-sm text-gray-500">Document preview</p>
+                            <p className="text-xs text-gray-400 mt-2">File size: {(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                            <a
+                                href={fileUrl}
+                                download={fileName}
+                                className="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                            >
+                                Download Document
+                            </a>
+                        </div>
+                    </div>
+                );
+            }
+
+            // Fallback for other file types
+            return (
+                <div className="flex flex-col items-center justify-center h-full space-y-4">
+                    <div className="text-6xl text-gray-300">📄</div>
+                    <div className="text-center">
+                        <p className="text-lg font-medium text-gray-700">{fileName}</p>
+                        <p className="text-sm text-gray-500">Preview not available for this file type</p>
+                        <p className="text-xs text-gray-400 mt-2">File size: {(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                    </div>
+                </div>
+            );
+        };
+
+        return (
+            <Dialog open={isOpen} onOpenChange={onClose}>
+                <DialogContent className="max-w-[80vw] w-[80vw] h-[80vh] p-0 flex flex-col">
+                    <DialogHeader className="p-6 pb-2 flex-shrink-0">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <DialogTitle className="text-lg font-semibold">
+                                    {label}
+                                </DialogTitle>
+                                <DialogDescription className="text-sm text-gray-600">
+                                    {file?.name} ({file ? (file.size / 1024 / 1024).toFixed(2) : '0'} MB)
+                                </DialogDescription>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={handleDelete}
+                                    className="text-red-600 border-red-600 hover:bg-red-50"
+                                >
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Delete
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={onClose}
+                                >
+                                    <X className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        </div>
+                    </DialogHeader>
+                    <div className="flex-1 p-6 pt-2 overflow-hidden min-h-0">
+                        <div className="w-full h-full bg-gray-50 rounded-lg overflow-hidden">
+                            {renderFileContent()}
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
+        );
+    };
+
     const renderUploadField = (fieldKey: string, label: string, required: boolean) => (
         <div key={fieldKey}>
             <Label className="block text-lg font-bold text-gray-700 mb-2">{label} {required && <span className="text-red-500">*</span>}</Label>
@@ -336,16 +489,22 @@ export function KYBVerificationForm() {
                         </div>
                         <p className="text-sm text-gray-700 truncate">{formData[fieldKey]?.name ?? 'file'}</p>
 
-                        <a
-                            href={uploadedUrls[fieldKey] || '#'}
-                            target="_blank"
-                            rel="noreferrer"
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setFileViewerState({
+                                    isOpen: true,
+                                    file: formData[fieldKey],
+                                    fieldKey,
+                                    label
+                                });
+                            }}
                             className="ml-auto inline-flex items-center gap-1 text-sm text-primary hover:underline"
                             aria-label={`View uploaded ${fieldKey}`}
                         >
+                            <Eye className="h-4 w-4" />
                             View
-                            <ExternalLink className="h-4 w-4" />
-                        </a>
+                        </button>
 
                         <button
                             type="button"
@@ -483,6 +642,21 @@ export function KYBVerificationForm() {
                     </div>
                 </div>
             </div>
+
+            {/* File Viewer Modal */}
+            <FileViewerModal
+                file={fileViewerState.file}
+                isOpen={fileViewerState.isOpen}
+                onClose={() => setFileViewerState(prev => ({ ...prev, isOpen: false }))}
+                onDelete={() => {
+                    const fieldKey = fileViewerState.fieldKey;
+                    setFormData(prev => ({ ...prev, [fieldKey]: null }));
+                    setUploadedUrls(prev => ({ ...prev, [fieldKey]: null }));
+                    setFieldErrors(prev => ({ ...prev, [fieldKey]: null }));
+                    setFileViewerState(prev => ({ ...prev, isOpen: false }));
+                }}
+                label={fileViewerState.label}
+            />
         </div>
     );
 }

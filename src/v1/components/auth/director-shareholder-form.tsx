@@ -7,7 +7,7 @@ import { Checkbox } from "@/v1/components/ui/checkbox"
 import { Popover, PopoverContent, PopoverTrigger } from "@/v1/components/ui/popover"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/v1/components/ui/command"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/v1/components/ui/select"
-import { Check, Plus, ArrowLeft, ArrowRight, Trash2, X, ArrowUpRight, AlertCircle, ChevronsUpDown, CalendarIcon } from "lucide-react"
+import { Check, Plus, ArrowLeft, ArrowRight, Trash2, X, ArrowUpRight, AlertCircle, ChevronsUpDown, CalendarIcon, CheckCircle, Eye } from "lucide-react"
 import { cn } from "@/v1/lib/utils"
 import { format } from "date-fns"
 import { Link, useParams } from "wouter"
@@ -21,6 +21,7 @@ import { Carousel, carouselItems } from "../carousel"
 import GlobeWrapper from "../globe"
 import countries from "../../data/country_state.json"
 import { Calendar } from "../ui/calendar"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/v1/components/ui/dialog"
 
 enum FormStage {
     SELECTION = 1,
@@ -71,11 +72,12 @@ const logoVariants: Variants = {
 }
 
 export function DirectorShareholderForm() {
-    const [loading, setLoading] = useState(true)
-    const [isLoading, setIsLoading] = useState(false)
+    const [loading, setLoading] = useState(false)
+    const [isLoading, setIsLoading] = useState(true)
     const [isNotApprove, setIsNotApprove] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [currentStage, setCurrentStage] = useState<FormStage>(FormStage.SELECTION)
+    const [showSuccessModal, setShowSuccessModal] = useState(false)
 
     // Selection stage data
     const [selectionData, setSelectionData] = useState({
@@ -305,7 +307,7 @@ export function DirectorShareholderForm() {
         return (
             form.firstName.trim() !== "" &&
             form.lastName.trim() !== "" &&
-            form.email.trim() !== "" &&
+            // form.email.trim() !== "" &&
             form.role.trim() !== "" &&
             form.dateOfBirth !== undefined &&
             form.nationality.trim() !== "" &&
@@ -328,6 +330,7 @@ export function DirectorShareholderForm() {
 
     const handleSubmit = async () => {
         setError(null)
+        console.log(forms);
 
         // Validate all forms
         for (let i = 0; i < forms.length; i++) {
@@ -370,7 +373,7 @@ export function DirectorShareholderForm() {
                 proofOfAddress: form.proofOfAddressUrl
             }))
 
-            const res = await fetch(`${Defaults.API_BASE_URL}/auth/directors-shareholders`, {
+            const res = await fetch(`${Defaults.API_BASE_URL}/auth/directors`, {
                 method: 'POST',
                 headers: {
                     ...Defaults.HEADERS,
@@ -387,8 +390,7 @@ export function DirectorShareholderForm() {
             if (data.status === Status.ERROR) throw new Error(data.message || data.error)
             if (data.status === Status.SUCCESS) {
                 toast.success("Directors/Shareholders information submitted successfully")
-                // Navigate to next step or login
-                window.location.href = "/login"
+                setShowSuccessModal(true)
             }
         } catch (err: any) {
             setError(err.message || "Failed to submit information")
@@ -458,7 +460,7 @@ export function DirectorShareholderForm() {
                             </p>
                         </div>
 
-                        <form className="space-y-6">
+                        <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
                             {error && (
                                 <p className="text-red-500 text-sm text-center">{error}</p>
                             )}
@@ -524,6 +526,7 @@ export function DirectorShareholderForm() {
                                     </div>
 
                                     <Button
+                                        type="button"
                                         onClick={handleSelectionNext}
                                         disabled={!selectionData.isDirector || !selectionData.dateOfBirth}
                                         className="w-full h-12 bg-primary hover:bg-primary/90 text-white disabled:bg-gray-300 disabled:cursor-not-allowed"
@@ -577,6 +580,7 @@ export function DirectorShareholderForm() {
                                             Back
                                         </Button>
                                         <Button
+                                            type="button"
                                             onClick={handleSubmit}
                                             disabled={loading}
                                             className="flex-1 h-12 bg-primary hover:bg-primary/90 text-white"
@@ -610,6 +614,32 @@ export function DirectorShareholderForm() {
                     </div>
                 </div>
             </div>
+
+            {/* Success Modal */}
+            <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+                            <CheckCircle className="h-8 w-8 text-green-600" />
+                        </div>
+                        <DialogTitle className="text-center text-xl font-semibold">
+                            Information Submitted Successfully!
+                        </DialogTitle>
+                        <DialogDescription className="text-center text-gray-600">
+                            Your Business profile, director and shareholder information has been submitted and is currently under review.
+                            We will get in touch with you shortly regarding the next steps.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="sm:justify-center">
+                        <Button
+                            onClick={() => window.location.href = "/"}
+                            className="w-full bg-primary hover:bg-primary/90 text-white"
+                        >
+                            Back to Homepage
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     )
 }
@@ -811,6 +841,7 @@ function DirectorShareholderFormCard({
                 </div>
             </div>
 
+            {/*
             <div className="grid grid-cols-2 gap-4">
                 <div>
                     <Label htmlFor={`email-${index}`} className="block text-sm font-medium text-gray-700 mb-2">
@@ -841,6 +872,20 @@ function DirectorShareholderFormCard({
                         placeholder="e.g., CEO, CFO"
                     />
                 </div>
+            </div>
+            */}
+
+            <div>
+                <Label htmlFor={`jobTitle-${index}`} className="block text-sm font-medium text-gray-700 mb-2">
+                    Job Title
+                </Label>
+                <Input
+                    id={`jobTitle-${index}`}
+                    className="h-12"
+                    value={form.jobTitle}
+                    onChange={(e) => onFormChange(index, 'jobTitle', e.target.value)}
+                    placeholder="e.g., CEO, CFO"
+                />
             </div>
 
             <div>
@@ -1241,6 +1286,8 @@ function DirectorShareholderFormCard({
                                     togglePopover(`expiryDate-${index}`, false)
                                 }}
                                 disabled={(date) => date < new Date()}
+                                fromYear={new Date().getFullYear()}
+                                toYear={new Date().getFullYear() + 50}
                                 initialFocus
                             />
                         </PopoverContent>
@@ -1403,6 +1450,150 @@ function DirectorShareholderFormCard({
     )
 }
 
+// File Viewer Modal Component
+interface FileViewerModalProps {
+    file: File | null;
+    isOpen: boolean;
+    onClose: () => void;
+    onDelete: () => void;
+    label: string;
+}
+
+function FileViewerModal({ file, isOpen, onClose, onDelete, label }: FileViewerModalProps) {
+    const [fileUrl, setFileUrl] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (file && isOpen) {
+            const url = URL.createObjectURL(file);
+            setFileUrl(url);
+
+            // Cleanup function to revoke the object URL
+            return () => {
+                URL.revokeObjectURL(url);
+                setFileUrl(null);
+            };
+        }
+    }, [file, isOpen]);
+
+    const handleDelete = () => {
+        onDelete();
+        onClose();
+    };
+
+    const renderFileContent = () => {
+        if (!file || !fileUrl) {
+            return (
+                <div className="flex items-center justify-center h-full">
+                    <p className="text-gray-500">No file to display</p>
+                </div>
+            );
+        }
+
+        const fileType = file.type.toLowerCase();
+        const fileName = file.name;
+
+        // Handle images
+        if (fileType.startsWith('image/')) {
+            return (
+                <img
+                    src={fileUrl}
+                    alt={fileName}
+                    className="max-w-full max-h-full object-contain mx-auto"
+                />
+            );
+        }
+
+        // Handle PDFs using browser's built-in PDF viewer
+        if (fileType === 'application/pdf') {
+            return (
+                <iframe
+                    src={fileUrl}
+                    className="w-full h-full border-0"
+                    title={fileName ?? "pdf-preview"}
+                />
+            );
+        }
+
+        // Handle other documents - show download option
+        if (fileType.includes('document') ||
+            fileType.includes('spreadsheet') ||
+            fileType.includes('presentation')) {
+
+            return (
+                <div className="flex flex-col items-center justify-center h-full space-y-4">
+                    <div className="text-6xl text-blue-500">📄</div>
+                    <div className="text-center">
+                        <p className="text-lg font-medium text-gray-700">{fileName}</p>
+                        <p className="text-sm text-gray-500">Document preview</p>
+                        <p className="text-xs text-gray-400 mt-2">File size: {(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                        <a
+                            href={fileUrl}
+                            download={fileName}
+                            className="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                        >
+                            Download Document
+                        </a>
+                    </div>
+                </div>
+            );
+        }
+
+        // Fallback for other file types
+        return (
+            <div className="flex flex-col items-center justify-center h-full space-y-4">
+                <div className="text-6xl text-gray-300">📄</div>
+                <div className="text-center">
+                    <p className="text-lg font-medium text-gray-700">{fileName}</p>
+                    <p className="text-sm text-gray-500">Preview not available for this file type</p>
+                    <p className="text-xs text-gray-400 mt-2">File size: {(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                </div>
+            </div>
+        );
+    };
+
+    return (
+        <Dialog open={isOpen} onOpenChange={onClose}>
+            <DialogContent className="max-w-[80vw] w-[80vw] h-[80vh] p-0 flex flex-col">
+                <DialogHeader className="p-6 pb-2 flex-shrink-0">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <DialogTitle className="text-lg font-semibold">
+                                {label}
+                            </DialogTitle>
+                            <DialogDescription className="text-sm text-gray-600">
+                                {file?.name} ({file ? (file.size / 1024 / 1024).toFixed(2) : '0'} MB)
+                            </DialogDescription>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handleDelete}
+                                className="text-red-600 border-red-600 hover:bg-red-50"
+                            >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Delete
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={onClose}
+                            >
+                                <X className="h-4 w-4" />
+                            </Button>
+                        </div>
+                    </div>
+                </DialogHeader>
+                <div className="flex-1 p-6 pt-2 overflow-hidden min-h-0">
+                    <div className="w-full h-full bg-gray-50 rounded-lg overflow-hidden">
+                        {renderFileContent()}
+                    </div>
+                </div>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
 // File upload component
 interface FileUploadFieldProps {
     label: string;
@@ -1418,6 +1609,7 @@ interface FileUploadFieldProps {
 function FileUploadField({ label, required = false, fieldKey, file, uploading, error, onFileSelect, onFileRemove }: FileUploadFieldProps) {
     const fileInputRef = useRef<HTMLInputElement>(null)
     const [dragActive, setDragActive] = useState(false)
+    const [showViewer, setShowViewer] = useState(false)
 
     const handleDrag = (e: React.DragEvent) => {
         e.preventDefault()
@@ -1510,19 +1702,34 @@ function FileUploadField({ label, required = false, fieldKey, file, uploading, e
                             <Check className="h-4 w-4" />
                             <p className="text-sm font-medium">Uploaded</p>
                         </div>
-                        <p className="text-sm text-gray-700 truncate">{file.name}</p>
+                        <p className="text-sm text-gray-700 truncate flex-1">{file.name}</p>
 
-                        <button
-                            type="button"
-                            onClick={(e) => {
-                                e.stopPropagation()
-                                onFileRemove()
-                            }}
-                            className="ml-auto text-red-500 hover:text-red-600"
-                            aria-label={`Remove ${fieldKey}`}
-                        >
-                            <X className="h-4 w-4" />
-                        </button>
+                        <div className="flex items-center gap-2">
+                            <button
+                                type="button"
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    setShowViewer(true)
+                                }}
+                                className="flex items-center gap-1 px-2 py-1 text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-md transition-colors"
+                                aria-label={`View ${fieldKey}`}
+                            >
+                                <Eye className="h-3 w-3" />
+                                View
+                            </button>
+                            <button
+                                type="button"
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    onFileRemove()
+                                }}
+                                className="flex items-center gap-1 px-2 py-1 text-xs bg-red-50 text-red-600 hover:bg-red-100 rounded-md transition-colors"
+                                aria-label={`Remove ${fieldKey}`}
+                            >
+                                <X className="h-3 w-3" />
+                                Delete
+                            </button>
+                        </div>
                     </div>
                 ) : (
                     <p className="text-sm text-gray-500">No file selected</p>
@@ -1532,6 +1739,15 @@ function FileUploadField({ label, required = false, fieldKey, file, uploading, e
                     <p className="text-sm text-red-500 mt-2">{error}</p>
                 )}
             </div>
+
+            {/* File Viewer Modal */}
+            <FileViewerModal
+                file={file}
+                isOpen={showViewer}
+                onClose={() => setShowViewer(false)}
+                onDelete={onFileRemove}
+                label={label}
+            />
         </div>
     )
 }
