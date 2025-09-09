@@ -617,7 +617,7 @@ export function RequestAccessForm() {
 
                             <div>
                                 <Label htmlFor="volume" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Volume Processed Weekly <span className="text-red-500">*</span>
+                                    Volume Processed Weekly ($) <span className="text-red-500">*</span>
                                 </Label>
                                 <div>
                                     <Input

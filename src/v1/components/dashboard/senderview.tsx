@@ -618,7 +618,7 @@ export function SenderView() {
                             {/* Volume Processed Weekly Input */}
                             <div className="mb-8">
                                 <Label htmlFor="volumeWeekly" className="flex flex-col items-start justify-start text-sm font-medium text-gray-700 mb-2">
-                                    <span>Volume Processed Weekly <span className="text-red-500">*</span></span>
+                                    <span>Volume Processed Weekly ($) <span className="text-red-500">*</span></span>
                                     <span className="text-slate-400">(please enter an accurate total volume processed to enable us serve your business better)</span>
                                 </Label>
                                 <input
