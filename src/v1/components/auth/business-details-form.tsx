@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react"
 import { Button } from "@/v1/components/ui/button"
 import { Input } from "@/v1/components/ui/input"
 import { Label } from "@/v1/components/ui/label"
-import { X, ChevronsUpDownIcon, CheckIcon, CalendarIcon, AlertCircle, ArrowUpRight } from "lucide-react"
+import { X, ChevronsUpDownIcon, CheckIcon, CalendarIcon, AlertCircle, ArrowUpRight, Check } from "lucide-react"
 import { Logo } from "@/v1/components/logo"
 import { session, SessionData } from "@/v1/session/session"
 import { toast } from "sonner"
@@ -85,6 +85,7 @@ const legalForms = [
 ]
 
 export function BusinessDetailsForm() {
+    const [completed, setCompleted] = useState(false);
     const [error, setError] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
@@ -143,6 +144,7 @@ export function BusinessDetailsForm() {
                 if (!data.handshake) throw new Error('Unable to process response right now, please try again.');
                 // User is authorized, continue
                 const parseData: IRequestAccess = Defaults.PARSE_DATA(data.data, sd.client.privateKey, data.handshake);
+                setCompleted(parseData.completed);
                 setFormData((prev) => ({
                     ...prev,
                     name: parseData.businessName || "",
@@ -314,6 +316,35 @@ export function BusinessDetailsForm() {
                                 Request Access
                             </Button>
                         </Link>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
+    if (completed) {
+        return (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-white">
+                <div className="p-6 max-w-md mx-auto text-center">
+                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+                        <Check className="h-8 w-8 text-green-600" />
+                    </div>
+                    <h2 className="text-xl font-semibold mb-2">Submission Received</h2>
+                    <p className="text-gray-600 mb-4">You have successfully submitted your documents. They are under review — you will be notified once the review is complete.</p>
+                    <div className="space-y-3">
+                        <Button
+                            onClick={() => window.location.href = '/login'}
+                            className="w-full bg-primary hover:bg-primary/90 text-white"
+                        >
+                            Go to Dashboard
+                        </Button>
+                        <Button
+                            variant="outline"
+                            onClick={() => window.location.href = '/'}
+                            className="w-full"
+                        >
+                            Back to Homepage
+                        </Button>
                     </div>
                 </div>
             </div>

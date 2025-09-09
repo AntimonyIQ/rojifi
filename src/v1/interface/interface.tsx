@@ -37,6 +37,7 @@ export interface IRequestAccess {
     otcdeskService: boolean;
     apiIntegrationService: boolean;
     metadata: Record<string, any>;
+    completed: boolean;
 }
 
 export interface IResponse<Data = any, Error = any> {
