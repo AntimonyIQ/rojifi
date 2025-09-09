@@ -477,7 +477,7 @@ export interface ISender {
     directorOrBeneficialOwnerIsPEPOrUSPerson?: boolean;
     immediateApprove?: boolean;
 
-    directorsAndShareholders?: Array<IDirectorAndShareholder>;
+    directors: Array<IDirectorAndShareholder>;
     metadata: Record<string, any>;
 
     createdAt: Date;

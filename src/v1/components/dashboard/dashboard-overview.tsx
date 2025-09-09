@@ -381,7 +381,7 @@ export function DashboardOverview() {
                                                         <div className="text-2xl">
                                                             {hideBalances
                                                                 ? "•••••"
-                                                                : `15`}
+                                                                : `0`}
                                                         </div>
                                                         <div className="text-xs uppercase">Total Recipient</div>
                                                     </div>

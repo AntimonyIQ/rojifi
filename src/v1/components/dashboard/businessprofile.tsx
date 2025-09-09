@@ -22,6 +22,7 @@ export function BusinessProfileView() {
     const [loading, setLoading] = useState<boolean>(true);
     const [kycCompleted, setKycCompleted] = useState<boolean>(false);
     const [sender, setSender] = useState<ISender | null>(null);
+    const [directors, setDirectors] = useState<Array<IDirectorAndShareholder>>([]);
     const sd: SessionData = session.getUserData();
     const { wallet } = useParams();
     console.log("Wallet param:", wallet);
@@ -34,17 +35,11 @@ export function BusinessProfileView() {
 
     const statusTabs = Object.values(Tabs);
 
-    // Simulate Directors & Shareholders data (replace with actual data when available)
-    const simulatedDirectorsAndShareholders: IDirectorAndShareholder[] = [];
-
-    // Use actual data if available, otherwise use simulated data
-    const directorsAndShareholders = sender?.directorsAndShareholders?.length
-        ? sender.directorsAndShareholders
-        : simulatedDirectorsAndShareholders;
-
     useEffect(() => {
         if (sd) {
+            console.log("Sender: ", sd.sender);
             setSender(sd.sender);
+            setDirectors(sd.sender.directors);
             setKycCompleted(sd.sender.businessVerificationCompleted);
             setLoading(false);
         }
@@ -63,7 +58,7 @@ export function BusinessProfileView() {
 
         const allVerified = documents.every(doc => doc.smileIdStatus === "verified");
         const hasFailed = documents.some(doc => doc.smileIdStatus === "failed");
-        const inReview = documents.some(doc => doc.smileIdStatus === "pending" || !doc.smileIdStatus);
+        const inReview = documents.some(doc => doc.kycVerified === false || !doc.kycVerified);
 
         return { allVerified, hasFailed, inReview };
     };
@@ -224,7 +219,7 @@ export function BusinessProfileView() {
                                                             ? 'bg-red-100 text-red-700'
                                                             : 'bg-yellow-100 text-yellow-700'
                                                         }`}>
-                                                        {doc.smileIdStatus || 'Pending'}
+                                                        {doc.kycVerified ? 'Verified' : 'In Review'}
                                                     </Badge>
                                                 </div>
                                             )) || (
@@ -251,22 +246,22 @@ export function BusinessProfileView() {
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: 0.4 }}
-                                        className={`p-6 rounded-xl border-2 ${directorsAndShareholders.length > 0
+                                        className={`p-6 rounded-xl border-2 ${directors.length > 0
                                             ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-200'
                                             : 'bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200'
                                             }`}
                                     >
                                         <div className="flex items-center justify-between mb-4">
-                                            <div className={`w-12 h-12 ${directorsAndShareholders.length > 0 ? 'bg-green-600' : 'bg-gray-400'
+                                            <div className={`w-12 h-12 ${directors.length > 0 ? 'bg-green-600' : 'bg-gray-400'
                                                 } rounded-full flex items-center justify-center`}>
                                                 <UsersIcon className="h-6 w-6 text-white" />
                                             </div>
                                             <Badge className={
-                                                directorsAndShareholders.length > 0
+                                                directors.length > 0
                                                     ? 'bg-green-100 text-green-800 border-green-200'
                                                     : 'bg-gray-100 text-gray-800 border-gray-200'
                                             }>
-                                                {directorsAndShareholders.length > 0 ? 'Complete' : 'Pending'}
+                                                {directors.length > 0 ? 'Complete' : 'Pending'}
                                             </Badge>
                                         </div>
                                         <h3 className="font-bold text-lg text-gray-900 mb-3">Directors & Shareholders</h3>
@@ -278,12 +273,12 @@ export function BusinessProfileView() {
                                             <div className="flex items-center justify-between text-xs">
                                                 <span>Directors & Shareholders Added</span>
                                                 <Badge className="text-xs bg-blue-100 text-blue-700">
-                                                    {directorsAndShareholders.length} Added
+                                                    {directors.length} Added
                                                 </Badge>
                                             </div>
                                         </div>
 
-                                        {directorsAndShareholders.length === 0 && (
+                                        {directors.length === 0 && (
                                             <Button
                                                 variant="outline"
                                                 size="sm"
@@ -964,27 +959,27 @@ export function BusinessProfileView() {
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <Badge variant="secondary" className="px-3 py-1">
-                                            {directorsAndShareholders.length} {directorsAndShareholders.length === 1 ? 'Person' : 'People'}
+                                            {directors.length} {directors.length === 1 ? 'Person' : 'People'}
                                         </Badge>
                                     </div>
                                 </div>
 
-                                {directorsAndShareholders.length > 0 ? (
+                                {directors.length > 0 ? (
                                     <>
                                         {/* Progress Indicator */}
                                         <div className="mb-6">
                                             <div className="flex items-center justify-between mb-2">
                                                 <p className="text-sm font-medium text-gray-700">
-                                                    {currentDirectorIndex + 1} of {directorsAndShareholders.length}
+                                                    {currentDirectorIndex + 1} of {directors.length}
                                                 </p>
                                                 <p className="text-sm text-gray-500">
-                                                    {directorsAndShareholders[currentDirectorIndex]?.firstName} {directorsAndShareholders[currentDirectorIndex]?.lastName}
+                                                    {directors[currentDirectorIndex]?.firstName} {directors[currentDirectorIndex]?.lastName}
                                                 </p>
                                             </div>
                                             <div className="w-full bg-gray-200 rounded-full h-2">
                                                 <div
                                                     className="bg-indigo-600 h-2 rounded-full transition-all duration-300 ease-in-out"
-                                                    style={{ width: `${((currentDirectorIndex + 1) / directorsAndShareholders.length) * 100}%` }}
+                                                    style={{ width: `${((currentDirectorIndex + 1) / directors.length) * 100}%` }}
                                                 />
                                             </div>
                                         </div>
@@ -1006,7 +1001,7 @@ export function BusinessProfileView() {
                                                     </Label>
                                                     <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border">
                                                         <p className="font-semibold text-gray-900">
-                                                            {`${directorsAndShareholders[currentDirectorIndex]?.firstName} ${directorsAndShareholders[currentDirectorIndex]?.middleName ? directorsAndShareholders[currentDirectorIndex]?.middleName + ' ' : ''}${directorsAndShareholders[currentDirectorIndex]?.lastName}`}
+                                                            {`${directors[currentDirectorIndex]?.firstName} ${directors[currentDirectorIndex]?.middleName ? directors[currentDirectorIndex]?.middleName + ' ' : ''}${directors[currentDirectorIndex]?.lastName}`}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -1017,7 +1012,7 @@ export function BusinessProfileView() {
                                                         Email Address
                                                     </Label>
                                                     <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border">
-                                                        <p className="text-gray-900">{directorsAndShareholders[currentDirectorIndex]?.email}</p>
+                                                        <p className="text-gray-900">{directors[currentDirectorIndex]?.email}</p>
                                                     </div>
                                                 </div>
 
@@ -1027,9 +1022,9 @@ export function BusinessProfileView() {
                                                         Role & Position
                                                     </Label>
                                                     <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border">
-                                                        <p className="font-semibold text-gray-900">{directorsAndShareholders[currentDirectorIndex]?.role}</p>
-                                                        {directorsAndShareholders[currentDirectorIndex]?.jobTitle && (
-                                                            <p className="text-sm text-gray-600 mt-1">{directorsAndShareholders[currentDirectorIndex]?.jobTitle}</p>
+                                                        <p className="font-semibold text-gray-900">{directors[currentDirectorIndex]?.role}</p>
+                                                        {directors[currentDirectorIndex]?.jobTitle && (
+                                                            <p className="text-sm text-gray-600 mt-1">{directors[currentDirectorIndex]?.jobTitle}</p>
                                                         )}
                                                     </div>
                                                 </div>
@@ -1041,16 +1036,16 @@ export function BusinessProfileView() {
                                                     </Label>
                                                     <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border">
                                                         <p className="font-semibold text-gray-900">
-                                                            {directorsAndShareholders[currentDirectorIndex]?.isShareholder
-                                                                ? `${directorsAndShareholders[currentDirectorIndex]?.shareholderPercentage}% shareholding`
+                                                            {directors[currentDirectorIndex]?.isShareholder
+                                                                ? `${directors[currentDirectorIndex]?.shareholderPercentage}% shareholding`
                                                                 : 'No shareholding'
                                                             }
                                                         </p>
                                                         <div className="flex gap-2 mt-2">
-                                                            {directorsAndShareholders[currentDirectorIndex]?.isDirector && (
+                                                            {directors[currentDirectorIndex]?.isDirector && (
                                                                 <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-800">Director</Badge>
                                                             )}
-                                                            {directorsAndShareholders[currentDirectorIndex]?.isShareholder && (
+                                                            {directors[currentDirectorIndex]?.isShareholder && (
                                                                 <Badge variant="secondary" className="text-xs bg-green-100 text-green-800">Shareholder</Badge>
                                                             )}
                                                         </div>
@@ -1063,7 +1058,7 @@ export function BusinessProfileView() {
                                                         Phone Number
                                                     </Label>
                                                     <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border">
-                                                        <p className="text-gray-900">+{directorsAndShareholders[currentDirectorIndex]?.phoneCode} {directorsAndShareholders[currentDirectorIndex]?.phoneNumber}</p>
+                                                        <p className="text-gray-900">+{directors[currentDirectorIndex]?.phoneCode} {directors[currentDirectorIndex]?.phoneNumber}</p>
                                                     </div>
                                                 </div>
 
@@ -1073,7 +1068,7 @@ export function BusinessProfileView() {
                                                         Nationality
                                                     </Label>
                                                     <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border">
-                                                        <p className="text-gray-900">{directorsAndShareholders[currentDirectorIndex]?.nationality}</p>
+                                                        <p className="text-gray-900">{directors[currentDirectorIndex]?.nationality}</p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -1088,28 +1083,28 @@ export function BusinessProfileView() {
                                                             Street Address
                                                         </Label>
                                                         <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border">
-                                                            <p className="text-gray-900">{directorsAndShareholders[currentDirectorIndex]?.streetAddress}</p>
+                                                            <p className="text-gray-900">{directors[currentDirectorIndex]?.streetAddress}</p>
                                                         </div>
                                                     </div>
 
                                                     <div className="space-y-2">
                                                         <Label className="text-sm font-semibold text-gray-700">City & Postal Code</Label>
                                                         <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border">
-                                                            <p className="text-gray-900">{directorsAndShareholders[currentDirectorIndex]?.city}, {directorsAndShareholders[currentDirectorIndex]?.postalCode}</p>
+                                                            <p className="text-gray-900">{directors[currentDirectorIndex]?.city}, {directors[currentDirectorIndex]?.postalCode}</p>
                                                         </div>
                                                     </div>
 
                                                     <div className="space-y-2">
                                                         <Label className="text-sm font-semibold text-gray-700">State/Province</Label>
                                                         <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border">
-                                                            <p className="text-gray-900">{directorsAndShareholders[currentDirectorIndex]?.state}</p>
+                                                            <p className="text-gray-900">{directors[currentDirectorIndex]?.state}</p>
                                                         </div>
                                                     </div>
 
                                                     <div className="space-y-2">
                                                         <Label className="text-sm font-semibold text-gray-700">Country</Label>
                                                         <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border">
-                                                            <p className="text-gray-900">{directorsAndShareholders[currentDirectorIndex]?.country}</p>
+                                                            <p className="text-gray-900">{directors[currentDirectorIndex]?.country}</p>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1126,11 +1121,11 @@ export function BusinessProfileView() {
                                                         </Label>
                                                         <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border">
                                                             <div className="flex items-center gap-2">
-                                                                <Badge className={directorsAndShareholders[currentDirectorIndex]?.idDocumentVerified ? 'bg-green-100 text-green-800 border-green-200' : 'bg-yellow-100 text-yellow-800 border-yellow-200'}>
-                                                                    {directorsAndShareholders[currentDirectorIndex]?.idDocumentVerified ? 'Verified' : 'Pending'}
+                                                                <Badge className={directors[currentDirectorIndex]?.idDocumentVerified ? 'bg-green-100 text-green-800 border-green-200' : 'bg-yellow-100 text-yellow-800 border-yellow-200'}>
+                                                                    {directors[currentDirectorIndex]?.idDocumentVerified ? 'Verified' : 'Pending'}
                                                                 </Badge>
                                                                 <span className="text-sm text-gray-600">
-                                                                    {directorsAndShareholders[currentDirectorIndex]?.idType === 'passport' ? 'Passport' : 'Driver\'s License'}
+                                                                    {directors[currentDirectorIndex]?.idType === 'passport' ? 'Passport' : 'Driver\'s License'}
                                                                 </span>
                                                             </div>
                                                         </div>
@@ -1142,8 +1137,8 @@ export function BusinessProfileView() {
                                                             Proof of Address
                                                         </Label>
                                                         <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border">
-                                                            <Badge className={directorsAndShareholders[currentDirectorIndex]?.proofOfAddressVerified ? 'bg-green-100 text-green-800 border-green-200' : 'bg-yellow-100 text-yellow-800 border-yellow-200'}>
-                                                                {directorsAndShareholders[currentDirectorIndex]?.proofOfAddressVerified ? 'Verified' : 'Pending'}
+                                                            <Badge className={directors[currentDirectorIndex]?.proofOfAddressVerified ? 'bg-green-100 text-green-800 border-green-200' : 'bg-yellow-100 text-yellow-800 border-yellow-200'}>
+                                                                {directors[currentDirectorIndex]?.proofOfAddressVerified ? 'Verified' : 'Pending'}
                                                             </Badge>
                                                         </div>
                                                     </div>
@@ -1164,7 +1159,7 @@ export function BusinessProfileView() {
                                             </Button>
 
                                             <div className="flex gap-2">
-                                                {directorsAndShareholders.map((_, index) => (
+                                                {directors.map((_, index) => (
                                                     <button
                                                         key={index}
                                                         onClick={() => setCurrentDirectorIndex(index)}
@@ -1178,8 +1173,8 @@ export function BusinessProfileView() {
 
                                             <Button
                                                 variant="outline"
-                                                onClick={() => setCurrentDirectorIndex(Math.min(directorsAndShareholders.length - 1, currentDirectorIndex + 1))}
-                                                disabled={currentDirectorIndex === directorsAndShareholders.length - 1}
+                                                onClick={() => setCurrentDirectorIndex(Math.min(directors.length - 1, currentDirectorIndex + 1))}
+                                                disabled={currentDirectorIndex === directors.length - 1}
                                                 className="flex items-center gap-2"
                                             >
                                                 Next

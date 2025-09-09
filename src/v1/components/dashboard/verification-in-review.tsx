@@ -67,7 +67,7 @@ export function VerificationInReview() {
                         <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-lg p-4 mb-6">
                             <div className="flex items-center justify-center gap-2 text-yellow-800">
                                 <Clock className="h-5 w-5" />
-                                <span className="font-medium">Review typically takes 1-3 business days</span>
+                                <span className="font-medium">Review typically takes 1-2 business days</span>
                             </div>
                         </div>
 

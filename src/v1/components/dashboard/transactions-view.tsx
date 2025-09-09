@@ -25,6 +25,7 @@ import { Status, TransactionType } from "@/v1/enums/enums";
 import { session, SessionData } from "@/v1/session/session";
 import Defaults from "@/v1/defaults/defaults";
 import { Input } from "@/v1/components/ui/input";
+// import { useLocation, useParams } from "wouter";
 
 interface ICurrency {
     name: string;
@@ -38,6 +39,8 @@ enum Owners {
 }
 
 export function TransactionsView() {
+    // const { wallet } = useParams();
+    // const [_, _navigate] = useLocation();
     const [hideBalances, setHideBalances] = useState(false);
     const [transactions, setTransactions] = useState<Array<ITransaction>>([]);
     const [loading, setLoading] = useState<boolean>(false);

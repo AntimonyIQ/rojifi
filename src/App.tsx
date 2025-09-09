@@ -18,7 +18,6 @@ import TeamsPage from "./v1/app/dashboard/[wallet]/teams/page";
 import StatementPage from "./v1/app/dashboard/[wallet]/statement/page";
 import SwapPage from "./v1/app/dashboard/[wallet]/swap/page";
 import SenderPage from "./v1/app/dashboard/[wallet]/sender/page";
-import EditSenderPage from "./v1/app/dashboard/[wallet]/sender/edit/page";
 import OTCDashboardPage from "./v1/app/dashboard/[wallet]/otc/page";
 import PaymentPage from "./v1/app/dashboard/[wallet]/payment/page";
 import BusinessProfilePage from "./v1/app/dashboard/[wallet]/businessprofile/page";
@@ -45,6 +44,7 @@ import InvitationPage from "./v1/app/invitation/[id]/page";
 import FaqPage from "./v1/app/faq/page";
 import DirectorPage from "./v1/app/signup/[id]/director/page";
 import { session, SessionData } from "./v1/session/session";
+import EditSenderPage from "./v1/app/dashboard/[wallet]/sender/edit/EditSenderPage";
 // ...existing code...
 
 function AppRoute({
@@ -56,9 +56,7 @@ function AppRoute({
 }) {
     const sd: SessionData = session.getUserData();
 
-    /* THIS IS TO ENABLE TESTING: REMOVE COMMENT WHEN DONE
-    const isVerificationComplete = sd.sender.businessVerificationCompleted;
-
+    const isVerificationComplete = sd?.sender?.businessVerificationCompleted;
     if (!isVerificationComplete) {
         if (path === "/dashboard/:wallet/businessprofile") {
             return (
@@ -67,6 +65,20 @@ function AppRoute({
                         <ProtectedRoute path={path}>
                             <DashboardLayout>
                                 <BusinessProfilePage />
+                            </DashboardLayout>
+                        </ProtectedRoute>
+                    )}
+                </Route>
+            );
+        }
+
+        if (path === "/dashboard/:wallet/sender/edit") {
+            return (
+                <Route path={path}>
+                    {() => (
+                        <ProtectedRoute path={path}>
+                            <DashboardLayout>
+                                <EditSenderPage />
                             </DashboardLayout>
                         </ProtectedRoute>
                     )}
@@ -86,7 +98,6 @@ function AppRoute({
             </Route>
         );
     }
-    */
 
     // State 3: Verification complete - show normal pages
     return (
