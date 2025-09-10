@@ -78,7 +78,7 @@ export function DirectorShareholderForm() {
     const [isNotApprove, setIsNotApprove] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [currentStage, setCurrentStage] = useState<FormStage>(FormStage.SELECTION)
-    const [showSuccessModal, setShowSuccessModal] = useState(false)
+    const [showSuccessModal, setShowSuccessModal] = useState(true)
 
     // Selection stage data
     const [selectionData, setSelectionData] = useState({
@@ -295,12 +295,9 @@ export function DirectorShareholderForm() {
                 // Update form with file and URL
                 handleFormChange(formIndex, fieldType, file)
                 handleFormChange(formIndex, `${fieldType}Url`, parseData.url)
-
-                toast.success("File uploaded successfully")
             }
         } catch (err: any) {
             setFieldErrors(prev => ({ ...prev, [uploadKey]: err.message || 'File upload failed' }))
-            toast.error(err.message || 'File upload failed')
         } finally {
             setUploadingFiles(prev => ({ ...prev, [uploadKey]: false }))
         }
@@ -659,15 +656,15 @@ export function DirectorShareholderForm() {
                         </DialogTitle>
                         <DialogDescription className="text-center text-gray-600">
                             Your Business profile, director and shareholder information has been submitted and is currently under review.
-                            We will get in touch with you shortly regarding the next steps.
+                            We will get in touch with you on your email/dashboard regarding the next steps.
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter className="sm:justify-center">
                         <Button
-                            onClick={() => window.location.href = "/"}
+                            onClick={() => window.location.href = "/dashboard/NGN"}
                             className="w-full bg-primary hover:bg-primary/90 text-white"
                         >
-                            Back to Homepage
+                            Back to Dashboard
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -1753,6 +1750,12 @@ function FileUploadField({ label, required = false, fieldKey, file, uploading, e
                                 type="button"
                                 onClick={(e) => {
                                     e.stopPropagation()
+                                    try {
+                                        // clear native input so selecting same file again triggers onChange
+                                        if (fileInputRef.current) fileInputRef.current.value = ''
+                                    } catch (e) {
+                                        // ignore
+                                    }
                                     onFileRemove()
                                 }}
                                 className="flex items-center gap-1 px-2 py-1 text-xs bg-red-50 text-red-600 hover:bg-red-100 rounded-md transition-colors"
@@ -1777,7 +1780,14 @@ function FileUploadField({ label, required = false, fieldKey, file, uploading, e
                 file={file}
                 isOpen={showViewer}
                 onClose={() => setShowViewer(false)}
-                onDelete={onFileRemove}
+                onDelete={() => {
+                    try {
+                        if (fileInputRef.current) fileInputRef.current.value = ''
+                    } catch (e) {
+                        // ignore
+                    }
+                    onFileRemove()
+                }}
                 label={label}
             />
         </div>

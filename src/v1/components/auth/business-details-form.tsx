@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react"
 import { Button } from "@/v1/components/ui/button"
 import { Input } from "@/v1/components/ui/input"
 import { Label } from "@/v1/components/ui/label"
-import { X, ChevronsUpDownIcon, CheckIcon, CalendarIcon, AlertCircle, ArrowUpRight, Check } from "lucide-react"
+import { ArrowLeft, ChevronsUpDownIcon, CheckIcon, CalendarIcon, AlertCircle, ArrowUpRight, Check } from "lucide-react"
 import { Logo } from "@/v1/components/logo"
 import { session, SessionData } from "@/v1/session/session"
 import { toast } from "sonner"
@@ -358,12 +358,19 @@ export function BusinessDetailsForm() {
                     <div className="p-4 max-w-md mx-auto">
                         {/* Header */}
                         <div className="flex items-center justify-between mb-8">
-                            <Link href="/" className="flex items-center space-x-2">
-                                <Logo className="h-8 w-auto" />
-                            </Link>
-                            <Link href="/" className="text-gray-400 hover:text-gray-600">
-                                <X className="h-6 w-6" />
-                            </Link>
+                            <div className="flex items-center space-x-2">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => window.history.back()}
+                                    className="text-gray-600"
+                                >
+                                    <ArrowLeft className="h-4 w-4" />
+                                </Button>
+                                <Link href="/" className="flex items-center space-x-2">
+                                    <Logo className="h-8 w-auto" />
+                                </Link>
+                            </div>
                         </div>
 
                         {/* Form Content */}

@@ -4,7 +4,7 @@ import { Button } from "@/v1/components/ui/button"
 import { Input } from "@/v1/components/ui/input"
 import { Label } from "@/v1/components/ui/label"
 import { Checkbox } from "@/v1/components/ui/checkbox"
-import { X, AlertCircle, ArrowUpRight, ChevronDownIcon, CheckIcon, Check } from "lucide-react"
+import { AlertCircle, ArrowUpRight, ChevronDownIcon, CheckIcon, Check, ArrowLeft } from "lucide-react"
 import { Logo } from "@/v1/components/logo"
 import { session, SessionData } from "@/v1/session/session"
 import { toast } from "sonner"
@@ -328,12 +328,19 @@ export function BusinessFinancialsForm() {
                     <div className="p-4 max-w-md mx-auto">
                         {/* Header */}
                         <div className="flex items-center justify-between mb-8">
-                            <Link href="/" className="flex items-center space-x-2">
-                                <Logo className="h-8 w-auto" />
-                            </Link>
-                            <Link href="/" className="text-gray-400 hover:text-gray-600">
-                                <X className="h-6 w-6" />
-                            </Link>
+                            <div className="flex items-center space-x-2">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => window.history.back()}
+                                    className="text-gray-600"
+                                >
+                                    <ArrowLeft className="h-4 w-4" />
+                                </Button>
+                                <Link href="/" className="flex items-center space-x-2">
+                                    <Logo className="h-8 w-auto" />
+                                </Link>
+                            </div>
                         </div>
 
                         {/* Form Content */}
@@ -353,7 +360,7 @@ export function BusinessFinancialsForm() {
 
                                 <div>
                                     <Label htmlFor="shareCapital" className="block text-sm font-medium text-gray-700 mb-2">
-                                        Share Capital <span className="text-gray-400">(Optional)</span>
+                                        Share Capital <span className="text-red-500">*</span>
                                     </Label>
                                     <Input
                                         id="shareCapital"
@@ -403,7 +410,7 @@ export function BusinessFinancialsForm() {
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
                                             <Label htmlFor="expectedMonthlyInboundCryptoPayments" className="block text-sm font-medium text-gray-700 mb-2">
-                                                Monthly Inbound Crypto <span className="text-gray-400">(Optional)</span>
+                                                Monthly Inbound Crypto <span className="text-red-500">*</span>
                                             </Label>
                                             <Input
                                                 id="expectedMonthlyInboundCryptoPayments"
@@ -419,7 +426,7 @@ export function BusinessFinancialsForm() {
 
                                         <div>
                                             <Label htmlFor="expectedMonthlyOutboundCryptoPayments" className="block text-sm font-medium text-gray-700 mb-2">
-                                                Monthly Outbound Crypto <span className="text-gray-400">(Optional)</span>
+                                                Monthly Outbound Crypto <span className="text-red-500">*</span>
                                             </Label>
                                             <Input
                                                 id="expectedMonthlyOutboundCryptoPayments"
@@ -438,7 +445,7 @@ export function BusinessFinancialsForm() {
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <Label htmlFor="expectedMonthlyInboundFiatPayments" className="block text-sm font-medium text-gray-700 mb-2">
-                                            Monthly Inbound Fiat <span className="text-gray-400">(Optional)</span>
+                                            Monthly Inbound Fiat <span className="text-red-500">*</span>
                                         </Label>
                                         <Input
                                             id="expectedMonthlyInboundFiatPayments"
@@ -454,7 +461,7 @@ export function BusinessFinancialsForm() {
 
                                     <div>
                                         <Label htmlFor="expectedMonthlyOutboundFiatPayments" className="block text-sm font-medium text-gray-700 mb-2">
-                                            Monthly Outbound Fiat <span className="text-gray-400">(Optional)</span>
+                                            Monthly Outbound Fiat <span className="text-red-500">*</span>
                                         </Label>
                                         <Input
                                             id="expectedMonthlyOutboundFiatPayments"

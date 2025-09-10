@@ -282,6 +282,18 @@ export function KYBVerificationForm() {
         }
     }
 
+    // Helper to clear the native file input so selecting the same file again triggers onChange
+    const clearFileInput = (fieldKey: string) => {
+        try {
+            const el = document.getElementById(`file-upload-${fieldKey}`) as HTMLInputElement | null;
+            if (el) {
+                el.value = '';
+            }
+        } catch (e) {
+            // ignore
+        }
+    }
+
     // File Viewer Modal Component
     const FileViewerModal = ({ file, isOpen, onClose, onDelete, label }: {
         file: File | null;
@@ -515,6 +527,7 @@ export function KYBVerificationForm() {
                                 setFormData(prev => ({ ...prev, [fieldKey]: null }));
                                 setUploadedUrls(prev => ({ ...prev, [fieldKey]: null }));
                                 setFieldErrors(prev => ({ ...prev, [fieldKey]: null }));
+                                clearFileInput(fieldKey);
                             }}
                             className="ml-2 text-red-500 hover:text-red-600"
                             aria-label={`Remove ${fieldKey}`}
@@ -540,6 +553,7 @@ export function KYBVerificationForm() {
                                 // allow removing before upload completes or before user reselects
                                 setFormData(prev => ({ ...prev, [fieldKey]: null }));
                                 setFieldErrors(prev => ({ ...prev, [fieldKey]: null }));
+                                clearFileInput(fieldKey);
                             }}
                             className="ml-auto text-red-500 hover:text-red-600"
                             aria-label={`Remove ${fieldKey}`}
@@ -684,6 +698,7 @@ export function KYBVerificationForm() {
                     setFormData(prev => ({ ...prev, [fieldKey]: null }));
                     setUploadedUrls(prev => ({ ...prev, [fieldKey]: null }));
                     setFieldErrors(prev => ({ ...prev, [fieldKey]: null }));
+                    clearFileInput(fieldKey);
                     setFileViewerState(prev => ({ ...prev, isOpen: false }));
                 }}
                 label={fileViewerState.label}

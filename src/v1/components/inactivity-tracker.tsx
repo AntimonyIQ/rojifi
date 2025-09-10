@@ -7,7 +7,7 @@ import { session } from "@/v1/session/session";
 //  - On /signup/* routes: redirect to home page
 //  - On /dashboard/* routes: logout and redirect to /login
 
-const INACTIVITY_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
+const INACTIVITY_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
 const MODAL_COUNTDOWN_SECONDS = 30; // 30s countdown once modal appears
 
 export const InactivityTracker: React.FC = () => {
