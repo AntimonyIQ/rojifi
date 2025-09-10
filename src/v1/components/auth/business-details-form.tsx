@@ -669,7 +669,7 @@ export function BusinessDetailsForm() {
 
                             {/* Address Section */}
                             <div className="space-y-4">
-                                <h3 className="text-lg font-medium text-gray-900">Registered Address</h3>
+                                <h3 className="text-lg font-medium text-gray-900">Business Registered Address</h3>
 
                                 <div>
                                     <Label htmlFor="streetAddress" className="block text-sm font-medium text-gray-700 mb-2">
