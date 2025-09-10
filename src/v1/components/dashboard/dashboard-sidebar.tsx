@@ -1,6 +1,6 @@
 import type React from "react"
 import { useState, useEffect } from "react"
-import { BarChart3, ArrowLeftRight, Settings, LogOut, X, CreditCard, Coins, Group, ReceiptText, Briefcase, LucideSend, Star, ChevronDown } from "lucide-react"
+import { BarChart3, ArrowLeftRight, Settings, LogOut, X, CreditCard, Coins, Group, ReceiptText, Briefcase, LucideSend, Star } from "lucide-react"
 import { Logo } from "@/v1/components/logo"
 import { Button } from "../ui/button"
 import { ISender, IUser } from "@/v1/interface/interface"
@@ -119,10 +119,9 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ open, setOpe
                                     className="w-full justify-between"
                                 >
                                     <div className="flex flex-row items-center gap-2">
-                                        <Briefcase className="h-4 w-4" />
+                                        <img src={sender?.countryflag} alt="" className="w-5 h-5 rounded-full" />
                                         {sender?.businessName}
                                     </div>
-                                    <ChevronDown className="ml-1 h-4 w-4 shrink-0 opacity-50" />
                                 </Button>
                             </li>
                         </ul>

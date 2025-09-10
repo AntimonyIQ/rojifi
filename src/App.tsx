@@ -45,6 +45,7 @@ import FaqPage from "./v1/app/faq/page";
 import DirectorPage from "./v1/app/signup/[id]/director/page";
 import { session, SessionData } from "./v1/session/session";
 import EditSenderPage from "./v1/app/dashboard/[wallet]/sender/edit/EditSenderPage";
+import InactivityTracker from "@/v1/components/inactivity-tracker";
 // ...existing code...
 
 function AppRoute({
@@ -142,6 +143,8 @@ function App() {
 
     return (
         <AnimatePresence mode="wait">
+            {/* Global inactivity tracker */}
+            <InactivityTracker />
             <Switch>
                 {/*
                 <RedirectIfAuthenticated path="/login">

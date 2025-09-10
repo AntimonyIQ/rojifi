@@ -618,6 +618,7 @@ export function AddShareHolderForm() {
                                     <Checkbox
                                         id="agreeToMarketing"
                                         checked={formData.agreeToMarketing}
+                                        required={true}
                                         onCheckedChange={(checked) => handleInputChange("agreeToMarketing", checked)}
                                     />
                                     <Label htmlFor="agreeToMarketing" className="text-sm text-gray-600">

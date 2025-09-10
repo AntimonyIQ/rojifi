@@ -541,6 +541,7 @@ export function SignupForm() {
                                     <Checkbox
                                         id="agreeToMarketing"
                                         disabled={loading}
+                                        required={true}
                                         checked={formData.agreeToMarketing}
                                         onCheckedChange={(checked) => handleInputChange("agreeToMarketing", checked)}
                                     />
