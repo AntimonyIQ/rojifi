@@ -102,7 +102,8 @@ export function SignupForm() {
             formData.confirmPassword.trim() !== "" &&
             isPasswordValid() &&
             isPasswordMatching &&
-            formData.agreeToTerms
+            formData.agreeToTerms &&
+            formData.agreeToMarketing
         );
     };
 
@@ -368,7 +369,7 @@ export function SignupForm() {
 
                             <div>
                                 <Label htmlFor="middleName" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Other Name <span className="text-red-500">*</span>
+                                    Other Name
                                 </Label>
                                 <div>
                                     <Input
