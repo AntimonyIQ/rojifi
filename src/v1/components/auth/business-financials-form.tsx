@@ -272,6 +272,7 @@ export function BusinessFinancialsForm() {
         )
     }
 
+    /*
     if (isNotApprove) {
         return (
             <div className="fixed inset-0 bg-white flex items-center justify-center">
@@ -320,6 +321,7 @@ export function BusinessFinancialsForm() {
             </div>
         )
     }
+    */
 
     return (
         <div className="fixed top-0 bottom-0 left-0 right-0">

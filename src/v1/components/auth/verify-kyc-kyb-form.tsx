@@ -274,6 +274,7 @@ export function KYBVerificationForm() {
                 // store returned url for the field
                 setUploadedUrls(prev => ({ ...prev, [fieldKey]: parseData.url }));
                 // keep formData file as-is (already set)
+                console.log(`File uploaded for ${fieldKey}: `, parseData.url);
             }
         } catch (err: any) {
             setFieldErrors(prev => ({ ...prev, [fieldKey]: err.message || 'File upload failed' }));
@@ -584,6 +585,7 @@ export function KYBVerificationForm() {
         )
     }
 
+    /*
     if (isNotApprove) {
         return (
             <div className="fixed inset-0 bg-white flex items-center justify-center">
@@ -632,6 +634,7 @@ export function KYBVerificationForm() {
             </div>
         )
     }
+    */
 
     return (
         <div className="fixed top-0 bottom-0 left-0 right-0">
