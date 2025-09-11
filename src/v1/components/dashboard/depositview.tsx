@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/v1/components/ui/card";
-import { CheckCircle, TrendingUp, Shield, Clock, Copy, ArrowDown, Building, Network, Wallet2, Info, AlertTriangle } from "lucide-react";
+import { CheckCircle, TrendingUp, Shield, Clock, Copy, ArrowDown, Building, Network, Wallet2, AlertTriangle, LoaderIcon } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/v1/components/ui/select";
 import { Button } from "@/v1/components/ui/button";
 // import QRCode from "react-qr-code";
@@ -22,6 +22,7 @@ import { motion } from "framer-motion";
 import { IWallet } from "@/v1/interface/interface";
 import { Fiat } from "@/v1/enums/enums";
 import { usePathname } from "wouter/use-browser-location";
+import BVNVerification from "./bvnverification";
 
 export function DepositView() {
     const ss: SessionData = session.getUserData();
@@ -29,6 +30,7 @@ export function DepositView() {
     const [usdToken, setUsdToken] = useState("USDT");
     const [network, setNetwork] = useState("BNB");
     const [_selectedDepositOption, setSelectedDepositOption] = useState<any>(null);
+    const [activated, _setActivated] = useState<boolean>(false);
 
     const [successfulDeposit, setSuccessfulDeposit] = useState(false);
     const [depositAmount, setDepositAmount] = useState("1,000.00");
@@ -167,6 +169,10 @@ export function DepositView() {
 
     const depositDetails = getDepositDetails();
 
+    if (!activated && selectedCurrency?.currency === Fiat.NGN) {
+        return <BVNVerification />
+    }
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30 p-6">
             <div className="max-w-4xl mx-auto space-y-8">
@@ -260,6 +266,7 @@ export function DepositView() {
                                                 </Select>
                                             </div>
 
+                                            {/*}
                                             <motion.div
                                                 initial={{ opacity: 0, x: -20 }}
                                                 animate={{ opacity: 1, x: 0 }}
@@ -273,6 +280,7 @@ export function DepositView() {
                                                     </div>
                                                 </div>
                                             </motion.div>
+                                            */}
 
                                             <div className="space-y-4">
                                                 <div className="space-y-3">
@@ -307,7 +315,7 @@ export function DepositView() {
                                             </div>
 
                                             <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
-                                                <Loading />
+                                                <LoaderIcon className="h-4 w-4 animate-spin" />
                                                 <span>Monitoring for incoming deposits...</span>
                                             </div>
                                         </div>
