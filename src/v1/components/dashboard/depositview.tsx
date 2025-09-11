@@ -8,7 +8,6 @@ import { Button } from "@/v1/components/ui/button";
 // import QRCode from "react-qr-code";
 import { QRCode } from 'react-qrcode-logo';
 import { toast } from "sonner";
-import Loading from "../loading";
 import { session, SessionData } from "@/v1/session/session";
 import {
     Dialog,
@@ -19,25 +18,27 @@ import {
     DialogFooter,
 } from "@/v1/components/ui/dialog";
 import { motion } from "framer-motion";
-import { IWallet } from "@/v1/interface/interface";
-import { Fiat } from "@/v1/enums/enums";
+import { IResponse, IWallet } from "@/v1/interface/interface";
+import { Fiat, Status } from "@/v1/enums/enums";
 import { usePathname } from "wouter/use-browser-location";
 import BVNVerification from "./bvnverification";
+import Defaults from "@/v1/defaults/defaults";
+import { ILoginFormProps } from "../auth/login-form";
 
 export function DepositView() {
     const ss: SessionData = session.getUserData();
     const [selectedCurrency, setSelectedCurrency] = useState<IWallet | null>(null);
     const [usdToken, setUsdToken] = useState("USDT");
-    const [network, setNetwork] = useState("BNB");
+    const [network, setNetwork] = useState("");
     const [_selectedDepositOption, setSelectedDepositOption] = useState<any>(null);
     const [activated, _setActivated] = useState<boolean>(false);
 
     const [successfulDeposit, setSuccessfulDeposit] = useState(false);
-    const [depositAmount, setDepositAmount] = useState("1,000.00");
+    const [depositResponse, setDepositResponse] = useState<{ status: string; amount: number; currency: string } | null>(null);
+    const [isCheckingDeposits, setIsCheckingDeposits] = useState(false);
 
     // refs to hold timer ids so we can clean them up
     const intervalRef = useRef<number | null>(null);
-    const autoCloseRef = useRef<number | null>(null);
 
     const pathname = usePathname()
     const parts = pathname ? pathname.split('/') : []
@@ -49,12 +50,29 @@ export function DepositView() {
         const sel = wallets.find(w => w.currency === wallet) || null;
         setSelectedCurrency(sel);
 
-        // set a sensible default for the usdToken select when the wallet changes
+        // set defaults for cryptocurrency and network when the wallet changes
         if (sel && Array.isArray(sel.deposit) && sel.deposit.length > 0) {
-            const first = sel.deposit[0] as any;
-            const defaultVal = first.institution ?? first.currency ?? first.network ?? usdToken;
-            setUsdToken(defaultVal);
-            setSelectedDepositOption(first);
+            // For crypto wallets, find USDT and set the first available network
+            if (sel.currency !== Fiat.NGN) {
+                const usdtOptions = sel.deposit.filter(d => d.currency === "USDT");
+                if (usdtOptions.length > 0) {
+                    setUsdToken("USDT");
+                    setNetwork(usdtOptions[0].network);
+                    setSelectedDepositOption(usdtOptions[0]);
+                } else {
+                    // If no USDT, use the first available option
+                    const first = sel.deposit[0] as any;
+                    setUsdToken(first.currency);
+                    setNetwork(first.network);
+                    setSelectedDepositOption(first);
+                }
+            } else {
+                // For NGN wallet, use institution
+                const first = sel.deposit[0] as any;
+                const defaultVal = first.institution ?? first.currency ?? first.network ?? usdToken;
+                setUsdToken(defaultVal);
+                setSelectedDepositOption(first);
+            }
         }
     }, [wallet]);
 
@@ -123,7 +141,7 @@ export function DepositView() {
             );
             return {
                 label: `${network} Address`,
-                value: cryptoOption?.address || "0x1234abcd5678ef901234abcd5678ef90abcdef12",
+                value: cryptoOption?.address || "",
                 network: network,
                 currency: usdToken,
                 icon: cryptoOption?.icon
@@ -131,27 +149,71 @@ export function DepositView() {
         }
     };
 
-    const simulateDeposit = () => {
-        // generate a mock deposit amount between 50,000 and 10,000,000
-        const amount = Math.random() * (10_000_000 - 50_000) + 50_000;
-        const formatted = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount);
-        setDepositAmount(formatted);
-        setSuccessfulDeposit(true);
+    // API function to check for deposits
+    const checkForDeposits = async () => {
+        if (isCheckingDeposits) return;
 
-        // clear any existing auto-close timeout then set a new one for 30s
-        if (autoCloseRef.current) {
-            clearTimeout(autoCloseRef.current);
+        setIsCheckingDeposits(true);
+        try {
+
+            const response = await fetch(`${Defaults.API_BASE_URL}/wallet/deposit`, {
+                method: 'POST',
+                headers: {
+                    ...Defaults.HEADERS,
+                    'x-rojifi-handshake': ss.client.publicKey,
+                    'x-rojifi-deviceid': ss.deviceid,
+                    'Authorization': `Bearer ${ss.authorization}`,
+                },
+            });
+
+            const data: IResponse = await response.json();
+            if (data.status === Status.ERROR) throw new Error(data.message || data.error);
+            if (data.status === Status.SUCCESS) {
+                const { status } = data.data;
+
+                if (status === 'success') {
+                    setDepositResponse(data.data);
+                    setSuccessfulDeposit(true);
+                }
+
+                const userres = await fetch(`${Defaults.API_BASE_URL}/wallet`, {
+                    method: 'GET',
+                    headers: {
+                        ...Defaults.HEADERS,
+                        'x-rojifi-handshake': ss.client.publicKey,
+                        'x-rojifi-deviceid': ss.deviceid,
+                        Authorization: `Bearer ${ss.authorization}`,
+                    },
+                });
+
+                const userdata: IResponse = await userres.json();
+                if (userdata.status === Status.ERROR) throw new Error(userdata.message || userdata.error);
+                if (userdata.status === Status.SUCCESS) {
+                    if (!userdata.handshake) throw new Error('Invalid Response');
+                    const parseData: ILoginFormProps = Defaults.PARSE_DATA(userdata.data, ss.client.privateKey, userdata.handshake);
+
+                    session.updateSession({
+                        ...ss,
+                        user: parseData.user,
+                        wallets: parseData.wallets,
+                        transactions: parseData.transactions,
+                        sender: parseData.sender,
+                    });
+
+                    setSelectedCurrency(parseData.wallets.find(w => w.currency === wallet) || null);
+                }
+            }
+        } catch (error) {
+            console.error('Error checking deposits:', error);
+        } finally {
+            setIsCheckingDeposits(false);
         }
-        autoCloseRef.current = window.setTimeout(() => {
-            setSuccessfulDeposit(false);
-            autoCloseRef.current = null;
-        }, 30_000);
     };
 
     useEffect(() => {
-        // start simulating deposits every 60 seconds
+        // start checking for deposits every 30 seconds
         intervalRef.current = window.setInterval(() => {
-            simulateDeposit();
+            checkForDeposits();
         }, 60_000);
 
         // cleanup on unmount
@@ -159,10 +221,6 @@ export function DepositView() {
             if (intervalRef.current) {
                 clearInterval(intervalRef.current);
                 intervalRef.current = null;
-            }
-            if (autoCloseRef.current) {
-                clearTimeout(autoCloseRef.current);
-                autoCloseRef.current = null;
             }
         };
     }, []);
@@ -190,7 +248,7 @@ export function DepositView() {
                                     rotateY: [0, 180, 360]
                                 }}
                                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                                className="p-2 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full"
+                                className="p-2 bg-teal-600 rounded-full"
                             >
                                 <ArrowDown className="h-5 w-5 text-white" />
                             </motion.div>
@@ -208,7 +266,7 @@ export function DepositView() {
                     </div>
                 </motion.div>
 
-                {/* Main Deposit Interface */}
+                {/* Main Deposit Interface  */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -218,7 +276,7 @@ export function DepositView() {
                     <Card className="w-full max-w-4xl shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
                         <CardContent className="p-0">
                             {/* Header Section */}
-                            <div className="px-8 py-6 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-t-xl">
+                            <div className="px-8 py-6 bg-emerald-600 text-white rounded-t-xl">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-3">
                                         <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
@@ -227,7 +285,7 @@ export function DepositView() {
                                         <div>
                                             <h2 className="text-xl font-bold">Deposit {selectedCurrency?.currency}</h2>
                                             <p className="text-emerald-100 text-sm">
-                                                {selectedCurrency?.currency === Fiat.NGN ? 'Bank Transfer' : 'Cryptocurrency'}
+                                                {selectedCurrency?.currency === Fiat.NGN ? 'Bank Transfer' : 'Dollar Deposit to your account'}
                                             </p>
                                         </div>
                                     </div>
@@ -315,8 +373,17 @@ export function DepositView() {
                                             </div>
 
                                             <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
-                                                <LoaderIcon className="h-4 w-4 animate-spin" />
+                                                <LoaderIcon className={`h-4 w-4 ${isCheckingDeposits ? 'animate-spin' : ''}`} />
                                                 <span>Monitoring for incoming deposits...</span>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={checkForDeposits}
+                                                    disabled={isCheckingDeposits}
+                                                    className="ml-auto text-emerald-600 hover:text-emerald-700 hover:bg-emerald-100"
+                                                >
+                                                    {isCheckingDeposits ? 'Checking...' : 'Check Now'}
+                                                </Button>
                                             </div>
                                         </div>
 
@@ -399,7 +466,7 @@ export function DepositView() {
                                                     <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
                                                     <div className="text-sm text-amber-800">
                                                         <p className="font-medium mb-1">Network Warning</p>
-                                                        <p>Only send <span className="font-semibold">{usdToken}</span> on the <span className="font-semibold">{network}</span> network. Wrong network transfers cannot be recovered.</p>
+                                                        <p>Only send <span className="font-semibold">{usdToken}</span> on the <span className="font-semibold">{network === "MATIC" ? "MATIC (POLYGON)" : network === "BSC" ? "BSC (BEP20)" : network}</span> network. Wrong network transfers cannot be recovered.</p>
                                                     </div>
                                                 </div>
                                             </motion.div>
@@ -420,8 +487,17 @@ export function DepositView() {
                                             </div>
 
                                             <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
-                                                <Loading />
+                                                <LoaderIcon className={`h-4 w-4 ${isCheckingDeposits ? 'animate-spin' : ''}`} />
                                                 <span>Monitoring blockchain for deposits...</span>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={checkForDeposits}
+                                                    disabled={isCheckingDeposits}
+                                                    className="ml-auto text-emerald-600 hover:text-emerald-700 hover:bg-emerald-100"
+                                                >
+                                                    {isCheckingDeposits ? 'Checking...' : 'Check Now'}
+                                                </Button>
                                             </div>
                                         </div>
 
@@ -458,7 +534,7 @@ export function DepositView() {
                     >
                         <Card className="p-6 bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-shadow">
                             <div className="flex items-center gap-3 mb-3">
-                                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+                                <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
                                     <Shield className="h-5 w-5 text-white" />
                                 </div>
                                 <h3 className="font-semibold text-gray-800">Secure Deposits</h3>
@@ -474,7 +550,7 @@ export function DepositView() {
                     >
                         <Card className="p-6 bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-shadow">
                             <div className="flex items-center gap-3 mb-3">
-                                <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center">
+                                <div className="w-10 h-10 bg-emerald-600 rounded-full flex items-center justify-center">
                                     <Clock className="h-5 w-5 text-white" />
                                 </div>
                                 <h3 className="font-semibold text-gray-800">Instant Processing</h3>
@@ -490,7 +566,7 @@ export function DepositView() {
                     >
                         <Card className="p-6 bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-shadow">
                             <div className="flex items-center gap-3 mb-3">
-                                <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
+                                <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center">
                                     <TrendingUp className="h-5 w-5 text-white" />
                                 </div>
                                 <h3 className="font-semibold text-gray-800">Low Fees</h3>
@@ -510,7 +586,7 @@ export function DepositView() {
                         Go Back
                     </Button>
                     <Button
-                        className="px-8 py-3 h-auto bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white"
+                        className="px-8 py-3 h-auto bg-emerald-600 hover:from-emerald-700 hover:to-teal-700 text-white"
                         onClick={() => window.location.href = `/dashboard/${wallet}`}
                     >
                         View Dashboard
@@ -535,7 +611,7 @@ export function DepositView() {
                         <div className="space-y-2">
                             <DialogTitle className="text-xl font-bold">Deposit Successful!</DialogTitle>
                             <DialogDescription className="text-gray-600">
-                                Your {selectedCurrency?.currency} wallet has been credited with {selectedCurrency?.symbol}{depositAmount}.
+                                Your {depositResponse?.currency || selectedCurrency?.currency} wallet has been credited with {selectedCurrency?.symbol}{depositResponse?.amount?.toLocaleString() || '0'}.
                             </DialogDescription>
                         </div>
                     </DialogHeader>

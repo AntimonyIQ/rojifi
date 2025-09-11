@@ -3,9 +3,8 @@
 import { useState, useEffect } from "react"
 import * as htmlToImage from "html-to-image";
 import { Button } from "@/v1/components/ui/button"
-import { ChevronRight, CircleDot, Download, Expand, EyeOff, Plus, Repeat, Send, Wallet, ArrowUpRight, ArrowDownLeft, MoreHorizontal, Calendar } from "lucide-react"
+import { ChevronRight, CircleDot, Download, Expand, EyeOff, Plus, Repeat, Send, Wallet, ArrowUpRight, ArrowDownLeft, Calendar } from "lucide-react"
 import { Card, CardContent } from "../ui/card"
-import { Badge } from "@/v1/components/ui/badge"
 import {
     Table,
     TableBody,
@@ -14,13 +13,15 @@ import {
     TableHeader,
     TableRow,
 } from "@/v1/components/ui/table"
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/v1/components/ui/dropdown-menu"
 import TransactionChart from "./transactionchart"
+import {
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
+} from "@/v1/components/ui/sheet"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog"
 import Loading from "../loading";
 import { session, SessionData } from "@/v1/session/session";
@@ -31,6 +32,12 @@ import { Fiat, Status, TransactionType } from "@/v1/enums/enums";
 import Defaults from "@/v1/defaults/defaults";
 import { ILoginFormProps } from "../auth/login-form";
 import { useLocation, useParams } from "wouter";
+
+interface ChartData {
+    day: string;
+    value: number;
+    amount: string;
+};
 
 export function DashboardOverview() {
     const { wallet } = useParams();
@@ -47,6 +54,8 @@ export function DashboardOverview() {
     const [withdrawEnabled, _setWithdrawEnabled] = useState<boolean>(false);
     const [activeWallet, setActiveWallet] = useState<IWallet | undefined>(undefined);
     const [activationLoading, setActivationLoading] = useState<boolean>(false);
+    const [_isSheetOpen, setIsSheetOpen] = useState<boolean>(false);
+    const [selectedTx, setSelectedTx] = useState<ITransaction | null>(null);
     const sd: SessionData = session.getUserData();
 
     const [currentPage, setCurrentPage] = useState<number>(1);
@@ -69,16 +78,36 @@ export function DashboardOverview() {
         setSelectedCurrency(wallet as Fiat);
     }, [selectedCurrency]);
 
-    const chartData = [
-        { day: "Sun", value: 60, amount: "$2,500" },
-        { day: "Mon", value: 80, amount: "$3,200" },
-        { day: "Tue", value: 70, amount: "$4,300" },
+    const chartData = (): ChartData[] => {
+        const filteredTxByActiveWallet = transactions.filter(tx => tx.fromCurrency === wallet || tx.toCurrency === wallet);
+        // Initialize all days with zero values
+        const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        const result: Record<string, { value: number; amount: number; currency: string }> = {};
 
-        { day: "Wed", value: 45, amount: "$2,000" },
-        { day: "Thu", value: 90, amount: "$5,000" },
-        { day: "Fri", value: 85, amount: "$4,800" },
-        { day: "Sat", value: 75, amount: "$3,900" },
-    ];
+        daysOfWeek.forEach(day => {
+            result[day] = { value: 0, amount: 0, currency: selectedCurrency };
+        });
+
+        // Aggregate transactions by day of week
+        filteredTxByActiveWallet.forEach(tx => {
+            const date = new Date(tx.createdAt);
+            const day = date.toLocaleDateString("en-US", { weekday: "short" });
+            if (result[day]) {
+                result[day].value += 1; // Count of transactions for 'value'
+                result[day].amount += Number(tx.amount); // Use the actual amount without multiplying
+                result[day].currency = tx.toCurrency || selectedCurrency;
+            }
+        });
+
+        // Format for chart
+        return daysOfWeek.map(day => ({
+            day,
+            value: result[day].value,
+            amount: result[day].amount > 0
+                ? result[day].amount.toLocaleString("en-US", { style: "currency", currency: result[day].currency })
+                : (0).toLocaleString("en-US", { style: "currency", currency: selectedCurrency }),
+        }));
+    }
 
     const rates: Record<string, number> = {
         "USD": 1,
@@ -182,7 +211,7 @@ export function DashboardOverview() {
                             Expand <Expand className="h-4 w-4" />
                         </button>
                     </div>
-                    <TransactionChart data={chartData} height={400} />
+                    <TransactionChart data={chartData()} height={400} />
                 </CardContent>
             </Card>
         );
@@ -200,6 +229,37 @@ export function DashboardOverview() {
         if (pa !== pb) return pa - pb;
         return String(a.currency).localeCompare(String(b.currency));
     });
+
+    const getTxDetails = (type: TransactionType, amount: number, currency: string, toCurrency?: string): string => {
+        switch (type) {
+            case TransactionType.DEPOSIT:
+                return `Wallet funded successfully with ${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`;
+            case TransactionType.WITHDRAWAL:
+                return `Wallet debited successfully with ${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`;
+            case TransactionType.TRANSFER:
+                return `Transfer of ${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`;
+            case TransactionType.SWAP:
+                return `${currency} swapped to ${toCurrency} successfully with ${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`;
+            default:
+                return "Unknown Transaction";
+        }
+    }
+
+    const formatDate = (input?: string | Date) => {
+        if (!input) return '';
+        const d = new Date(input);
+        const weekday = d.toLocaleDateString('en-US', { weekday: 'long' });
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = d.toLocaleDateString('en-US', { month: 'long' });
+        const year = d.getFullYear();
+        const hours = d.getHours();
+        const hour12 = hours % 12 === 0 ? 12 : hours % 12;
+        const minutes = String(d.getMinutes()).padStart(2, '0');
+        const seconds = String(d.getSeconds()).padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        const time = `${String(hour12).padStart(2, '0')}:${minutes}:${seconds}${ampm}`;
+        return `${weekday}, ${day} ${month} ${year} - ${time} WAT`;
+    }
 
     return (
         <div className="flex flex-col lg:flex-row gap-6">
@@ -432,184 +492,6 @@ export function DashboardOverview() {
                                     <Chart />
                                 </div>
 
-                                <div className="mt-5">
-                                    <h2 className="text-lg font-medium capitalize">Recent Transactions</h2>
-                                </div>
-
-                                {/* Transactions Table */}
-                                <Card className="w-full">
-                                    <CardContent className="p-0 w-full">
-                                        <Table>
-                                            <TableHeader>
-                                                <TableRow className="bg-gray-50/50">
-                                                    <TableHead className="w-[100px] pl-6">Type</TableHead>
-                                                    <TableHead>Details</TableHead>
-                                                    <TableHead>Amount</TableHead>
-                                                    <TableHead>Status</TableHead>
-                                                    <TableHead>Date</TableHead>
-                                                    <TableHead className="w-[50px] pr-6">Actions</TableHead>
-                                                </TableRow>
-                                            </TableHeader>
-                                            <TableBody>
-                                                {transactions.length === 0 ? (
-                                                    <TableRow>
-                                                        <TableCell colSpan={6} className="py-20 text-center">
-                                                            <div className="flex flex-col items-center gap-2">
-                                                                <Wallet className="h-8 w-8 text-gray-400" />
-                                                                <p className="text-sm text-gray-600">No transactions found</p>
-                                                                <p className="text-xs text-gray-500">Your recent transactions will appear here</p>
-                                                            </div>
-                                                        </TableCell>
-                                                    </TableRow>
-                                                ) : (
-                                                    transactions.slice(0, 4).map((transaction) => (
-                                                        <TableRow
-                                                            key={transaction._id}
-                                                            className="hover:bg-gray-50/50 cursor-pointer transition-colors"
-                                                            onClick={() => {
-                                                                // Handle transaction details view
-                                                                console.log('View transaction:', transaction._id);
-                                                            }}
-                                                        >
-                                                            <TableCell className="pl-6">
-                                                                <div className="flex items-center gap-2">
-                                                                    <div className={`p-2 rounded-full ${transaction.type === TransactionType.TRANSFER || transaction.type === TransactionType.WITHDRAWAL
-                                                                        ? 'bg-red-100 text-red-600'
-                                                                        : transaction.type === TransactionType.DEPOSIT
-                                                                            ? 'bg-green-100 text-green-600'
-                                                                            : 'bg-blue-100 text-blue-600'
-                                                                        }`}>
-                                                                        {transaction.type === TransactionType.TRANSFER || transaction.type === TransactionType.WITHDRAWAL ? (
-                                                                            <ArrowUpRight className="h-3 w-3" />
-                                                                        ) : transaction.type === TransactionType.DEPOSIT ? (
-                                                                            <ArrowDownLeft className="h-3 w-3" />
-                                                                        ) : (
-                                                                            <Repeat className="h-3 w-3" />
-                                                                        )}
-                                                                    </div>
-                                                                    <span className="text-xs font-medium capitalize">
-                                                                        {transaction.type || 'Payment'}
-                                                                    </span>
-                                                                </div>
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                <div className="flex flex-col">
-                                                                    <span className="font-medium text-sm">
-                                                                        {transaction.beneficiaryAccountName || transaction.to || 'Payment Transfer'}
-                                                                    </span>
-                                                                    {transaction.beneficiaryCountry && (
-                                                                        <span className="text-xs text-gray-500">
-                                                                            {transaction.beneficiaryCountry}
-                                                                        </span>
-                                                                    )}
-                                                                    {transaction.purposeOfPayment && (
-                                                                        <span className="text-xs text-gray-500 truncate max-w-[200px]">
-                                                                            {transaction.purposeOfPayment}
-                                                                        </span>
-                                                                    )}
-                                                                </div>
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                <div className="flex flex-col">
-                                                                    <span className="font-semibold text-sm">
-                                                                        {hideBalances ? (
-                                                                            "••••••••"
-                                                                        ) : (
-                                                                            `${activeWallet?.symbol || '$'}${Number(transaction.beneficiaryAmount || transaction.amount || 0).toLocaleString("en-US", {
-                                                                                minimumFractionDigits: 2,
-                                                                                maximumFractionDigits: 2,
-                                                                            })}`
-                                                                        )}
-                                                                    </span>
-                                                                    <span className="text-xs text-gray-500">
-                                                                        {transaction.senderCurrency || transaction.wallet || selectedCurrency}
-                                                                    </span>
-                                                                </div>
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                <Badge
-                                                                    variant={
-                                                                        transaction.status.toLowerCase() === "successful" || transaction.status.toLowerCase() === "completed"
-                                                                            ? "default"
-                                                                            : transaction.status.toLowerCase() === "pending"
-                                                                                ? "secondary"
-                                                                                : "destructive"
-                                                                    }
-                                                                    className={`text-xs ${transaction.status.toLowerCase() === "successful" || transaction.status.toLowerCase() === "completed"
-                                                                        ? "bg-green-100 text-green-800 hover:bg-green-100"
-                                                                        : transaction.status.toLowerCase() === "pending"
-                                                                            ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-100"
-                                                                            : "bg-red-100 text-red-800 hover:bg-red-100"
-                                                                        }`}
-                                                                >
-                                                                    {transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)}
-                                                                </Badge>
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                <div className="flex items-center gap-1 text-xs text-gray-600">
-                                                                    <Calendar className="h-3 w-3" />
-                                                                    {transaction.createdAt ? new Date(transaction.createdAt).toLocaleDateString() : ''}
-                                                                </div>
-                                                            </TableCell>
-                                                            <TableCell className="pr-6">
-                                                                <DropdownMenu>
-                                                                    <DropdownMenuTrigger asChild>
-                                                                        <Button variant="ghost" className="h-8 w-8 p-0">
-                                                                            <MoreHorizontal className="h-4 w-4" />
-                                                                        </Button>
-                                                                    </DropdownMenuTrigger>
-                                                                    <DropdownMenuContent align="end">
-                                                                        <DropdownMenuItem>
-                                                                            View Details
-                                                                        </DropdownMenuItem>
-                                                                        {transaction.receipt && (
-                                                                            <DropdownMenuItem>
-                                                                                Download Receipt
-                                                                            </DropdownMenuItem>
-                                                                        )}
-                                                                        <DropdownMenuItem>
-                                                                            Track Payment
-                                                                        </DropdownMenuItem>
-                                                                    </DropdownMenuContent>
-                                                                </DropdownMenu>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    ))
-                                                )}
-                                            </TableBody>
-                                        </Table>
-
-                                        {/* Pagination */}
-                                        {transactions.length > 0 && (
-                                            <div className="flex flex-col sm:flex-row items-center justify-between px-6 py-4 border-t border-gray-200 gap-4">
-                                                <div className="text-sm text-gray-700">
-                                                    Showing {startIndex + 1} to {endIndex} of {totalItems} entries
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                                                        disabled={currentPage === 1}
-                                                    >
-                                                        Previous
-                                                    </Button>
-                                                    <span className="text-sm text-gray-700 px-2">
-                                                        Page {currentPage} of {totalPages}
-                                                    </span>
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                                                        disabled={currentPage === totalPages}
-                                                    >
-                                                        Next
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </CardContent>
-                                </Card>
                             </>
                         )}
                     </div>
@@ -769,6 +651,188 @@ export function DashboardOverview() {
 
                 </div>
 
+                <div className="mt-5">
+                    <h2 className="text-lg font-medium capitalize">Recent Transactions</h2>
+                </div>
+
+                {/* Transactions Table */}
+                <Card className="w-full">
+                    <CardContent className="p-0 w-full">
+                        <Table>
+                            <TableHeader>
+                                <TableRow className="bg-gray-50/50">
+                                    <TableHead className="w-[100px] pl-6">Type</TableHead>
+                                    <TableHead>Details</TableHead>
+                                    <TableHead>Date</TableHead>
+                                    <TableHead>Action</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {transactions.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={6} className="py-20 text-center">
+                                            <div className="flex flex-col items-center gap-2">
+                                                <Wallet className="h-8 w-8 text-gray-400" />
+                                                <p className="text-sm text-gray-600">No transactions found</p>
+                                                <p className="text-xs text-gray-500">Your recent transactions will appear here</p>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                ) : (
+                                    transactions.slice(0, 4).map((transaction) => (
+                                        <TableRow
+                                            key={transaction._id}
+                                            className="hover:bg-gray-50/50 cursor-pointer transition-colors"
+                                            onClick={() => {
+                                                // Handle transaction details view
+                                                console.log('View transaction:', transaction._id);
+                                            }}
+                                        >
+                                            <TableCell className="pl-6">
+                                                <div className="flex items-center gap-2">
+                                                    <div className={`p-2 rounded-full ${transaction.type === TransactionType.TRANSFER || transaction.type === TransactionType.WITHDRAWAL
+                                                        ? 'bg-red-100 text-red-600'
+                                                        : transaction.type === TransactionType.DEPOSIT
+                                                            ? 'bg-green-100 text-green-600'
+                                                            : 'bg-blue-100 text-blue-600'
+                                                        }`}>
+                                                        {transaction.type === TransactionType.TRANSFER || transaction.type === TransactionType.WITHDRAWAL ? (
+                                                            <ArrowUpRight className="h-3 w-3" />
+                                                        ) : transaction.type === TransactionType.DEPOSIT ? (
+                                                            <ArrowDownLeft className="h-3 w-3" />
+                                                        ) : (
+                                                            <Repeat className="h-3 w-3" />
+                                                        )}
+                                                    </div>
+                                                    <span className="text-xs font-medium capitalize">
+                                                        {transaction.type || 'Payment'}
+                                                    </span>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex flex-col">
+                                                    <span className="font-medium text-sm">
+                                                        {getTxDetails(transaction.type, Number(transaction.amount), transaction.fromCurrency)}
+                                                    </span>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex items-center gap-1 text-xs text-gray-600">
+                                                    <Calendar className="h-3 w-3" />
+                                                    {transaction.createdAt ? new Date(transaction.createdAt).toLocaleDateString() : ''}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Sheet>
+                                                    <SheetTrigger asChild>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className="text-xs text-blue-600 underline"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setSelectedTx(transaction);
+                                                                setIsSheetOpen(true);
+                                                            }}
+                                                        >
+                                                            View Details
+                                                        </Button>
+                                                    </SheetTrigger>
+                                                    <SheetContent
+
+                                                        onInteractOutside={() => setIsSheetOpen(false)}
+                                                        className="overflow-y-auto"
+                                                    >
+                                                        <SheetHeader>
+                                                            <SheetTitle>Transaction Details</SheetTitle>
+                                                            <SheetDescription>
+                                                                Details for the selected transaction
+                                                            </SheetDescription>
+                                                        </SheetHeader>
+
+                                                        <div className="p-4 space-y-4">
+                                                            <div className="border-b pb-3">
+                                                                <div className="text-xs text-gray-500">Status</div>
+                                                                <div
+                                                                    className={`font-medium inline-flex items-center gap-2 px-2 py-1 rounded
+                                                                        ${selectedTx?.type === TransactionType.DEPOSIT
+                                                                            ? "bg-green-100 text-green-600"
+                                                                            : selectedTx?.type === TransactionType.WITHDRAWAL || selectedTx?.type === TransactionType.TRANSFER
+                                                                                ? "bg-red-100 text-red-600"
+                                                                                : "bg-blue-100 text-blue-600"
+                                                                        }
+                                                                    `}
+                                                                >
+                                                                    {selectedTx?.status || 'Unknown'}
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="border-b pb-3">
+                                                                <div className="text-xs text-gray-500">Type</div>
+                                                                <div className="font-medium capitalize">{selectedTx?.type || 'Unknown'}</div>
+                                                            </div>
+
+                                                            <div className="border-b pb-3">
+                                                                <div className="text-xs text-gray-500">Amount</div>
+                                                                <div className="font-medium">{selectedTx ? `${selectedTx.fromCurrency} ${Number(selectedTx.amount).toLocaleString()}` : ''}</div>
+                                                            </div>
+
+                                                            <div className="border-b pb-3">
+                                                                <div className="text-xs text-gray-500">Initial Balance</div>
+                                                                <div className="font-medium">{selectedTx?.initialBalance ? `${selectedTx.fromCurrency} ${Number(selectedTx.initialBalance).toLocaleString()}` : '-'}</div>
+                                                            </div>
+
+                                                            <div className="border-b pb-3">
+                                                                <div className="text-xs text-gray-500">Final Balance</div>
+                                                                <div className="font-medium">{selectedTx?.finalBalance ? `${selectedTx.fromCurrency} ${Number(selectedTx.finalBalance).toLocaleString()}` : '-'}</div>
+                                                            </div>
+
+                                                            <div className="border-b pb-3">
+                                                                <div className="text-xs text-gray-500">Date</div>
+                                                                <div className="font-medium">{formatDate(selectedTx?.createdAt)}</div>
+                                                            </div>
+                                                        </div>
+
+                                                    </SheetContent>
+                                                </Sheet>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                )}
+                            </TableBody>
+                        </Table>
+
+                        {/* Pagination */}
+                        {transactions.length > 0 && (
+                            <div className="flex flex-col sm:flex-row items-center justify-between px-6 py-4 border-t border-gray-200 gap-4">
+                                <div className="text-sm text-gray-700">
+                                    Showing {startIndex + 1} to {endIndex} of {totalItems} entries
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                                        disabled={currentPage === 1}
+                                    >
+                                        Previous
+                                    </Button>
+                                    <span className="text-sm text-gray-700 px-2">
+                                        Page {currentPage} of {totalPages}
+                                    </span>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                                        disabled={currentPage === totalPages}
+                                    >
+                                        Next
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
             </div>
 
             <Dialog open={isStatisticsModalOpen} onOpenChange={setIsStatisticsModalOpen}>
@@ -780,7 +844,7 @@ export function DashboardOverview() {
                                 <Download className="h-4 w-4" />
                             </Button>
                         </div>
-                        <TransactionChart data={chartData} height={400} />
+                        <TransactionChart data={chartData()} height={400} />
                     </div>
                 </DialogContent>
             </Dialog>
@@ -811,6 +875,8 @@ export function DashboardOverview() {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            {/* Transaction Details Sheet */}
         </div>
     )
 }

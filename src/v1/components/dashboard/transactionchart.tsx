@@ -30,9 +30,13 @@ export default function TransactionChart({ data, height = 200 }: TransactionChar
             .range([margin.left, width - margin.right])
             .padding(0.2);
 
+        // Ensure the y-domain has a non-zero max so the 0 line doesn't collapse to the middle
+        const rawMax = d3.max(data, d => d.value) ?? 0;
+        const maxY = Math.max(1, rawMax);
+
         const y = d3
             .scaleLinear()
-            .domain([0, d3.max(data, d => d.value)!])
+            .domain([0, maxY])
             .nice()
             .range([height - margin.bottom, margin.top]);
 
@@ -47,10 +51,56 @@ export default function TransactionChart({ data, height = 200 }: TransactionChar
             .style("pointer-events", "none")
             .style("opacity", 0);
 
+        // Gridlines (draw before bars so they sit behind)
+        // Horizontal grid lines for y-axis
+        const hGrid = svg
+            .append("g")
+            .attr("class", "grid horizontal")
+            .attr("transform", `translate(${margin.left},0)`)
+            .call(
+                d3
+                    .axisLeft(y)
+                    .tickSize(-(width - margin.left - margin.right))
+                    .tickFormat(() => "")
+            )
+            .call(g => g.select(".domain").remove()); // remove domain so no left/right extra border
+
+        // style horizontal lines, hide the topmost so there's no top border
+        hGrid
+            .selectAll("line")
+            .attr("stroke", "#000")
+            .attr("stroke-opacity", 0.06)
+            .attr("shape-rendering", "crispEdges")
+            .filter((_, i) => i === 0)
+            .attr("stroke-opacity", 0);
+
+        // Vertical grid lines for x-axis (subtle)
+        const vGrid = svg
+            .append("g")
+            .attr("class", "grid vertical")
+            .attr("transform", `translate(0,${height - margin.bottom})`)
+            .call(
+                d3
+                    .axisBottom(x)
+                    .tickSize(-(height - margin.top - margin.bottom))
+                    .tickFormat(() => "")
+            )
+            .call(g => g.select(".domain").remove());
+
+        // style vertical lines, hide the rightmost so there's no right border
+        const vLines = vGrid.selectAll("line");
+        const vCount = vLines.size();
+        vLines
+            .attr("stroke", "#000")
+            .attr("stroke-opacity", 0.02)
+            .attr("shape-rendering", "crispEdges");
+        vLines.filter((_, i) => i === vCount - 1).attr("stroke-opacity", 0);
+
         svg
             .append("g")
             .selectAll("rect")
-            .data(data)
+            // Only create bars for values > 0 to avoid tiny artifacts when value is zero
+            .data(data.filter(d => d.value > 0))
             .enter()
             .append("path")
             .attr("d", d => {

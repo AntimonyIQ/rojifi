@@ -565,8 +565,10 @@ export interface ILocation {
 export interface ITransaction extends IPayment {
     from: string;
     to: string;
-    fromCurrency: Coin;
-    toCurrency: Coin;
+    fromCurrency: Coin | Fiat;
+    toCurrency: Coin | Fiat;
+    initialBalance: number;
+    finalBalance: number;
     userId: string | IUser;
     swapToAmount: number;
     hash: string;
