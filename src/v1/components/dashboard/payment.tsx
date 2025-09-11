@@ -260,6 +260,7 @@ const SwiftOrRouting: React.FC<SwiftOrRoutingProps> = ({
 
 export const PaymentView: React.FC = () => {
     // State management
+    // const { wallet } = useParams();
     const [swiftmodal, setSwiftModal] = useState(false);
     const [loading, setLoading] = useState(false);
     const [dragActive, setDragActive] = useState(false);
@@ -277,6 +278,7 @@ export const PaymentView: React.FC = () => {
     const [uploading, setUploading] = useState(false);
     const [swiftDetails, setSwiftDetails] = useState<ISwiftDetails | null>(null);
     const [paymentLoading, setPaymentLoading] = useState(false);
+    const [walletActivationModal, setWalletActivationModal] = useState(false);
 
     const sd: SessionData = session.getUserData();
 
@@ -960,10 +962,20 @@ export const PaymentView: React.FC = () => {
                         const selectedWalletData: IWallet | undefined = wallets.find(wallet => wallet.currency === value);
                         if (selectedWalletData) {
                             setSelectedWallet(selectedWalletData);
+
+                            // Check if wallet is not activated and currency is not USD
+                            if (value !== Fiat.USD && selectedWalletData.activated === false) {
+                                setWalletActivationModal(true);
+                            }
                         }
                         if (value === Fiat.USD) {
                             setSwiftModal(true);
                         }
+
+                        if (value !== Fiat.USD) {
+
+                        }
+
                     }}
                 >
                     <SelectTrigger className="w-full">
@@ -1480,6 +1492,49 @@ export const PaymentView: React.FC = () => {
                     }}
                 />
             )}
+
+            {/* Wallet Activation Modal */}
+            <Dialog open={walletActivationModal} onOpenChange={setWalletActivationModal}>
+                <DialogContent className="max-w-md bg-white border-0 shadow-2xl">
+                    <div className="flex flex-col gap-6 p-6">
+                        {/* Header */}
+                        <div className="flex items-center justify-center">
+                            <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
+                                <Building2 className="w-6 h-6 text-amber-600" />
+                            </div>
+                        </div>
+
+                        <div className="text-center">
+                            <DialogTitle className="text-xl font-semibold text-gray-900 mb-2">
+                                Wallet Not Activated
+                            </DialogTitle>
+                            <p className="text-sm text-gray-600">
+                                Your {selectedWallet?.currency} wallet needs to be activated before you can make payments with it.
+                            </p>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex gap-3">
+                            <Button
+                                variant="outline"
+                                onClick={() => setWalletActivationModal(false)}
+                                className="flex-1"
+                            >
+                                Close
+                            </Button>
+                            <Button
+                                onClick={() => {
+                                    setWalletActivationModal(false);
+                                    window.location.href = `/dashboard/${selectedWallet?.currency}`;
+                                }}
+                                className="flex-1 bg-blue-600 hover:bg-blue-700"
+                            >
+                                Activate
+                            </Button>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };

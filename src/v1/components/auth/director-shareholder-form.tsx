@@ -7,7 +7,7 @@ import { Checkbox } from "@/v1/components/ui/checkbox"
 import { Popover, PopoverContent, PopoverTrigger } from "@/v1/components/ui/popover"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/v1/components/ui/command"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/v1/components/ui/select"
-import { Check, Plus, ArrowLeft, ArrowRight, Trash2, X, ArrowUpRight, AlertCircle, ChevronsUpDown, CalendarIcon, CheckCircle, Eye } from "lucide-react"
+import { Check, Plus, Trash2, X, ChevronsUpDown, CalendarIcon, CheckCircle, Eye, AlertCircle, ArrowUpRight } from "lucide-react"
 import { cn } from "@/v1/lib/utils"
 import { format } from "date-fns"
 import { Link, useParams } from "wouter"
@@ -22,11 +22,6 @@ import GlobeWrapper from "../globe"
 import countries from "../../data/country_state.json"
 import { Calendar } from "../ui/calendar"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/v1/components/ui/dialog"
-
-enum FormStage {
-    SELECTION = 1,
-    DETAILS = 2
-}
 
 interface DirectorShareholderFormData {
     firstName: string;
@@ -77,15 +72,7 @@ export function DirectorShareholderForm() {
     const [isLoading, setIsLoading] = useState(true)
     const [isNotApprove, setIsNotApprove] = useState(false)
     const [error, setError] = useState<string | null>(null)
-    const [currentStage, setCurrentStage] = useState<FormStage>(FormStage.SELECTION)
     const [showSuccessModal, setShowSuccessModal] = useState(true)
-
-    // Selection stage data
-    const [selectionData, setSelectionData] = useState({
-        isDirector: false,
-        isShareholder: false,
-        dateOfBirth: undefined as Date | undefined
-    })
 
     // Forms array to handle multiple directors/shareholders
     const [forms, setForms] = useState<DirectorShareholderFormData[]>([])
@@ -105,6 +92,8 @@ export function DirectorShareholderForm() {
         if (id) {
             loadData()
         }
+        // Initialize with one empty form
+        setForms([createNewForm()])
     }, [id])
 
     const loadData = async () => {
@@ -135,63 +124,21 @@ export function DirectorShareholderForm() {
         }
     }
 
-    const createNewForm = (isAdditional: boolean = false): DirectorShareholderFormData => {
-        if (isAdditional) {
-            // For additional forms, start with empty values that user can select
-            return {
-                firstName: "",
-                lastName: "",
-                middleName: "",
-                email: "",
-                jobTitle: "",
-                role: "",
-                isDirector: false,
-                isShareholder: false,
-                shareholderPercentage: "",
-                dateOfBirth: undefined,
-                nationality: "",
-                phoneCode: "234",
-                selectedCountryCode: "Nigeria",
-                phoneNumber: "",
-                idType: "",
-                idNumber: "",
-                issuedCountry: "",
-                issueDate: undefined,
-                expiryDate: undefined,
-                streetAddress: "",
-                city: "",
-                state: "",
-                postalCode: "",
-                country: "",
-                idDocument: null,
-                proofOfAddress: null
-            }
-        }
-
-        // For first form, use pre-filled values from selection
-        let roleDisplay = "";
-        if (selectionData.isDirector && selectionData.isShareholder) {
-            roleDisplay = "Director and Shareholder";
-        } else if (selectionData.isDirector) {
-            roleDisplay = "Director";
-        } else if (selectionData.isShareholder) {
-            roleDisplay = "Shareholder";
-        }
-
+    const createNewForm = (): DirectorShareholderFormData => {
         return {
             firstName: "",
             lastName: "",
             middleName: "",
             email: "",
             jobTitle: "",
-            role: roleDisplay,
-            isDirector: selectionData.isDirector,
-            isShareholder: selectionData.isShareholder,
+            role: "",
+            isDirector: false,
+            isShareholder: false,
             shareholderPercentage: "",
-            dateOfBirth: selectionData.dateOfBirth,
+            dateOfBirth: undefined,
             nationality: "",
             phoneCode: "234",
-            selectedCountryCode: "Nigeria", // Track specific country for phone code
+            selectedCountryCode: "Nigeria",
             phoneNumber: "",
             idType: "",
             idNumber: "",
@@ -208,24 +155,8 @@ export function DirectorShareholderForm() {
         }
     }
 
-    const handleSelectionNext = () => {
-        if (!selectionData.isDirector) {
-            setError("Director role must be selected")
-            return
-        }
-        if (!selectionData.dateOfBirth) {
-            setError("Please select date of birth")
-            return
-        }
-
-        setError(null)
-        // Initialize with one form
-        setForms([createNewForm()])
-        setCurrentStage(FormStage.DETAILS)
-    }
-
     const handleAddForm = () => {
-        setForms(prev => [...prev, createNewForm(true)])
+        setForms(prev => [...prev, createNewForm()])
     }
 
     const handleRemoveForm = (index: number) => {
@@ -247,16 +178,6 @@ export function DirectorShareholderForm() {
         }
         setError(null)
     }
-
-    /*
-    const handleValidationError = (index: number, field: string, error: string) => {
-        const fieldKey = `${index}-${field}`;
-        setValidationErrors(prev => ({
-            ...prev,
-            [fieldKey]: error
-        }));
-    }
-    */
 
     const togglePopover = (key: string, value: boolean) => {
         setPopoverStates(prev => ({ ...prev, [key]: value }))
@@ -479,13 +400,10 @@ export function DirectorShareholderForm() {
                         {/* Form Content */}
                         <div className="text-center mb-8">
                             <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                                {currentStage === FormStage.SELECTION ? "Director & Shareholder Information" : "Director Details"}
+                                Director & Shareholder Information
                             </h1>
                             <p className="text-gray-600">
-                                {currentStage === FormStage.SELECTION
-                                    ? "Add directors and shareholders for your company"
-                                    : "Provide detailed information for each person"
-                                }
+                                Provide detailed information for each person
                             </p>
                         </div>
 
@@ -494,138 +412,55 @@ export function DirectorShareholderForm() {
                                 <p className="text-red-500 text-sm text-center">{error}</p>
                             )}
 
-                            {currentStage === FormStage.SELECTION ? (
-                                <motion.div
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    className="space-y-6"
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="space-y-6"
+                            >
+                                {forms.map((form, index) => (
+                                    <DirectorShareholderFormCard
+                                        key={index}
+                                        form={form}
+                                        index={index}
+                                        isFirstForm={index === 0}
+                                        onFormChange={handleFormChange}
+                                        onFileUpload={handleFileUpload}
+                                        onRemove={forms.length > 1 && index > 0 ? () => handleRemoveForm(index) : undefined}
+                                        popoverStates={popoverStates}
+                                        togglePopover={togglePopover}
+                                        uploadingFiles={uploadingFiles}
+                                        fieldErrors={fieldErrors}
+                                        validationErrors={validationErrors}
+                                        countries={countries}
+                                    />
+                                ))}
+
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={handleAddForm}
+                                    className="w-full h-12 bg-green-50 border-green-600 text-green-600 hover:bg-green-600 hover:text-white"
                                 >
-                                    <div>
-                                        <Label className="text-base font-semibold">Select Role(s)<span className="text-red-500">*</span></Label>
-                                        <div className="mt-3 space-y-3">
-                                            <div className="flex items-center space-x-2">
-                                                <Checkbox
-                                                    id="director"
-                                                    checked={selectionData.isDirector}
-                                                    onCheckedChange={(checked) =>
-                                                        setSelectionData(prev => ({ ...prev, isDirector: checked as boolean }))
-                                                    }
-                                                />
-                                                <Label htmlFor="director" className="font-normal">Director</Label>
-                                            </div>
-                                            <div className="flex items-center space-x-2">
-                                                <Checkbox
-                                                    id="shareholder"
-                                                    checked={selectionData.isShareholder}
-                                                    onCheckedChange={(checked) =>
-                                                        setSelectionData(prev => ({ ...prev, isShareholder: checked as boolean }))
-                                                    }
-                                                />
-                                                <Label htmlFor="shareholder" className="font-normal">Shareholder</Label>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <Plus className="mr-2 h-4 w-4" />
+                                    Add Another Director/Shareholder
+                                </Button>
 
-                                    <div>
-                                        <Label>Date of Birth<span className="text-red-500">*</span></Label>
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                <Button
-                                                    variant="outline"
-                                                    className={cn(
-                                                        "w-full justify-start text-left font-normal mt-1 h-12",
-                                                        !selectionData.dateOfBirth && "text-muted-foreground"
-                                                    )}
-                                                >
-                                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                                    {selectionData.dateOfBirth ? format(selectionData.dateOfBirth, "PPP") : "Select date"}
-                                                </Button>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="w-auto p-0" align="start">
-                                                <Calendar
-                                                    mode="single"
-                                                    captionLayout="dropdown"
-                                                    selected={selectionData.dateOfBirth}
-                                                    onSelect={(date) => setSelectionData(prev => ({ ...prev, dateOfBirth: date }))}
-                                                    disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
-                                                    initialFocus
-                                                />
-                                            </PopoverContent>
-                                        </Popover>
-                                    </div>
-
-                                    <Button
-                                        type="button"
-                                        onClick={handleSelectionNext}
-                                        disabled={!selectionData.isDirector || !selectionData.dateOfBirth}
-                                        className="w-full h-12 bg-primary hover:bg-primary/90 text-white disabled:bg-gray-300 disabled:cursor-not-allowed"
-                                    >
-                                        Next
-                                        <ArrowRight className="ml-2 h-4 w-4" />
-                                    </Button>
-                                </motion.div>
-                            ) : (
-                                <motion.div
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    className="space-y-6"
+                                <Button
+                                    type="button"
+                                    onClick={handleSubmit}
+                                    disabled={loading}
+                                    className="w-full h-12 bg-primary hover:bg-primary/90 text-white"
                                 >
-                                    {forms.map((form, index) => (
-                                        <DirectorShareholderFormCard
-                                            key={index}
-                                            form={form}
-                                            index={index}
-                                            isFirstForm={index === 0}
-                                            onFormChange={handleFormChange}
-                                            onFileUpload={handleFileUpload}
-                                            onRemove={forms.length > 1 && index > 0 ? () => handleRemoveForm(index) : undefined}
-                                            popoverStates={popoverStates}
-                                            togglePopover={togglePopover}
-                                            uploadingFiles={uploadingFiles}
-                                            fieldErrors={fieldErrors}
-                                            validationErrors={validationErrors}
-                                            countries={countries}
-                                        />
-                                    ))}
+                                    {loading ? "Submitting..." : "Submit"}
+                                </Button>
 
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        onClick={handleAddForm}
-                                        className="w-full h-12 bg-green-50 border-green-600 text-green-600 hover:bg-green-600 hover:text-white"
-                                    >
-                                        <Plus className="mr-2 h-4 w-4" />
-                                        Add Another Director/Shareholder
-                                    </Button>
-
-                                    <div className="flex justify-between space-x-4">
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            onClick={() => setCurrentStage(FormStage.SELECTION)}
-                                            className="flex-1 h-12"
-                                        >
-                                            <ArrowLeft className="mr-2 h-4 w-4" />
-                                            Back
-                                        </Button>
-                                        <Button
-                                            type="button"
-                                            onClick={handleSubmit}
-                                            disabled={loading}
-                                            className="flex-1 h-12 bg-primary hover:bg-primary/90 text-white"
-                                        >
-                                            {loading ? "Submitting..." : "Submit"}
-                                        </Button>
-                                    </div>
-
-                                    <div className="text-center text-sm text-gray-600">
-                                        Have any issues?{" "}
-                                        <a href="mailto:support@rojifi.com" className="text-primary hover:text-primary/80 font-medium">
-                                            Contact Support
-                                        </a>
-                                    </div>
-                                </motion.div>
-                            )}
+                                <div className="text-center text-sm text-gray-600">
+                                    Have any issues?{" "}
+                                    <a href="mailto:support@rojifi.com" className="text-primary hover:text-primary/80 font-medium">
+                                        Contact Support
+                                    </a>
+                                </div>
+                            </motion.div>
                         </form>
                     </div>
                 </div>
@@ -781,24 +616,22 @@ function DirectorShareholderFormCard({
     };
 
     const handleRoleChange = (roleType: 'director' | 'shareholder', checked: boolean) => {
-        if (!isFirstForm) {
-            onFormChange(index, roleType === 'director' ? 'isDirector' : 'isShareholder', checked);
+        onFormChange(index, roleType === 'director' ? 'isDirector' : 'isShareholder', checked);
 
-            // Update role display
-            const newIsDirector = roleType === 'director' ? checked : form.isDirector;
-            const newIsShareholder = roleType === 'shareholder' ? checked : form.isShareholder;
+        // Update role display
+        const newIsDirector = roleType === 'director' ? checked : form.isDirector;
+        const newIsShareholder = roleType === 'shareholder' ? checked : form.isShareholder;
 
-            let roleDisplay = "";
-            if (newIsDirector && newIsShareholder) {
-                roleDisplay = "Director and Shareholder";
-            } else if (newIsDirector) {
-                roleDisplay = "Director";
-            } else if (newIsShareholder) {
-                roleDisplay = "Shareholder";
-            }
-
-            onFormChange(index, 'role', roleDisplay);
+        let roleDisplay = "";
+        if (newIsDirector && newIsShareholder) {
+            roleDisplay = "Director and Shareholder";
+        } else if (newIsDirector) {
+            roleDisplay = "Director";
+        } else if (newIsShareholder) {
+            roleDisplay = "Shareholder";
         }
+
+        onFormChange(index, 'role', roleDisplay);
     };
 
     const handleFileRemove = (fieldType: 'idDocument' | 'proofOfAddress') => {
@@ -870,43 +703,9 @@ function DirectorShareholderFormCard({
                 </div>
             </div>
 
-            {/*
-            <div className="grid grid-cols-2 gap-4">
-                <div>
-                    <Label htmlFor={`email-${index}`} className="block text-sm font-medium text-gray-700 mb-2">
-                        Email<span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                        id={`email-${index}`}
-                        type="email"
-                        className={`h-12 ${hasFieldError('email') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
-                        value={form.email}
-                        onChange={(e) => handleFieldChange('email', e.target.value)}
-                        onBlur={(e) => handleFieldBlur('email', e.target.value)}
-                        placeholder="email@example.com"
-                    />
-                    {getFieldError('email') && (
-                        <p className="text-red-500 text-xs mt-1">{getFieldError('email')}</p>
-                    )}
-                </div>
-                <div>
-                    <Label htmlFor={`jobTitle-${index}`} className="block text-sm font-medium text-gray-700 mb-2">
-                        Job Title
-                    </Label>
-                    <Input
-                        id={`jobTitle-${index}`}
-                        className="h-12"
-                        value={form.jobTitle}
-                        onChange={(e) => onFormChange(index, 'jobTitle', e.target.value)}
-                        placeholder="e.g., CEO, CFO"
-                    />
-                </div>
-            </div>
-            */}
-
             <div>
                 <Label htmlFor={`jobTitle-${index}`} className="block text-sm font-medium text-gray-700 mb-2">
-                    Job Title
+                    Job Title <span className="text-red-500">*</span>
                 </Label>
                 <Input
                     id={`jobTitle-${index}`}
@@ -921,33 +720,24 @@ function DirectorShareholderFormCard({
                 <Label className="block text-sm font-medium text-gray-700 mb-2">
                     Role<span className="text-red-500">*</span>
                 </Label>
-                {isFirstForm ? (
-                    <Input
-                        className="h-12"
-                        value={form.role}
-                        disabled
-                        placeholder="Role"
-                    />
-                ) : (
-                    <div className="space-y-3">
-                        <div className="flex items-center space-x-2">
-                            <Checkbox
-                                id={`director-${index}`}
-                                checked={form.isDirector}
-                                onCheckedChange={(checked) => handleRoleChange('director', checked as boolean)}
-                            />
-                            <Label htmlFor={`director-${index}`} className="font-normal">Director</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                            <Checkbox
-                                id={`shareholder-${index}`}
-                                checked={form.isShareholder}
-                                onCheckedChange={(checked) => handleRoleChange('shareholder', checked as boolean)}
-                            />
-                            <Label htmlFor={`shareholder-${index}`} className="font-normal">Shareholder</Label>
-                        </div>
+                <div className="space-y-3">
+                    <div className="flex items-center space-x-2">
+                        <Checkbox
+                            id={`director-${index}`}
+                            checked={form.isDirector}
+                            onCheckedChange={(checked) => handleRoleChange('director', checked as boolean)}
+                        />
+                        <Label htmlFor={`director-${index}`} className="font-normal">Director</Label>
                     </div>
-                )}
+                    <div className="flex items-center space-x-2">
+                        <Checkbox
+                            id={`shareholder-${index}`}
+                            checked={form.isShareholder}
+                            onCheckedChange={(checked) => handleRoleChange('shareholder', checked as boolean)}
+                        />
+                        <Label htmlFor={`shareholder-${index}`} className="font-normal">Shareholder</Label>
+                    </div>
+                </div>
             </div>
 
             {form.isShareholder && (
@@ -1066,49 +856,40 @@ function DirectorShareholderFormCard({
                     <Label className="block text-sm font-medium text-gray-700 mb-2">
                         Date of Birth<span className="text-red-500">*</span>
                     </Label>
-                    {isFirstForm ? (
-                        <Input
-                            value={form.dateOfBirth ? format(new Date(form.dateOfBirth), "MMMM d, yyyy") : ""}
-                            disabled
-                            className="w-full h-12 bg-gray-50 text-gray-600"
-                            placeholder="Date will be pre-filled"
-                        />
-                    ) : (
-                        <Popover
-                            open={popoverStates[`dateOfBirth-${index}`]}
-                            onOpenChange={(open) => togglePopover(`dateOfBirth-${index}`, open)}
-                        >
-                            <PopoverTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    className={cn(
-                                        "w-full h-12 justify-start text-left font-normal",
-                                        !form.dateOfBirth && "text-muted-foreground"
-                                    )}
-                                >
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {form.dateOfBirth ? format(form.dateOfBirth, "PPP") : "Select date"}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                                <Calendar
-                                    mode="single"
-                                    captionLayout="dropdown"
-                                    selected={form.dateOfBirth}
-                                    onSelect={(date) => {
-                                        onFormChange(index, 'dateOfBirth', date)
-                                        togglePopover(`dateOfBirth-${index}`, false)
-                                    }}
-                                    disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
-                                    initialFocus
-                                />
-                            </PopoverContent>
-                        </Popover>
-                    )}
+                    <Popover
+                        open={popoverStates[`dateOfBirth-${index}`]}
+                        onOpenChange={(open) => togglePopover(`dateOfBirth-${index}`, open)}
+                    >
+                        <PopoverTrigger asChild>
+                            <Button
+                                variant="outline"
+                                className={cn(
+                                    "w-full h-12 justify-start text-left font-normal",
+                                    !form.dateOfBirth && "text-muted-foreground"
+                                )}
+                            >
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {form.dateOfBirth ? format(form.dateOfBirth, "PPP") : "Select date"}
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                                mode="single"
+                                captionLayout="dropdown"
+                                selected={form.dateOfBirth}
+                                onSelect={(date) => {
+                                    onFormChange(index, 'dateOfBirth', date)
+                                    togglePopover(`dateOfBirth-${index}`, false)
+                                }}
+                                disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+                                initialFocus
+                            />
+                        </PopoverContent>
+                    </Popover>
                 </div>
                 <div>
                     <Label className="block text-sm font-medium text-gray-700 mb-2">
-                        Nationality<span className="text-red-500">*</span>
+                        Country Of Birth<span className="text-red-500">*</span>
                     </Label>
                     <Popover
                         open={popoverStates[`nationality-${index}`]}
@@ -1120,7 +901,7 @@ function DirectorShareholderFormCard({
                                     {form.nationality && (
                                         <img src={`https://flagcdn.com/w320/${countries.find((country) => country.name === form.nationality)?.iso2.toLowerCase()}.png`} alt="" width={18} height={18} />
                                     )}
-                                    {form.nationality || "Select nationality"}
+                                    {form.nationality || "Select country of birth"}
                                 </div>
                                 <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
                             </Button>

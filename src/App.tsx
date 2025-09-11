@@ -7,7 +7,7 @@ import { ProtectedRoute } from "./app/ProtectedRoute";
 // import { RedirectIfAuthenticated } from "./app/RedirectIfAuthenticated";
 import LoginPage from "./v1/app/login/page";
 import { DashboardLayout } from "./v1/components/dashboard/dashboard-layout";
-import { VerificationInReview } from "./v1/components/dashboard/verification-in-review";
+// import { VerificationInReview } from "./v1/components/dashboard/verification-in-review";
 import Home from "./v1/app/page";
 import ContactPage from "./v1/app/contactus/page";
 import DashboardPage from "./v1/app/dashboard/[wallet]/page";
@@ -43,7 +43,7 @@ import KYCKYBVerificationPage from "./v1/app/signup/[id]/verification/page";
 import InvitationPage from "./v1/app/invitation/[id]/page";
 import FaqPage from "./v1/app/faq/page";
 import DirectorPage from "./v1/app/signup/[id]/director/page";
-import { session, SessionData } from "./v1/session/session";
+// import { session, SessionData } from "./v1/session/session";
 import EditSenderPage from "./v1/app/dashboard/[wallet]/sender/edit/EditSenderPage";
 import InactivityTracker from "@/v1/components/inactivity-tracker";
 // ...existing code...
@@ -55,8 +55,9 @@ function AppRoute({
     path: string;
     page: React.ComponentType;
 }) {
-    const sd: SessionData = session.getUserData();
+    // const sd: SessionData = session.getUserData();
 
+    /*
     const isVerificationComplete = sd?.sender?.businessVerificationCompleted;
     if (!isVerificationComplete) {
         if (path === "/dashboard/:wallet/businessprofile") {
@@ -99,6 +100,7 @@ function AppRoute({
             </Route>
         );
     }
+    */
 
     // State 3: Verification complete - show normal pages
     return (
