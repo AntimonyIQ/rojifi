@@ -357,6 +357,7 @@ export function BusinessDetailsForm() {
         }
     }
 
+    /*
     if (isLoading) {
         return (
             <div className="fixed top-0 bottom-0 left-0 right-0 z-50 flex items-center justify-center bg-white">
@@ -388,6 +389,7 @@ export function BusinessDetailsForm() {
             </div>
         )
     }
+    */
 
     if (completed) {
         return (
@@ -794,39 +796,6 @@ export function BusinessDetailsForm() {
                                             </PopoverContent>
                                         </Popover>
                                     </div>
-
-                                    {/** Onboarding Date */}
-                                    {/*
-                                    <div>
-                                        <Label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Onboarding Date <span className="text-red-500">*</span>
-                                        </Label>
-                                        <Popover open={onboardingDatePopover} onOpenChange={setOnboardingDatePopover}>
-                                            <PopoverTrigger asChild>
-                                                <Button
-                                                    variant="outline"
-                                                    className="w-full h-12 justify-start text-left font-normal"
-                                                    disabled={loading}
-                                                >
-                                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                                    {formData.onboardingDate ? format(formData.onboardingDate, "PPP") : "Pick a date"}
-                                                </Button>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="w-auto p-0">
-                                                <Calendar
-                                                    mode="single"
-                                                    captionLayout="dropdown"
-                                                    selected={formData.onboardingDate}
-                                                    onSelect={(date) => {
-                                                        handleInputChange("onboardingDate", date!)
-                                                        setOnboardingDatePopover(false)
-                                                    }}
-                                                    initialFocus
-                                                />
-                                            </PopoverContent>
-                                        </Popover>
-                                    </div>
-                                    */}
                                 </div>
                             </div>
 
