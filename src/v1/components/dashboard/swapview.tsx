@@ -17,11 +17,19 @@ import {
     DialogFooter,
 } from "@/v1/components/ui/dialog";
 import { session, SessionData } from "@/v1/session/session";
-import { IWallet } from "@/v1/interface/interface";
-import { Fiat } from "@/v1/enums/enums";
+import { IResponse, IWallet } from "@/v1/interface/interface";
+import { Fiat, PaymentRail, Status } from "@/v1/enums/enums";
 import { usePathname } from "wouter/use-browser-location";
 import { Link } from "wouter";
+import Defaults from "@/v1/defaults/defaults";
+import { ILoginFormProps } from "../auth/login-form";
 
+interface IEstimateResponse {
+    fromAmount: number;
+    toAmount: number;
+    expiresIn: number;
+    rate: number;
+}
 
 export function SwapView() {
     const [hideBalances, setHideBalances] = useState(false);
@@ -34,6 +42,8 @@ export function SwapView() {
     const [pendingCurrency, setPendingCurrency] = useState<IWallet | null>(null);
     const [successfulSwap, setSuccessfulSwap] = useState<boolean>(false);
     const [currencies, setCurrencies] = useState<Array<IWallet>>([]);
+    const [estimate, setEstimate] = useState<IEstimateResponse | null>(null);
+    const sd: SessionData = session.getUserData()!;
 
     const pathname = usePathname();
     const parts = pathname ? pathname.split('/') : [];
@@ -75,9 +85,89 @@ export function SwapView() {
             }
         };
         fetchRates();
+        estimateSwap();
         const interval = setInterval(fetchRates, 60 * 1000); // 1 minute
         return () => clearInterval(interval);
-    }, []);
+    }, [amount]);
+
+    const estimateSwap = async () => {
+
+        try {
+            setLoading(true);
+            let toRail: PaymentRail;
+            switch (toCurrency) {
+                case Fiat.EUR:
+                    toRail = PaymentRail.SEPA;
+                    break;
+                case Fiat.USD:
+                    toRail = PaymentRail.SWIFT;
+                    break;
+                case Fiat.GBP:
+                    toRail = PaymentRail.FPS;
+                    break;
+                default:
+                    toRail = PaymentRail.SEPA;
+            }
+
+            const response = await fetch(`${Defaults.API_BASE_URL}/wallet/swap/estimate`, {
+                method: 'POST',
+                headers: {
+                    ...Defaults.HEADERS,
+                    'x-rojifi-handshake': sd.client.publicKey,
+                    'x-rojifi-deviceid': sd.deviceid,
+                    'Authorization': `Bearer ${sd.authorization}`,
+                },
+                body: JSON.stringify({
+                    fromCurrency,
+                    toCurrency,
+                    fromValue: amount,
+                    fromRail: PaymentRail.TRX,
+                    toRail,
+                })
+            });
+
+            const data: IResponse = await response.json();
+            if (data.status === Status.ERROR) throw new Error(data.message || data.error);
+            if (data.status === Status.SUCCESS) {
+                if (!data.handshake) throw new Error('Invalid Response');
+                const parseData: IEstimateResponse = Defaults.PARSE_DATA(data.data, sd.client.privateKey, data.handshake);
+                console.log('Parsed Data:', parseData);
+                setEstimate(parseData);
+
+                const userres = await fetch(`${Defaults.API_BASE_URL}/wallet`, {
+                    method: 'GET',
+                    headers: {
+                        ...Defaults.HEADERS,
+                        'x-rojifi-handshake': sd.client.publicKey,
+                        'x-rojifi-deviceid': sd.deviceid,
+                        Authorization: `Bearer ${sd.authorization}`,
+                    },
+                });
+
+                const userdata: IResponse = await userres.json();
+                if (userdata.status === Status.ERROR) throw new Error(userdata.message || userdata.error);
+                if (userdata.status === Status.SUCCESS) {
+                    if (!userdata.handshake) throw new Error('Invalid Response');
+                    const parseData: ILoginFormProps = Defaults.PARSE_DATA(userdata.data, sd.client.privateKey, userdata.handshake);
+
+                    session.updateSession({
+                        ...sd,
+                        user: parseData.user,
+                        wallets: parseData.wallets,
+                        transactions: parseData.transactions,
+                        sender: parseData.sender,
+                    });
+
+                    setCurrencies(parseData.wallets);
+                    // setSelectedCurrency(parseData.wallets.find(w => w.currency === wallet) || null);
+                }
+            }
+        } catch (error) {
+            console.error('Error checking deposits:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleSwap = () => {
         const oldFrom = fromCurrency;
@@ -210,7 +300,7 @@ export function SwapView() {
                             ) : (
                                 <>
                                     {/* Header with Rate */}
-                                    <div className="px-8 py-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+                                    <div className="px-8 py-6 bg-blue-600 text-white">
                                         <div className="text-center space-y-3">
                                             <h2 className="text-xl font-semibold">Exchange Rate</h2>
                                             <motion.div
@@ -282,7 +372,7 @@ export function SwapView() {
                                                 </div>
                                             </div>
                                             <div className="relative">
-                                                <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-gray-50 to-gray-100/50 rounded-2xl border border-gray-200 focus-within:border-blue-300 focus-within:ring-4 focus-within:ring-blue-50 transition-all">
+                                                <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-200 focus-within:border-blue-300 focus-within:ring-4 focus-within:ring-blue-50 transition-all">
                                                     <Select value={fromCurrency} onValueChange={handleFromChange}>
                                                         <SelectTrigger className="w-32 border-0 bg-white shadow-sm">
                                                             <SelectValue />

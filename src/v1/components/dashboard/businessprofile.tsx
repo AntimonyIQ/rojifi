@@ -213,13 +213,13 @@ export function BusinessProfileView() {
                                             {sender?.documents?.map((doc, index) => (
                                                 <div key={index} className="flex items-center justify-between text-xs">
                                                     <span>{doc.which?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
-                                                    <Badge className={`text-xs ${doc.smileIdStatus === 'verified'
+                                                    <Badge className={`text-xs ${doc.issue === true ? "bg-red-100 text-red-700" : doc.smileIdStatus === 'verified'
                                                         ? 'bg-green-100 text-green-700'
                                                         : doc.smileIdStatus === 'failed'
                                                             ? 'bg-red-100 text-red-700'
                                                             : 'bg-yellow-100 text-yellow-700'
                                                         }`}>
-                                                        {doc.kycVerified ? 'Verified' : 'In Review'}
+                                                        {doc.issue === true ? "Failed" : doc.smileIdStatus === 'verified' ? "Verified" : "In Review"}
                                                     </Badge>
                                                 </div>
                                             )) || (
@@ -424,7 +424,7 @@ export function BusinessProfileView() {
                                             Registration Number
                                         </Label>
                                         <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
-                                            <p className="font-semibold text-gray-900">{sender?.businessRegistrationNumber || "Not provided"}</p>
+                                            <p className="font-mono text-gray-900">{sender?.businessRegistrationNumber || "Not provided"}</p>
                                         </div>
                                     </div>
 
@@ -464,7 +464,7 @@ export function BusinessProfileView() {
                                             Country of Incorporation
                                         </Label>
                                         <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
-                                            <p className="font-semibold text-gray-900">{sender?.countryOfIncorporation || "Not provided"}</p>
+                                            <p className="font-semibold text-gray-900">{sender?.country || "Not provided"}</p>
                                         </div>
                                     </div>
 
@@ -476,7 +476,7 @@ export function BusinessProfileView() {
                                         <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
                                             <p className="text-gray-900">
                                                 {sender?.registrationDate
-                                                    ? new Date(sender.registrationDate).toLocaleDateString()
+                                                    ? new Date(sender.createdAt).toLocaleDateString()
                                                     : "Not provided"
                                                 }
                                             </p>
@@ -599,26 +599,6 @@ export function BusinessProfileView() {
                                         </Label>
                                         <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
                                             <p className="text-gray-900">{sender?.email || "Not provided"}</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                                            <Phone className="h-4 w-4 text-blue-600" />
-                                            Business Phone
-                                        </Label>
-                                        <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
-                                            <p className="text-gray-900">{sender?.phoneCountryCode} {sender?.phoneNumber || "Not provided"}</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                                            <Files className="h-4 w-4 text-blue-600" />
-                                            Tax Identification Number
-                                        </Label>
-                                        <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
-                                            <p className="text-gray-900">{sender?.taxIdentificationNumber || "Not provided"}</p>
                                         </div>
                                     </div>
 
@@ -999,7 +979,7 @@ export function BusinessProfileView() {
                                                         <User className="h-4 w-4 text-indigo-600" />
                                                         Full Name
                                                     </Label>
-                                                    <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border">
+                                                    <div className="p-4 rounded-lg border">
                                                         <p className="font-semibold text-gray-900">
                                                             {`${directors[currentDirectorIndex]?.firstName} ${directors[currentDirectorIndex]?.middleName ? directors[currentDirectorIndex]?.middleName + ' ' : ''}${directors[currentDirectorIndex]?.lastName}`}
                                                         </p>
@@ -1011,7 +991,7 @@ export function BusinessProfileView() {
                                                         <Mail className="h-4 w-4 text-indigo-600" />
                                                         Email Address
                                                     </Label>
-                                                    <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border">
+                                                    <div className="p-4 rounded-lg border">
                                                         <p className="text-gray-900">{directors[currentDirectorIndex]?.email}</p>
                                                     </div>
                                                 </div>
@@ -1021,7 +1001,7 @@ export function BusinessProfileView() {
                                                         <Building className="h-4 w-4 text-indigo-600" />
                                                         Role & Position
                                                     </Label>
-                                                    <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border">
+                                                    <div className="p-4 rounded-lg border">
                                                         <p className="font-semibold text-gray-900">{directors[currentDirectorIndex]?.role}</p>
                                                         {directors[currentDirectorIndex]?.jobTitle && (
                                                             <p className="text-sm text-gray-600 mt-1">{directors[currentDirectorIndex]?.jobTitle}</p>
@@ -1034,7 +1014,7 @@ export function BusinessProfileView() {
                                                         <TrendingUp className="h-4 w-4 text-indigo-600" />
                                                         Ownership
                                                     </Label>
-                                                    <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border">
+                                                    <div className="p-4 rounded-lg border">
                                                         <p className="font-semibold text-gray-900">
                                                             {directors[currentDirectorIndex]?.isShareholder
                                                                 ? `${directors[currentDirectorIndex]?.shareholderPercentage}% shareholding`
@@ -1057,7 +1037,7 @@ export function BusinessProfileView() {
                                                         <Phone className="h-4 w-4 text-indigo-600" />
                                                         Phone Number
                                                     </Label>
-                                                    <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border">
+                                                    <div className="p-4 rounded-lg border">
                                                         <p className="text-gray-900">+{directors[currentDirectorIndex]?.phoneCode} {directors[currentDirectorIndex]?.phoneNumber}</p>
                                                     </div>
                                                 </div>
@@ -1067,7 +1047,7 @@ export function BusinessProfileView() {
                                                         <Globe className="h-4 w-4 text-indigo-600" />
                                                         Nationality
                                                     </Label>
-                                                    <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border">
+                                                    <div className="p-4 rounded-lg border">
                                                         <p className="text-gray-900">{directors[currentDirectorIndex]?.nationality}</p>
                                                     </div>
                                                 </div>
@@ -1082,28 +1062,28 @@ export function BusinessProfileView() {
                                                             <MapPin className="h-4 w-4 text-indigo-600" />
                                                             Street Address
                                                         </Label>
-                                                        <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border">
+                                                        <div className="p-4 rounded-lg border">
                                                             <p className="text-gray-900">{directors[currentDirectorIndex]?.streetAddress}</p>
                                                         </div>
                                                     </div>
 
                                                     <div className="space-y-2">
                                                         <Label className="text-sm font-semibold text-gray-700">City & Postal Code</Label>
-                                                        <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border">
+                                                        <div className="p-4 rounded-lg border">
                                                             <p className="text-gray-900">{directors[currentDirectorIndex]?.city}, {directors[currentDirectorIndex]?.postalCode}</p>
                                                         </div>
                                                     </div>
 
                                                     <div className="space-y-2">
                                                         <Label className="text-sm font-semibold text-gray-700">State/Province</Label>
-                                                        <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border">
+                                                        <div className="p-4 rounded-lg border">
                                                             <p className="text-gray-900">{directors[currentDirectorIndex]?.state}</p>
                                                         </div>
                                                     </div>
 
                                                     <div className="space-y-2">
                                                         <Label className="text-sm font-semibold text-gray-700">Country</Label>
-                                                        <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border">
+                                                        <div className="p-4 rounded-lg border">
                                                             <p className="text-gray-900">{directors[currentDirectorIndex]?.country}</p>
                                                         </div>
                                                     </div>
@@ -1119,7 +1099,7 @@ export function BusinessProfileView() {
                                                             <Shield className="h-4 w-4 text-indigo-600" />
                                                             ID Document
                                                         </Label>
-                                                        <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border">
+                                                        <div className="p-4 rounded-lg border">
                                                             <div className="flex items-center gap-2">
                                                                 <Badge className={directors[currentDirectorIndex]?.idDocumentVerified ? 'bg-green-100 text-green-800 border-green-200' : 'bg-yellow-100 text-yellow-800 border-yellow-200'}>
                                                                     {directors[currentDirectorIndex]?.idDocumentVerified ? 'Verified' : 'Pending'}
@@ -1136,7 +1116,7 @@ export function BusinessProfileView() {
                                                             <MapPin className="h-4 w-4 text-indigo-600" />
                                                             Proof of Address
                                                         </Label>
-                                                        <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border">
+                                                        <div className="p-4 rounded-lg border">
                                                             <Badge className={directors[currentDirectorIndex]?.proofOfAddressVerified ? 'bg-green-100 text-green-800 border-green-200' : 'bg-yellow-100 text-yellow-800 border-yellow-200'}>
                                                                 {directors[currentDirectorIndex]?.proofOfAddressVerified ? 'Verified' : 'Pending'}
                                                             </Badge>

@@ -87,6 +87,7 @@ export interface IWallet {
     symbol: "₦" | "$" | "€" | "£",
     activated: boolean;
     name: string;
+    lastFundingRail: PaymentRail;
     deposit: Array<{
         currency: Coin | Fiat;
         icon: string;
@@ -370,6 +371,13 @@ export interface ISenderDocument {
     description?: string;
     expiresAt?: Date;
     isRequired: boolean;
+
+    issue: boolean;
+    issueMessage?: string;
+    issuedBy?: IUser;
+    issuedAt?: Date;
+    issueResolved: boolean;
+    issueResolvedAt: Date | null;
 }
 
 export interface ISender {

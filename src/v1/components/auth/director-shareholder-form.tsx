@@ -228,7 +228,7 @@ export function DirectorShareholderForm() {
         return (
             form.firstName.trim() !== "" &&
             form.lastName.trim() !== "" &&
-            // form.email.trim() !== "" &&
+            form.email.trim() !== "" &&
             form.role.trim() !== "" &&
             form.dateOfBirth !== undefined &&
             form.nationality.trim() !== "" &&
@@ -775,6 +775,24 @@ function DirectorShareholderFormCard({
 
             {/* Separator */}
             <div className="border-t border-gray-200 my-6"></div>
+
+            {/* Email */}
+            <div>
+                <Label htmlFor={`email-${index}`} className="block text-sm font-medium text-gray-700 mb-2">
+                    Email<span className="text-red-500">*</span>
+                </Label>
+                <Input
+                    id={`email-${index}`}
+                    className={`h-12 ${hasFieldError('email') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
+                    value={form.email}
+                    onChange={(e) => handleFieldChange('email', e.target.value)}
+                    onBlur={(e) => handleFieldBlur('email', e.target.value)}
+                    placeholder="Email address"
+                />
+                {getFieldError('email') && (
+                    <p className="text-red-500 text-xs mt-1">{getFieldError('email')}</p>
+                )}
+            </div>
 
             {/* Phone Number with Country Code */}
             <div>
