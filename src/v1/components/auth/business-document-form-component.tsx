@@ -2,28 +2,20 @@ import { useState, useEffect } from "react"
 import { Button } from "@/v1/components/ui/button"
 import { Label } from "@/v1/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/v1/components/ui/dialog"
-import { X, Plus, Check, AlertCircle, ArrowUpRight, Trash2, Eye } from "lucide-react"
-import { Logo } from "@/v1/components/logo"
-import { Carousel, carouselItems } from "../carousel"
-import GlobeWrapper from "../globe"
+import { X, Plus, Check, Trash2, Eye } from "lucide-react"
 import Defaults from "@/v1/defaults/defaults"
-import { IRequestAccess, IResponse, ISender } from "@/v1/interface/interface"
+import { IResponse, ISender } from "@/v1/interface/interface"
 import { Status, WhichDocument } from "@/v1/enums/enums"
 import { session, SessionData } from "@/v1/session/session"
 import { toast } from "sonner"
-import { Link, useParams } from "wouter"
-import { motion } from "framer-motion"
 
 interface BusinessDetailsStageProps {
     sender: Partial<ISender>;
 }
 
 export function KYBVerificationFormComponent({ sender }: BusinessDetailsStageProps) {
-    const [completed, setCompleted] = useState(false);
     const [dragActive, setDragActive] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
     const [loading, setLoading] = useState(false);
-    const [isNotApprove, setIsNotApprove] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [formData, setFormData] = useState<Record<string, File | null>>({
         cacCertOfIncoporation: null,
@@ -66,51 +58,15 @@ export function KYBVerificationFormComponent({ sender }: BusinessDetailsStagePro
     });
     const sd: SessionData = session.getUserData();
 
-    const { id } = useParams();
-
-    const loadData = async () => {
-        try {
-            const res = await fetch(`${Defaults.API_BASE_URL}/requestaccess/approved/${id}`, {
-                method: 'GET',
-                headers: {
-                    ...Defaults.HEADERS,
-                    "Content-Type": "application/json",
-                    'x-rojifi-handshake': sd.client.publicKey,
-                    'x-rojifi-deviceid': sd.deviceid,
-                },
-            });
-            const data: IResponse = await res.json();
-            if (data.status === Status.ERROR) throw new Error(data.message || data.error);
-            if (data.status === Status.SUCCESS) {
-                if (!data.handshake) throw new Error('Unable to process response right now, please try again.');
-                const parseData: IRequestAccess = Defaults.PARSE_DATA(data.data, sd.client.privateKey, data.handshake);
-
-                setCompleted(parseData.completed);
-            }
-        } catch (error) {
-            console.error('Error loading data:', error);
-            setIsNotApprove(true);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
     useEffect(() => {
-        if (id) {
-            loadData();
-        }
-    }, [id]);
-
-    const logoVariants = {
-        animate: {
-            scale: [1, 1.1, 1],
-            transition: {
-                duration: 2,
-                repeat: Infinity,
-                ease: "easeInOut"
-            }
-        }
-    }
+        setUploadedUrls({
+            ...uploadedUrls,
+            cacCertOfIncoporation: sender.documents?.find(doc => doc.which === WhichDocument.CERTIFICATE_INCORPORATION)?.url || null,
+            memorandumArticlesOfAssociation: sender.documents?.find(doc => doc.which === WhichDocument.MEMORANDUM_ARTICLES)?.url || null,
+            cacStatusReport: sender.documents?.find(doc => doc.which === WhichDocument.INCORPORATION_STATUS)?.url || null,
+            proofOfAddress: sender.documents?.find(doc => doc.which === WhichDocument.PROOF_ADDRESS)?.url || null,
+        })
+    }, []);
 
     const handleDrag = (e: React.DragEvent) => {
         e.preventDefault();
@@ -218,7 +174,6 @@ export function KYBVerificationFormComponent({ sender }: BusinessDetailsStagePro
                     'x-rojifi-deviceid': sd.deviceid,
                 },
                 body: JSON.stringify({
-                    rojifiId: id,
                     documents: documents
                 })
             });
@@ -227,7 +182,6 @@ export function KYBVerificationFormComponent({ sender }: BusinessDetailsStagePro
             if (data.status === Status.ERROR) throw new Error(data.message || data.error);
             if (data.status === Status.SUCCESS) {
                 toast.success("Documents Uploaded Successfully, You will be redirected to login.");
-                window.location.href = `/signup/${id}/director`;
             }
         } catch (err: any) {
             setError(err.message || "Failed to upload documents");
@@ -577,108 +531,24 @@ export function KYBVerificationFormComponent({ sender }: BusinessDetailsStagePro
         </div>
     );
 
-    if (isLoading) {
-        return (
-            <div className="fixed top-0 bottom-0 left-0 right-0 z-50 flex items-center justify-center bg-white">
-                <div className="flex min-h-screen items-center justify-center bg-background">
-                    <motion.div variants={logoVariants} animate="animate">
-                        <Logo className="h-16 w-auto" />
-                    </motion.div>
-                </div>
-            </div>
-        )
-    }
-
-    if (isNotApprove) {
-        return (
-            <div className="fixed inset-0 bg-white flex items-center justify-center">
-                <div className="text-center max-w-lg px-6">
-                    <AlertCircle className="mx-auto h-12 w-12 text-gray-500" />
-                    <h2 className="mt-4 text-2xl font-semibold text-gray-900">Request access required</h2>
-                    <p className="mt-2 text-gray-600">You currently don't have access to this page. Please request access to continue.</p>
-                    <div className="mt-6">
-                        <Link href="/request-access" className="inline-flex">
-                            <Button className="px-6 py-2 bg-primary hover:bg-primary/90 text-white">
-                                <ArrowUpRight size={18} />
-                                Request Access
-                            </Button>
-                        </Link>
-                    </div>
-                </div>
-            </div>
-        )
-    }
-
-    if (completed) {
-        return (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-white">
-                <div className="p-6 max-w-md mx-auto text-center">
-                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-                        <Check className="h-8 w-8 text-green-600" />
-                    </div>
-                    <h2 className="text-xl font-semibold mb-2">Submission Received</h2>
-                    <p className="text-gray-600 mb-4">You have successfully submitted your documents. They are under review — you will be notified once the review is complete.</p>
-                    <div className="space-y-3">
-                        <Button
-                            onClick={() => window.location.href = '/login'}
-                            className="w-full bg-primary hover:bg-primary/90 text-white"
-                        >
-                            Go to Dashboard
-                        </Button>
-                        <Button
-                            variant="outline"
-                            onClick={() => window.location.href = '/'}
-                            className="w-full"
-                        >
-                            Back to Homepage
-                        </Button>
-                    </div>
-                </div>
-            </div>
-        )
-    }
-
     return (
-        <div className="fixed top-0 bottom-0 left-0 right-0">
+        <div className="w-full">
             <div className="w-full h-full flex flex-row items-start justify-between">
-                <div className="w-full md:w-[40%] h-full overflow-y-auto custom-scroll px-4 py-6">
-                    <div className="p-4 max-w-md mx-auto">
-                        <div className="flex items-center justify-between mb-8">
-                            <Link href="/" className="flex items-center space-x-2">
-                                <Logo className="h-8 w-auto" />
-                            </Link>
-                            <Link href="/" className="text-gray-400 hover:text-gray-600">
-                                <X className="h-6 w-6" />
-                            </Link>
-                        </div>
+                <form className="space-y-6 w-full" onSubmit={handleSubmit}>
+                    {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 
-                        <div className="text-center mb-8">
-                            <h1 className="text-2xl font-bold text-gray-900 mb-2">KYC/KYB Verification</h1>
-                            <p className="text-gray-600">We need to verify your details for compliance and protection.</p>
-                        </div>
+                    {renderUploadField("cacCertOfIncoporation", "CAC Certificate of Incorporation", true)}
+                    {renderUploadField("memorandumArticlesOfAssociation", "Memorandum & Articles of Association (Memart)", false)}
+                    {renderUploadField("cacStatusReport", "CAC Status Report", true)}
+                    {renderUploadField("proofOfAddress", "Business Proof of Address (Recent Utility Bill, Bank Statement, Etc...)", true)}
 
-                        <form className="space-y-6" onSubmit={handleSubmit}>
-                            {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-                            {renderUploadField("cacCertOfIncoporation", "CAC Certificate of Incorporation", true)}
-                            {renderUploadField("memorandumArticlesOfAssociation", "Memorandum & Articles of Association (Memart)", false)}
-                            {renderUploadField("cacStatusReport", "CAC Status Report", true)}
-                            {renderUploadField("proofOfAddress", "Business Proof of Address (Recent Utility Bill, Bank Statement, Etc...)", true)}
-
-                            <div className="space-y-4">
-                                <Button type="submit" className="w-full h-12 bg-primary hover:bg-primary/90 text-white" disabled={loading}>
-                                    {loading ? "Loading..." : "Continue"}
-                                </Button>
-                            </div>
-
-                            <div className="text-center text-sm text-gray-600">
-                                Have an account?{" "}
-                                <Link href="/login" className="text-primary hover:text-primary/80 font-medium">
-                                    Sign in
-                                </Link>
-                            </div>
-                        </form>
+                    <div className="space-y-4">
+                        <Button type="submit" className="w-full h-12 bg-primary hover:bg-primary/90 text-white" disabled={loading}>
+                            {loading ? "Loading..." : "Continue"}
+                        </Button>
                     </div>
-                </div>
+
+                </form>
             </div>
 
             {/* File Viewer Modal */}
