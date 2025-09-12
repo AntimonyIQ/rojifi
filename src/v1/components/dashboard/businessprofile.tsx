@@ -46,19 +46,21 @@ export function BusinessProfileView() {
     }, [sd]);
 
     // Helper function to check document status
+    const [showDocumentIssues, setShowDocumentIssues] = useState(false);
+
     const getDocumentStatuses = () => {
         if (!sender) return { allVerified: false, hasFailed: false, inReview: false };
 
-        // Use the new documents array structure
         const documents = sender.documents || [];
 
         if (documents.length === 0) {
             return { allVerified: false, hasFailed: false, inReview: true };
         }
 
-        const allVerified = documents.every(doc => doc.smileIdStatus === "verified");
-        const hasFailed = documents.some(doc => doc.smileIdStatus === "failed");
-        const inReview = documents.some(doc => doc.kycVerified === false || !doc.kycVerified);
+        // Any document with issue === true should mark the whole set as failed
+        const hasFailed = documents.some(doc => doc.issue === true || doc.smileIdStatus === 'failed');
+        const allVerified = documents.every(doc => doc.smileIdStatus === "verified" && doc.issue !== true);
+        const inReview = documents.some(doc => (doc.kycVerified === false || !doc.kycVerified) && doc.issue !== true);
 
         return { allVerified, hasFailed, inReview };
     };
@@ -74,6 +76,24 @@ export function BusinessProfileView() {
             default: return 'bg-gray-100 text-gray-800 border-gray-200';
         }
     };
+
+    // Determine if any director/shareholder has an issue according to IDirectorAndShareholder
+    const directorHasIssue = (directors || []).some((d: IDirectorAndShareholder | any) => {
+        const idDoc = d?.idDocument;
+        const poa = d?.proofOfAddress;
+
+        // Consider it an issue when:
+        // - the SmileID status for the idDocument is explicitly 'rejected'
+        // - the explicit verified flags are false
+        // - or one of the required document URLs is missing
+        return (
+            idDoc?.smileIdStatus === 'rejected' ||
+            d?.idDocumentVerified === false ||
+            d?.proofOfAddressVerified === false ||
+            !idDoc?.url ||
+            !poa?.url
+        );
+    });
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30 p-6">
@@ -230,14 +250,36 @@ export function BusinessProfileView() {
                                         </div>
 
                                         {hasFailed && (
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                className="w-full text-red-600 border-red-300 hover:bg-red-50"
-                                            >
-                                                <Eye className="mr-2 h-4 w-4" />
-                                                Review Issues
-                                            </Button>
+                                            <div>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="w-full text-red-600 border-red-300 hover:bg-red-50"
+                                                    onClick={() => setShowDocumentIssues(v => !v)}
+                                                >
+                                                    <Eye className="mr-2 h-4 w-4" />
+                                                    Review Issues
+                                                </Button>
+
+                                                {showDocumentIssues && (
+                                                    <div className="mt-3 p-3 bg-red-50 border border-red-100 rounded">
+                                                        <h4 className="text-sm font-semibold text-red-800 mb-2">Document Issues</h4>
+                                                        <div className="space-y-2 text-xs text-red-700">
+                                                            {sender?.documents?.filter(d => d.issue === true || d.smileIdStatus === 'failed').map((d, i) => (
+                                                                <div key={i} className="flex items-start justify-between">
+                                                                    <div>
+                                                                        <div className="font-medium">{d.which?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</div>
+                                                                        <div className="text-red-600">{d.issueMessage || (d.smileIdStatus === 'failed' ? 'Verification failed' : 'Issue detected')}</div>
+                                                                    </div>
+                                                                    <div className="ml-4">
+                                                                        <a href={`/dashboard/${wallet}/sender/edit`} className="text-red-700 underline">View</a>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
                                         )}
                                     </motion.div>
 
@@ -246,22 +288,26 @@ export function BusinessProfileView() {
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: 0.4 }}
-                                        className={`p-6 rounded-xl border-2 ${directors.length > 0
-                                            ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-200'
-                                            : 'bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200'
+                                        className={`p-6 rounded-xl border-2 ${directorHasIssue
+                                            ? 'bg-gradient-to-br from-red-50 to-red-100 border-red-200'
+                                            : directors.length > 0
+                                                ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-200'
+                                                : 'bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200'
                                             }`}
                                     >
                                         <div className="flex items-center justify-between mb-4">
-                                            <div className={`w-12 h-12 ${directors.length > 0 ? 'bg-green-600' : 'bg-gray-400'
+                                            <div className={`w-12 h-12 ${directorHasIssue ? 'bg-red-600' : directors.length > 0 ? 'bg-green-600' : 'bg-gray-400'
                                                 } rounded-full flex items-center justify-center`}>
                                                 <UsersIcon className="h-6 w-6 text-white" />
                                             </div>
                                             <Badge className={
-                                                directors.length > 0
-                                                    ? 'bg-green-100 text-green-800 border-green-200'
-                                                    : 'bg-gray-100 text-gray-800 border-gray-200'
+                                                directorHasIssue
+                                                    ? 'bg-red-100 text-red-800 border-red-200'
+                                                    : directors.length > 0
+                                                        ? 'bg-green-100 text-green-800 border-green-200'
+                                                        : 'bg-gray-100 text-gray-800 border-gray-200'
                                             }>
-                                                {directors.length > 0 ? 'Complete' : 'Pending'}
+                                                {directorHasIssue ? 'Failed' : directors.length > 0 ? 'Complete' : 'Pending'}
                                             </Badge>
                                         </div>
                                         <h3 className="font-bold text-lg text-gray-900 mb-3">Directors & Shareholders</h3>
@@ -278,7 +324,7 @@ export function BusinessProfileView() {
                                             </div>
                                         </div>
 
-                                        {directors.length === 0 && (
+                                        {directors.length === 0 ? (
                                             <Button
                                                 variant="outline"
                                                 size="sm"
@@ -287,7 +333,16 @@ export function BusinessProfileView() {
                                                 <UsersIcon className="mr-2 h-4 w-4" />
                                                 Add Directors & Shareholders
                                             </Button>
-                                        )}
+                                        ) : directorHasIssue ? (
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                className="w-full text-red-600 border-red-300 hover:bg-red-50"
+                                            >
+                                                <Eye className="mr-2 h-4 w-4" />
+                                                Review Issues
+                                            </Button>
+                                        ) : null}
                                     </motion.div>
                                 </div>
 
@@ -373,10 +428,6 @@ export function BusinessProfileView() {
                                         </div>
                                     </div>
                                     <div className="flex gap-2">
-                                        <Button variant="outline" className="px-4 py-2 h-auto">
-                                            <Eye className="mr-2 h-4 w-4" />
-                                            View Details
-                                        </Button>
                                         <Link href={`/dashboard/${wallet}/sender/edit`}>
                                             <Button className="px-4 py-2 h-auto">
                                                 <Building className="mr-2 h-4 w-4" />

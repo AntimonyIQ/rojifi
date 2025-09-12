@@ -2,12 +2,13 @@ import { useState, useEffect } from "react"
 import { Button } from "@/v1/components/ui/button"
 import { Label } from "@/v1/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/v1/components/ui/dialog"
-import { X, Plus, Check, Trash2, Eye } from "lucide-react"
+import { X, Plus, Check, Eye, AlertCircle } from "lucide-react"
 import Defaults from "@/v1/defaults/defaults"
 import { IResponse, ISender } from "@/v1/interface/interface"
 import { Status, WhichDocument } from "@/v1/enums/enums"
 import { session, SessionData } from "@/v1/session/session"
 import { toast } from "sonner"
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert"
 
 interface BusinessDetailsStageProps {
     sender: Partial<ISender>;
@@ -366,7 +367,9 @@ export function KYBVerificationFormComponent({ sender }: BusinessDetailsStagePro
                                 </DialogDescription>
                             </div>
                             <div className="flex items-center space-x-2">
-                                <Button
+                                {/**
+                                 * 
+                                 * <Button
                                     variant="outline"
                                     size="sm"
                                     onClick={handleDelete}
@@ -375,6 +378,8 @@ export function KYBVerificationFormComponent({ sender }: BusinessDetailsStagePro
                                     <Trash2 className="h-4 w-4 mr-2" />
                                     Delete
                                 </Button>
+
+                                 */}
                                 <Button
                                     variant="outline"
                                     size="sm"
@@ -541,6 +546,14 @@ export function KYBVerificationFormComponent({ sender }: BusinessDetailsStagePro
                     {renderUploadField("memorandumArticlesOfAssociation", "Memorandum & Articles of Association (Memart)", false)}
                     {renderUploadField("cacStatusReport", "CAC Status Report", true)}
                     {renderUploadField("proofOfAddress", "Business Proof of Address (Recent Utility Bill, Bank Statement, Etc...)", true)}
+
+                    <Alert variant="default" className="mt-2 bg-yellow-50 border-yellow-200 text-yellow-800">
+                        <AlertCircle className="w-5 h-5" />
+                        <AlertTitle className="text-sm">Note: Proof of Address requirement</AlertTitle>
+                        <AlertDescription>
+                            Kindly ensure the Proof of Address document matches the company's operations address.
+                        </AlertDescription>
+                    </Alert>
 
                     <div className="space-y-4">
                         <Button type="submit" className="w-full h-12 bg-primary hover:bg-primary/90 text-white" disabled={loading}>

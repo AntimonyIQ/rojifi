@@ -4,14 +4,13 @@ import { KYBVerificationFormComponent } from "@/v1/components/auth/business-docu
 
 interface DocumentsStageProps {
     sender: ISender | null;
-    onDocumentUploaded: (field: string, url: string) => void;
 }
 
 export const DocumentsStage: React.FC<DocumentsStageProps> = ({
     sender
-}) => {
+}: DocumentsStageProps) => {
 
-
+    if (!sender) return null;
     return (
         <div>
             <KYBVerificationFormComponent sender={sender} />

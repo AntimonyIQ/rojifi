@@ -26,6 +26,13 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
         }
     }, [])
 
+    // KYC state computation (three states)
+    const isVerified = sender?.businessVerificationCompleted === true;
+    const hasNoDirectors = !(sender?.directors && sender.directors.length > 0);
+    const documentsHaveIssue = !!(sender?.documents && sender.documents.some(d => d.issue === true || d.smileIdStatus === 'failed'));
+    const directorsHaveIssue = !!(sender?.directors && sender.directors.some(d => d?.idDocument?.smileIdStatus === 'rejected' || d?.idDocument?.smileIdStatus === "" || d?.proofOfAddress?.issue === true || d?.idDocument?.smileIdStatus === 'rejected' || d?.proofOfAddress?.smileIdStatus === 'rejected'));
+    const hasAnyIssue = documentsHaveIssue || directorsHaveIssue;
+
     return (
         <div className="h-screen bg-gray-50 flex overflow-hidden relative">
             <DashboardSidebar open={sidebarOpen} setOpen={setSidebarOpen} />
@@ -119,13 +126,13 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                 </header>
 
                 {/* Enhanced KYC Verification Warning - Integrated into layout flow */}
-                {sender?.businessVerificationCompleted === false && showKycWarning && (
+                {(!isVerified && showKycWarning && (hasNoDirectors || hasAnyIssue)) && (
                     <motion.div
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
                         exit={{ opacity: 0, height: 0 }}
                         transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                        className="bg-gradient-to-r from-amber-50 via-orange-50 to-red-50 border-b-2 border-amber-300 shadow-lg flex-shrink-0"
+                        className={`${hasNoDirectors ? 'bg-gradient-to-r from-red-50 to-red-100 border-b-2 border-red-200' : 'bg-gradient-to-r from-amber-50 via-orange-50 to-red-50 border-b-2 border-amber-300'} shadow-lg flex-shrink-0`}
                     >
                         <div className="relative overflow-hidden">
                             {/* Animated background pattern */}
@@ -156,11 +163,14 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                                     <div className="flex-1">
                                         <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
                                             <div className="flex-1">
-                                                <h4 className="font-semibold text-amber-900 text-sm">
-                                                    KYC Verification Required
+                                                <h4 className={`font-semibold text-sm ${hasNoDirectors ? 'text-red-900' : 'text-amber-900'}`}>
+                                                    {hasNoDirectors ? 'KYC Verification Required' : hasAnyIssue ? 'KYC Verification Issues' : 'KYC Verification Required'}
                                                 </h4>
-                                                <p className="text-xs text-amber-800 opacity-90">
-                                                    Complete your business verification to unlock all platform features
+                                                <p className={`text-xs ${hasNoDirectors ? 'text-red-800' : 'text-amber-800'} opacity-90`}>
+                                                    {hasNoDirectors
+                                                        ? 'No directors or shareholders added — add them to complete KYC and unlock platform features.'
+                                                        : (hasAnyIssue ? 'Some submitted documents or director records have verification issues that need your attention.' : 'Complete your business verification to unlock all platform features')
+                                                    }
                                                 </p>
                                             </div>
 
@@ -168,17 +178,17 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                                             <div className="flex items-center gap-2 mt-2 sm:mt-0 flex-shrink-0">
                                                 <Button
                                                     size="sm"
-                                                    className="h-7 px-3 bg-orange-600 hover:from-amber-700 hover:to-orange-700 text-white text-xs font-medium shadow-md"
+                                                    className={`${hasNoDirectors ? 'h-7 px-3 bg-red-600' : 'h-7 px-3 bg-orange-600'} text-white text-xs font-medium shadow-md`}
                                                     onClick={() => window.location.href = `/dashboard/${wallet}/businessprofile`}
                                                 >
                                                     <Shield className="h-3 w-3 mr-1" />
-                                                    Start Verification
+                                                    {hasNoDirectors ? 'Start Verification' : (hasAnyIssue ? 'Review Issues' : 'Start Verification')}
                                                 </Button>
 
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
-                                                    className="h-7 px-2 text-amber-700 hover:text-amber-900 hover:bg-amber-100 text-xs hidden sm:inline-flex"
+                                                    className={`${hasNoDirectors ? 'h-7 px-2 text-red-700 hover:bg-red-100' : 'h-7 px-2 text-amber-700 hover:bg-amber-100'} text-xs hidden sm:inline-flex`}
                                                     onClick={() => window.location.href = `/dashboard/${wallet}/businessprofile`}
                                                 >
                                                     Review Details

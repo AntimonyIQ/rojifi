@@ -295,6 +295,7 @@ export interface ITeams {
 export interface IDirectorAndShareholder {
     _id?: string;
     senderId: string;
+    providerId?: string; // ID from business verification provider (e.g., Dunamis)
     firstName: string;
     lastName: string;
     middleName: string;
@@ -318,6 +319,7 @@ export interface IDirectorAndShareholder {
     state: string;
     postalCode: string;
     country: string;
+    isVerificationComplete: boolean;
     idDocument: {
         name: string;
         type: string; // file type (pdf, jpg, png, etc.)
@@ -382,6 +384,8 @@ export interface ISenderDocument {
 
 export interface ISender {
     _id: string;
+    isVerificationComplete: boolean;
+    providerId?: string; // ID from business verification provider (e.g., Dunamis)
     rojifiId: string;
     creator: string;
     teams: string;

@@ -255,25 +255,18 @@ export default function EditSenderPage() {
                     {currentStage === EditStages.BUSINESS_INFO && (
                         <BusinessDetailsStage
                             formData={formData}
-                            onInputChange={handleInputChange}
-                            onSave={saveBusinessInfo}
-                            saving={saving}
                         />
                     )}
 
                     {currentStage === EditStages.DOCUMENTS && (
                         <DocumentsStage
                             sender={sender}
-                            onDocumentUploaded={handleDocumentUploaded}
                         />
                     )}
 
                     {currentStage === EditStages.DIRECTORS && (
                         <DirectorsStage
                             sender={sender}
-                            onDirectorsChange={handleDirectorsChange}
-                            onSaveDirectors={saveDirectors}
-                            saving={saving}
                         />
                     )}
                 </motion.div>

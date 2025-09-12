@@ -33,6 +33,7 @@ import { Carousel, carouselItems } from "../carousel"
 import { motion, Variants } from "framer-motion"
 import { format } from "date-fns"
 import countries from "../../data/country_state.json";
+import { Checkbox } from "../ui/checkbox"
 
 const logoVariants: Variants = {
     animate: {
@@ -93,7 +94,9 @@ export function BusinessDetailsForm() {
     const errorRef = useRef<HTMLDivElement>(null)
 
     const [countryPopover, setCountryPopover] = useState(false)
+    const [actualCountryPopover, setActualCountryPopover] = useState(false)
     const [activityPopover, setActivityPopover] = useState(false)
+    const [countriesOfOperationPopover, setCountriesOfOperationPopover] = useState(false)
     const [legalFormPopover, setLegalFormPopover] = useState(false)
     const [registrationDatePopover, setRegistrationDatePopover] = useState(false)
 
@@ -109,6 +112,7 @@ export function BusinessDetailsForm() {
         registrationDate: undefined as Date | undefined,
         onboardingDate: undefined as Date | undefined,
         tradingName: "",
+        countriesOfOperation: [] as string[],
 
         // Address
         streetAddress: "",
@@ -117,6 +121,18 @@ export function BusinessDetailsForm() {
         state: "",
         region: "",
         postalCode: "",
+        // Whether actual operations address matches registered address
+        actualOperationsAndRegisteredAddressesMatch: true,
+        // Actual operations address (required if match === false)
+        actualOperationsAddress: {
+            streetAddress: "",
+            streetAddress2: "",
+            city: "",
+            state: "",
+            region: "",
+            postalCode: "",
+            country: "",
+        },
     })
 
     const { id } = useParams()
@@ -168,47 +184,87 @@ export function BusinessDetailsForm() {
             formData.registrationNumber.trim() !== "" &&
             formData.legalForm.trim() !== "" &&
             formData.companyActivity.trim() !== "" &&
+            formData.countriesOfOperation.length > 0 &&
             formData.streetAddress.trim() !== "" &&
             formData.city.trim() !== "" &&
             formData.state.trim() !== "" &&
             formData.postalCode.trim() !== "" &&
+            // If actual operations address does not match, require its fields
+            (formData.actualOperationsAndRegisteredAddressesMatch || (
+                formData.actualOperationsAddress.streetAddress.trim() !== "" &&
+                formData.actualOperationsAddress.city.trim() !== "" &&
+                formData.actualOperationsAddress.state.trim() !== "" &&
+                formData.actualOperationsAddress.postalCode.trim() !== "" &&
+                formData.actualOperationsAddress.country.trim() !== ""
+            )) &&
             // formData.tradingName.trim() !== "" &&
             formData.registrationDate !== undefined
         )
     }
 
-    const handleInputChange = (field: string, value: string | boolean | Date | string[]) => {
-        let sanitizedValue = value
-
-        if (typeof value === "string") {
-            switch (field) {
-                case "name":
-                case "tradingName":
-                    sanitizedValue = value.replace(/[^a-zA-Z0-9\s\-_,.]/g, "")
-                    break
-                case "registrationNumber":
-                    sanitizedValue = value
-                        .replace(/[^a-zA-Z0-9\-\/_\s]/g, "")
-                        .replace(/\s+/g, " ");
-                    break
-                case "website":
-                    sanitizedValue = value.replace(/[^a-zA-Z0-9\.\-_/:?=&%#]/g, "").toLowerCase()
-                    break
-                case "streetAddress":
-                case "streetAddress2":
-                case "city":
-                case "state":
-                case "region":
-                case "country":
-                    sanitizedValue = value.replace(/[^a-zA-Z0-9\s\-_,.]/g, "")
-                    break
-                case "postalCode":
-                    sanitizedValue = value.replace(/[^a-zA-Z0-9]/g, "")
-                    break
-            }
+    const sanitizeValue = (field: string, value: string | boolean | Date | string[]) => {
+        if (typeof value !== 'string') return value
+        switch (field) {
+            case "name":
+            case "tradingName":
+                return value.replace(/[^a-zA-Z0-9\s\-_,.]/g, "")
+            case "registrationNumber":
+                return value
+                    .replace(/[^a-zA-Z0-9\-\/_\s]/g, "")
+                    .replace(/\s+/g, " ")
+            case "website":
+                return value.replace(/[^a-zA-Z0-9\.\-_/:?=&%#]/g, "").toLowerCase()
+            case "streetAddress":
+            case "streetAddress2":
+            case "city":
+            case "state":
+            case "region":
+            case "country":
+                return value.replace(/[^a-zA-Z0-9\s\-_,.]/g, "")
+            case "postalCode":
+                return value.replace(/[^a-zA-Z0-9]/g, "")
+            default:
+                return value
         }
+    }
 
+    const handleInputChange = (field: string, value: string | boolean | Date | string[]) => {
+        const sanitizedValue = sanitizeValue(field, value)
         setFormData((prev) => ({ ...prev, [field]: sanitizedValue }))
+        setError(null)
+    }
+
+    const handleNestedInputChange = (parent: string, field: string, value: string | boolean | Date | string[]) => {
+        const sanitizedValue = sanitizeValue(field, value)
+        setFormData((prev: any) => ({
+            ...prev,
+            [parent]: {
+                ...(prev as any)[parent],
+                [field]: sanitizedValue
+            }
+        }))
+        setError(null)
+    }
+
+    const handleCountriesOfOperationChange = (countryName: string) => {
+        setFormData((prev) => {
+            const currentCountries = prev.countriesOfOperation
+            const isSelected = currentCountries.includes(countryName)
+
+            if (isSelected) {
+                // Remove country
+                return {
+                    ...prev,
+                    countriesOfOperation: currentCountries.filter(c => c !== countryName)
+                }
+            } else {
+                // Add country
+                return {
+                    ...prev,
+                    countriesOfOperation: [...currentCountries, countryName]
+                }
+            }
+        })
         setError(null)
     }
 
@@ -240,6 +296,7 @@ export function BusinessDetailsForm() {
                     website: formData.website,
                     legalForm: formData.legalForm,
                     companyActivity: formData.companyActivity,
+                    countriesOfOperation: formData.countriesOfOperation,
                     registrationDate: formData.registrationDate ? format(formData.registrationDate, 'yyyy-MM-dd') : "",
                     onboardingDate: format(new Date(), 'yyyy-MM-dd'), // Set to current date
                     registeredAddress: {
@@ -251,6 +308,16 @@ export function BusinessDetailsForm() {
                         country: formData.country,
                         postalCode: formData.postalCode
                     },
+                    actualOperationsAndRegisteredAddressesMatch: formData.actualOperationsAndRegisteredAddressesMatch,
+                    actualOperationsAddress: formData.actualOperationsAndRegisteredAddressesMatch ? undefined : {
+                        streetAddress: formData.actualOperationsAddress.streetAddress,
+                        streetAddress2: formData.actualOperationsAddress.streetAddress2,
+                        city: formData.actualOperationsAddress.city,
+                        state: formData.actualOperationsAddress.state,
+                        region: formData.actualOperationsAddress.region,
+                        country: formData.actualOperationsAddress.country,
+                        postalCode: formData.actualOperationsAddress.postalCode
+                    }
                 },
                 tradingName: formData.tradingName
             }
@@ -608,6 +675,95 @@ export function BusinessDetailsForm() {
                                     </Popover>
                                 </div>
 
+                                {/* Countries of Operation Selection */}
+                                <div>
+                                    <Label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Countries of Operation <span className="text-red-500">*</span>
+                                    </Label>
+                                    <Popover open={countriesOfOperationPopover} onOpenChange={setCountriesOfOperationPopover}>
+                                        <PopoverTrigger asChild>
+                                            <Button
+                                                variant="outline"
+                                                role="combobox"
+                                                className="w-full h-12 justify-between"
+                                                disabled={loading}
+                                            >
+                                                <div className="flex items-center gap-2 flex-1 text-left">
+                                                    {formData.countriesOfOperation.length === 0 ? (
+                                                        "Select countries of operation..."
+                                                    ) : formData.countriesOfOperation.length === 1 ? (
+                                                        <div className="flex items-center gap-2">
+                                                            <img
+                                                                src={`https://flagcdn.com/w320/${countries.find((country) => country.name === formData.countriesOfOperation[0])?.iso2?.toLowerCase()}.png`}
+                                                                alt=""
+                                                                width={18}
+                                                                height={18}
+                                                            />
+                                                            {formData.countriesOfOperation[0]}
+                                                        </div>
+                                                    ) : (
+                                                        `${formData.countriesOfOperation.length} countries selected`
+                                                    )}
+                                                </div>
+                                                <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-full p-0">
+                                            <Command>
+                                                <CommandInput placeholder="Search countries..." />
+                                                <CommandList>
+                                                    <CommandEmpty>No country found.</CommandEmpty>
+                                                    <CommandGroup>
+                                                        {countries.map((country, index) => (
+                                                            <CommandItem
+                                                                key={`operation-${country.name}-${index}`}
+                                                                value={country.name}
+                                                                onSelect={() => {
+                                                                    handleCountriesOfOperationChange(country.name)
+                                                                }}
+                                                            >
+                                                                <CheckIcon
+                                                                    className={cn(
+                                                                        "mr-2 h-4 w-4",
+                                                                        formData.countriesOfOperation.includes(country.name) ? "opacity-100" : "opacity-0"
+                                                                    )}
+                                                                />
+                                                                <img src={`https://flagcdn.com/w320/${country.iso2.toLowerCase()}.png`} alt="" width={18} height={18} />
+                                                                {country.name}
+                                                            </CommandItem>
+                                                        ))}
+                                                    </CommandGroup>
+                                                </CommandList>
+                                            </Command>
+                                        </PopoverContent>
+                                    </Popover>
+                                    {formData.countriesOfOperation.length > 0 && (
+                                        <div className="mt-2 flex flex-wrap gap-1">
+                                            {formData.countriesOfOperation.map((countryName) => (
+                                                <div
+                                                    key={countryName}
+                                                    className="flex items-center gap-1 bg-blue-100 text-blue-800 px-2 py-1 rounded-md text-xs"
+                                                >
+                                                    <img
+                                                        src={`https://flagcdn.com/w320/${countries.find((country) => country.name === countryName)?.iso2?.toLowerCase()}.png`}
+                                                        alt=""
+                                                        width={12}
+                                                        height={12}
+                                                    />
+                                                    {countryName}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleCountriesOfOperationChange(countryName)}
+                                                        className="ml-1 text-blue-600 hover:text-blue-800"
+                                                    >
+                                                        ×
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
                                 {/* Date Fields */}
                                 <div className="grid grid-cols-1 gap-4">
                                     <div>
@@ -835,6 +991,183 @@ export function BusinessDetailsForm() {
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Actual operations address match checkbox */}
+                            <div className="pt-2 px-0 md:px-0 max-w-md mx-auto">
+                                <label className="flex items-center space-x-3 text-sm text-gray-700">
+                                    <Checkbox
+                                        checked={formData.actualOperationsAndRegisteredAddressesMatch}
+                                        onCheckedChange={(checked) => handleInputChange('actualOperationsAndRegisteredAddressesMatch', !!checked)}
+                                        className="h-4 w-4"
+                                        id="actualOperationsAndRegisteredAddressesMatch"
+                                    />
+                                    <span >Actual operations address matches registered address</span>
+                                </label>
+                            </div>
+
+                            {/* Conditional actual operations address fields */}
+                            {!formData.actualOperationsAndRegisteredAddressesMatch && (
+                                <div className="space-y-4 px-0 md:px-0 max-w-md mx-auto">
+                                    <h3 className="text-lg font-medium text-gray-900">Actual Operations Address</h3>
+
+                                    <div>
+                                        <Label htmlFor="actual_streetAddress" className="block text-sm font-medium text-gray-700 mb-2">
+                                            Street Address <span className="text-red-500">*</span>
+                                        </Label>
+                                        <Input
+                                            id="actual_streetAddress"
+                                            name="actual_streetAddress"
+                                            type="text"
+                                            className="h-12"
+                                            placeholder="Enter street address"
+                                            value={formData.actualOperationsAddress.streetAddress}
+                                            disabled={loading}
+                                            onChange={(e) => handleNestedInputChange('actualOperationsAddress', 'streetAddress', e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <Label htmlFor="actual_streetAddress2" className="block text-sm font-medium text-gray-700 mb-2">
+                                            Street Address 2 <span className="text-gray-400">(Optional)</span>
+                                        </Label>
+                                        <Input
+                                            id="actual_streetAddress2"
+                                            name="actual_streetAddress2"
+                                            type="text"
+                                            className="h-12"
+                                            placeholder="Apartment, suite, unit, etc."
+                                            value={formData.actualOperationsAddress.streetAddress2}
+                                            disabled={loading}
+                                            onChange={(e) => handleNestedInputChange('actualOperationsAddress', 'streetAddress2', e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <Label htmlFor="actual_city" className="block text-sm font-medium text-gray-700 mb-2">
+                                                City <span className="text-red-500">*</span>
+                                            </Label>
+                                            <Input
+                                                id="actual_city"
+                                                name="actual_city"
+                                                type="text"
+                                                className="h-12"
+                                                placeholder="Enter city"
+                                                value={formData.actualOperationsAddress.city}
+                                                disabled={loading}
+                                                onChange={(e) => handleNestedInputChange('actualOperationsAddress', 'city', e.target.value)}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <Label htmlFor="actual_state" className="block text-sm font-medium text-gray-700 mb-2">
+                                                State/Province <span className="text-red-500">*</span>
+                                            </Label>
+                                            <Input
+                                                id="actual_state"
+                                                name="actual_state"
+                                                type="text"
+                                                className="h-12"
+                                                placeholder="Enter state"
+                                                value={formData.actualOperationsAddress.state}
+                                                disabled={loading}
+                                                onChange={(e) => handleNestedInputChange('actualOperationsAddress', 'state', e.target.value)}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <Label htmlFor="actual_region" className="block text-sm font-medium text-gray-700 mb-2">
+                                                Region <span className="text-gray-400">(Optional)</span>
+                                            </Label>
+                                            <Input
+                                                id="actual_region"
+                                                name="actual_region"
+                                                type="text"
+                                                className="h-12"
+                                                placeholder="Enter region"
+                                                value={formData.actualOperationsAddress.region}
+                                                disabled={loading}
+                                                onChange={(e) => handleNestedInputChange('actualOperationsAddress', 'region', e.target.value)}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <Label htmlFor="actual_postalCode" className="block text-sm font-medium text-gray-700 mb-2">
+                                                Postal Code <span className="text-red-500">*</span>
+                                            </Label>
+                                            <Input
+                                                id="actual_postalCode"
+                                                name="actual_postalCode"
+                                                type="text"
+                                                className="h-12"
+                                                placeholder="Enter postal code"
+                                                value={formData.actualOperationsAddress.postalCode}
+                                                disabled={loading}
+                                                onChange={(e) => handleNestedInputChange('actualOperationsAddress', 'postalCode', e.target.value)}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <Label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-2">
+                                            Country <span className="text-red-500">*</span>
+                                        </Label>
+                                        <div className="flex gap-2">
+                                            <Popover open={actualCountryPopover} onOpenChange={() => setActualCountryPopover(!actualCountryPopover)}>
+                                                <PopoverTrigger asChild>
+                                                    <Button
+                                                        variant="outline"
+                                                        role="combobox"
+                                                        size="md"
+                                                        aria-expanded={countryPopover}
+                                                        className="w-full h-12 justify-between"
+                                                        disabled={loading}
+                                                    >
+                                                        <div className="flex flex-row items-center gap-2">
+                                                            <img src={`https://flagcdn.com/w320/${countries.find((country) => country.name === formData.actualOperationsAddress.country)?.iso2.toLowerCase()}.png`} alt="" width={18} height={18} />
+                                                            {formData.actualOperationsAddress.country
+                                                                ? countries.find((country) => country.name === formData.actualOperationsAddress.country)?.name
+                                                                : "Select country..."}
+                                                        </div>
+                                                        <ChevronsUpDownIcon className="ml-1 h-4 w-4 shrink-0 opacity-50" />
+                                                    </Button>
+                                                </PopoverTrigger>
+                                                <PopoverContent className="w-full p-0">
+                                                    <Command>
+                                                        <CommandInput placeholder="Search country..." />
+                                                        <CommandList>
+                                                            <CommandEmpty>No country found.</CommandEmpty>
+                                                            <CommandGroup>
+                                                                {countries.map((country, index) => (
+                                                                    <CommandItem
+                                                                        key={`actual-${country.name}-${index}`}
+                                                                        value={country.name}
+                                                                        onSelect={(currentValue) => {
+                                                                            handleNestedInputChange("actualOperationsAddress", "country", currentValue)
+                                                                            setActualCountryPopover(false)
+                                                                        }}
+                                                                    >
+                                                                        <CheckIcon
+                                                                            className={cn(
+                                                                                "mr-2 h-4 w-4",
+                                                                                formData.actualOperationsAddress.country === country.name ? "opacity-100" : "opacity-0"
+                                                                            )}
+                                                                        />
+                                                                        <img src={`https://flagcdn.com/w320/${country.iso2.toLowerCase()}.png`} alt="" width={18} height={18} />
+                                                                        {country.name}
+                                                                    </CommandItem>
+                                                                ))}
+                                                            </CommandGroup>
+                                                        </CommandList>
+                                                    </Command>
+                                                </PopoverContent>
+                                            </Popover>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
 
                             <Button
                                 type="submit"

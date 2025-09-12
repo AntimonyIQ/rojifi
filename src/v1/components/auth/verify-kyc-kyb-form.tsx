@@ -13,6 +13,7 @@ import { session, SessionData } from "@/v1/session/session"
 import { toast } from "sonner"
 import { Link, useParams } from "wouter"
 import { motion } from "framer-motion"
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert"
 
 export function KYBVerificationForm() {
     const [completed, setCompleted] = useState(false);
@@ -659,6 +660,14 @@ export function KYBVerificationForm() {
                             {renderUploadField("memorandumArticlesOfAssociation", "Memorandum & Articles of Association (Memart)", false)}
                             {renderUploadField("cacStatusReport", "CAC Status Report", true)}
                             {renderUploadField("proofOfAddress", "Business Proof of Address (Recent Utility Bill, Bank Statement, Etc...)", true)}
+
+                            <Alert variant="default" className="mt-2 bg-yellow-50 border-yellow-200 text-yellow-800">
+                                <AlertCircle className="w-5 h-5" />
+                                <AlertTitle className="text-sm">Note: Proof of Address requirement</AlertTitle>
+                                <AlertDescription>
+                                    Kindly ensure the Proof of Address document matches the company's operations address.
+                                </AlertDescription>
+                            </Alert>
 
                             <div className="space-y-4">
                                 <Button type="submit" className="w-full h-12 bg-primary hover:bg-primary/90 text-white" disabled={loading}>

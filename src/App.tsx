@@ -21,6 +21,7 @@ import SenderPage from "./v1/app/dashboard/[wallet]/sender/page";
 import OTCDashboardPage from "./v1/app/dashboard/[wallet]/otc/page";
 import PaymentPage from "./v1/app/dashboard/[wallet]/payment/page";
 import BusinessProfilePage from "./v1/app/dashboard/[wallet]/businessprofile/page";
+import OnboardingBusinessRegistration from "./v1/app/dashboard/[wallet]/businessprofile/OnboardingBusinessRegistration";
 import DepositPage from "./v1/app/dashboard/[wallet]/deposit/page";
 import SettingsPage from "./v1/app/dashboard/[wallet]/settings/page";
 import TransactionsPage from "./v1/app/dashboard/[wallet]/transactions/page";
@@ -57,6 +58,20 @@ function AppRoute({
 }) {
     const sd: SessionData = session.getUserData();
 
+    if (sd && sd.sender && sd.sender.directors.length === 0 && path.startsWith("/dashboard/:wallet")) {
+        return (
+            <Route path={path}>
+                {() => (
+                    <ProtectedRoute path={path}>
+                        <DashboardLayout>
+                            <OnboardingBusinessRegistration rojifiId={sd.user.rojifiId} />
+                        </DashboardLayout>
+                    </ProtectedRoute>
+                )}
+            </Route>
+        );
+    }
+
     const isVerificationComplete = sd?.sender?.businessVerificationCompleted;
     if (!isVerificationComplete) {
         if (path === "/dashboard/:wallet/businessprofile") {
@@ -92,7 +107,8 @@ function AppRoute({
                 {() => (
                     <ProtectedRoute path={path}>
                         <DashboardLayout>
-                            <VerificationInReview />
+                            <OnboardingBusinessRegistration rojifiId={sd.user.rojifiId} />
+                            {/****** <VerificationInReview /> */}
                         </DashboardLayout>
                     </ProtectedRoute>
                 )}

@@ -119,6 +119,7 @@ export function BusinessFinancialsForm() {
         // Boolean fields
         companyProvideRegulatedFinancialServices: null as boolean | null,
         directorOrBeneficialOwnerIsPEPOrUSPerson: null as boolean | null,
+        pepOrUsPerson: [] as string[], // New field for names of PEP or US persons
     })
 
     const { id } = useParams()
@@ -128,6 +129,13 @@ export function BusinessFinancialsForm() {
     useEffect(() => {
         loadData();
     }, []);
+
+    // Ensure at least one PEP input when the PEP question is set to true
+    useEffect(() => {
+        if (formData.directorOrBeneficialOwnerIsPEPOrUSPerson === true && formData.pepOrUsPerson.length === 0) {
+            setFormData(prev => ({ ...prev, pepOrUsPerson: [""] }))
+        }
+    }, [formData.directorOrBeneficialOwnerIsPEPOrUSPerson])
 
     const loadData = async () => {
         try {
@@ -167,7 +175,9 @@ export function BusinessFinancialsForm() {
             formData.sourceOfWealth.length > 0 &&
             formData.anticipatedSourceOfFundsOnDunamis.length > 0 &&
             formData.companyProvideRegulatedFinancialServices !== null &&
-            formData.directorOrBeneficialOwnerIsPEPOrUSPerson !== null
+            formData.directorOrBeneficialOwnerIsPEPOrUSPerson !== null &&
+            // if PEP question answered Yes, require at least one name
+            (formData.directorOrBeneficialOwnerIsPEPOrUSPerson === true ? formData.pepOrUsPerson.length > 0 && formData.pepOrUsPerson.some(n => n.trim() !== "") : true)
         )
     }
 
@@ -228,7 +238,8 @@ export function BusinessFinancialsForm() {
                     sourceOfWealth: formData.sourceOfWealth,
                     anticipatedSourceOfFundsOnDunamis: formData.anticipatedSourceOfFundsOnDunamis,
                     companyProvideRegulatedFinancialServices: formData.companyProvideRegulatedFinancialServices || false,
-                    directorOrBeneficialOwnerIsPEPOrUSPerson: formData.directorOrBeneficialOwnerIsPEPOrUSPerson || false
+                    directorOrBeneficialOwnerIsPEPOrUSPerson: formData.directorOrBeneficialOwnerIsPEPOrUSPerson || false,
+                    pepOrUsPerson: formData.pepOrUsPerson.filter(n => n.trim() !== ""),
                 },
             }
 
@@ -620,7 +631,60 @@ export function BusinessFinancialsForm() {
                                         </Popover>
                                     </div>
                                 </div>
+
                             </div>
+
+                            {/** Names of PEP */}
+                            {formData.directorOrBeneficialOwnerIsPEPOrUSPerson === true && (
+                                <div className="space-y-3">
+                                    <h3 className="text-sm font-medium text-gray-900">Names of PEP or US persons <span className="text-red-500">*</span></h3>
+                                    <p className="text-sm text-gray-500 mb-2">Provide the full names of any politically exposed persons (PEP) or US persons who are directors or beneficial owners.</p>
+
+                                    {formData.pepOrUsPerson.map((name, idx) => (
+                                        <div key={`pep-${idx}`} className="flex items-center space-x-2">
+                                            <Input
+                                                id={`pep-${idx}`}
+                                                type="text"
+                                                placeholder={`Person ${idx + 1} full name`}
+                                                value={name}
+                                                disabled={loading}
+                                                onChange={(e) => {
+                                                    const val = e.target.value
+                                                    setFormData(prev => {
+                                                        const arr = [...prev.pepOrUsPerson]
+                                                        arr[idx] = val
+                                                        return { ...prev, pepOrUsPerson: arr }
+                                                    })
+                                                }}
+                                            />
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => {
+                                                    setFormData(prev => {
+                                                        const arr = prev.pepOrUsPerson.filter((_, i) => i !== idx)
+                                                        return { ...prev, pepOrUsPerson: arr }
+                                                    })
+                                                }}
+                                                className="text-red-500"
+                                            >
+                                                Remove
+                                            </Button>
+                                        </div>
+                                    ))}
+
+                                    <div>
+                                        <Button
+                                            type="button"
+                                            onClick={() => setFormData(prev => ({ ...prev, pepOrUsPerson: [...prev.pepOrUsPerson, ""] }))}
+                                            className="inline-flex items-center space-x-2"
+                                        >
+                                            <span className="text-lg">+</span>
+                                            <span>Add another person</span>
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
 
                             <Button
                                 type="submit"
