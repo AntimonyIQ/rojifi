@@ -30,7 +30,13 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
     const isVerified = sender?.businessVerificationCompleted === true;
     const hasNoDirectors = !(sender?.directors && sender.directors.length > 0);
     const documentsHaveIssue = !!(sender?.documents && sender.documents.some(d => d.issue === true || d.smileIdStatus === 'failed'));
-    const directorsHaveIssue = !!(sender?.directors && sender.directors.some(d => d?.idDocument?.smileIdStatus === 'rejected' || d?.idDocument?.smileIdStatus === "" || d?.proofOfAddress?.issue === true || d?.idDocument?.smileIdStatus === 'rejected' || d?.proofOfAddress?.smileIdStatus === 'rejected'));
+    const directorsHaveIssue = !!(sender?.directors && sender.directors.some(
+        d => d?.idDocument?.smileIdStatus === 'rejected' // TODO: FIX HERE ||
+        // d?.idDocument?.smileIdStatus === "" ||
+        // d?.proofOfAddress?.issue === true ||
+        // d?.idDocument?.smileIdStatus === 'rejected' ||
+        // d?.proofOfAddress?.smileIdStatus === 'rejected'
+    ));
     const hasAnyIssue = documentsHaveIssue || directorsHaveIssue;
 
     return (

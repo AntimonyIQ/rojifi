@@ -357,7 +357,6 @@ export function BusinessDetailsForm() {
         }
     }
 
-    /*
     if (isLoading) {
         return (
             <div className="fixed top-0 bottom-0 left-0 right-0 z-50 flex items-center justify-center bg-white">
@@ -389,7 +388,6 @@ export function BusinessDetailsForm() {
             </div>
         )
     }
-    */
 
     if (completed) {
         return (
@@ -549,7 +547,7 @@ export function BusinessDetailsForm() {
                                                     <CommandEmpty>No legal form found.</CommandEmpty>
                                                     <CommandGroup>
                                                         {legalForms
-                                                            .filter(form => ['Partnership', 'Sole_Proprietorship', 'LTD', 'OTHERS'].includes(form.value))
+                                                            .filter(form => ['Partnership', 'Sole_Proprietorship', 'LTD', 'PLC', 'OTHERS'].includes(form.value))
                                                             .map((form) => (
                                                                 <CommandItem
                                                                     key={form.value}

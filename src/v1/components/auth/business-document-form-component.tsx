@@ -280,6 +280,7 @@ export function KYBVerificationFormComponent({ sender }: BusinessDetailsStagePro
         const handleDelete = () => {
             onDelete();
             onClose();
+            handleDelete(); // TODO: DELETE LATER
         };
 
         const renderFileContent = () => {

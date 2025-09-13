@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react"
-import { motion, Variants } from "framer-motion"
+import { motion } from "framer-motion"
 import { Button } from "@/v1/components/ui/button"
 import { Input } from "@/v1/components/ui/input"
 import { Label } from "@/v1/components/ui/label"

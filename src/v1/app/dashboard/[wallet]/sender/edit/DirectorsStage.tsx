@@ -1,5 +1,5 @@
 import React from "react";
-import { ISender, IDirectorAndShareholder } from "@/v1/interface/interface";
+import { ISender } from "@/v1/interface/interface";
 import { DirectorShareholderFormComponent } from "@/v1/components/auth/director-shareholder-form-component";
 
 interface DirectorsStageProps {

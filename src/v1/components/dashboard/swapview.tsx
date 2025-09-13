@@ -42,7 +42,7 @@ export function SwapView() {
     const [pendingCurrency, setPendingCurrency] = useState<IWallet | null>(null);
     const [successfulSwap, setSuccessfulSwap] = useState<boolean>(false);
     const [currencies, setCurrencies] = useState<Array<IWallet>>([]);
-    const [estimate, setEstimate] = useState<IEstimateResponse | null>(null);
+    const [_estimate, setEstimate] = useState<IEstimateResponse | null>(null);
     const sd: SessionData = session.getUserData()!;
 
     const pathname = usePathname();

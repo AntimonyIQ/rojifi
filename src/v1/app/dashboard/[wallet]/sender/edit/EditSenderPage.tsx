@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, Check } from "lucide-react";
@@ -9,11 +7,11 @@ import { Badge } from "@/v1/components/ui/badge";
 import { Progress } from "@/v1/components/ui/progress";
 import Loading from "@/v1/components/loading";
 import { session, SessionData } from "@/v1/session/session";
-import { ISender, IDirectorAndShareholder, IResponse } from "@/v1/interface/interface";
+import { ISender } from "@/v1/interface/interface";
 import { useParams, useLocation } from "wouter";
 import { toast } from "sonner";
-import Defaults from "@/v1/defaults/defaults";
-import { Status } from "@/v1/enums/enums";
+// import Defaults from "@/v1/defaults/defaults";
+// import { Status } from "@/v1/enums/enums";
 
 // Import the new stage components
 import { BusinessDetailsStage } from "./BusinessDetailsStage";
@@ -28,7 +26,7 @@ enum EditStages {
 
 export default function EditSenderPage() {
     const [loading, setLoading] = useState<boolean>(true);
-    const [saving, setSaving] = useState<boolean>(false);
+    // const [_saving, setSaving] = useState<boolean>(false);
     const [currentStage, setCurrentStage] = useState<number>(EditStages.BUSINESS_INFO);
     const [sender, setSender] = useState<ISender | null>(null);
     const [formData, setFormData] = useState<Partial<ISender>>({});
@@ -45,6 +43,7 @@ export default function EditSenderPage() {
         }
     }, [sd]);
 
+    /*
     const handleInputChange = (field: keyof ISender, value: any) => {
         setFormData(prev => ({
             ...prev,
@@ -162,6 +161,7 @@ export default function EditSenderPage() {
         // Document upload handled by DocumentsStage component
         console.log(`Document uploaded for ${field}: ${url}`);
     };
+    */
 
     const proceedToNextStage = () => {
         if (currentStage < 3) {
