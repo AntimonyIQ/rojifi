@@ -40,18 +40,6 @@ const logoVariants: Variants = {
     },
 }
 
-/*
-const requestedServices = [
-    { value: "fx_crossborder_payments", label: "FX Cross-border Payments" },
-    { value: "virtual_ibans", label: "Virtual IBANs" },
-    { value: "digital_assets", label: "Digital Assets" },
-    { value: "payment_processing", label: "Payment Processing" },
-    { value: "treasury_management", label: "Treasury Management" },
-    { value: "compliance_services", label: "Compliance Services" }
-]
-
-*/
-
 const sourceOfWealthOptions = [
     { value: "sales_revenue_business_earnings", label: "Sales Revenue/Business Earnings" },
     { value: "investors_funds", label: "Investors Funds" },
@@ -76,14 +64,6 @@ const anticipatedSourceOptions = [
     { value: "grant", label: "Grant" },
     { value: "other", label: "Other" }
 ]
-
-/*
-const riskLevels = [
-    { value: "low_risk", label: "Low Risk" },
-    { value: "medium_risk", label: "Medium Risk" },
-    { value: "high_risk", label: "High Risk" }
-]
-*/
 
 const yesNoOptions = [
     { value: true, label: "Yes" },
@@ -177,7 +157,12 @@ export function BusinessFinancialsForm() {
             formData.companyProvideRegulatedFinancialServices !== null &&
             formData.directorOrBeneficialOwnerIsPEPOrUSPerson !== null &&
             // if PEP question answered Yes, require at least one name
-            (formData.directorOrBeneficialOwnerIsPEPOrUSPerson === true ? formData.pepOrUsPerson.length > 0 && formData.pepOrUsPerson.some(n => n.trim() !== "") : true)
+            (formData.directorOrBeneficialOwnerIsPEPOrUSPerson === true ? formData.pepOrUsPerson.length > 0 && formData.pepOrUsPerson.some(n => n.trim() !== "") : true) &&
+            formData.lastYearTurnover.trim() !== "" &&
+            formData.expectedMonthlyInboundFiatPayments.trim() !== "" &&
+            formData.expectedMonthlyOutboundFiatPayments.trim() !== "" &&
+            (offRampService ? (formData.expectedMonthlyInboundCryptoPayments.trim() !== "" && formData.expectedMonthlyOutboundCryptoPayments.trim() !== "") : true) &&
+            formData.pepOrUsPerson.every(name => name.trim() !== "")
         )
     }
 
@@ -235,11 +220,11 @@ export function BusinessFinancialsForm() {
                     expectedMonthlyOutboundCryptoPayments: parseInt(formData.expectedMonthlyOutboundCryptoPayments) || 0,
                     expectedMonthlyInboundFiatPayments: parseInt(formData.expectedMonthlyInboundFiatPayments) || 0,
                     expectedMonthlyOutboundFiatPayments: parseInt(formData.expectedMonthlyOutboundFiatPayments) || 0,
-                    sourceOfWealth: formData.sourceOfWealth,
-                    anticipatedSourceOfFundsOnDunamis: formData.anticipatedSourceOfFundsOnDunamis,
-                    companyProvideRegulatedFinancialServices: formData.companyProvideRegulatedFinancialServices || false,
-                    directorOrBeneficialOwnerIsPEPOrUSPerson: formData.directorOrBeneficialOwnerIsPEPOrUSPerson || false,
-                    pepOrUsPerson: formData.pepOrUsPerson.filter(n => n.trim() !== ""),
+                    sourceOfWealth: formData.sourceOfWealth || [],
+                    anticipatedSourceOfFundsOnDunamis: formData.anticipatedSourceOfFundsOnDunamis || [],
+                    companyProvideRegulatedFinancialServices: formData.companyProvideRegulatedFinancialServices ?? false,
+                    directorOrBeneficialOwnerIsPEPOrUSPerson: formData.directorOrBeneficialOwnerIsPEPOrUSPerson ?? false,
+                    pepOrUsPerson: (formData.pepOrUsPerson || []).map((n: string) => n.trim()).filter((n: string) => n !== ""),
                 },
             }
 

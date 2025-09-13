@@ -185,20 +185,21 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                                                 <Button
                                                     size="sm"
                                                     className={`${hasNoDirectors ? 'h-7 px-3 bg-red-600' : 'h-7 px-3 bg-orange-600'} text-white text-xs font-medium shadow-md`}
-                                                    onClick={() => window.location.href = `/dashboard/${wallet}/businessprofile`}
+                                                    onClick={() => window.location.href = `/signup/${sd.user.rojifiId}/business-details`}
                                                 >
                                                     <Shield className="h-3 w-3 mr-1" />
                                                     {hasNoDirectors ? 'Start Verification' : (hasAnyIssue ? 'Review Issues' : 'Start Verification')}
                                                 </Button>
-
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    className={`${hasNoDirectors ? 'h-7 px-2 text-red-700 hover:bg-red-100' : 'h-7 px-2 text-amber-700 hover:bg-amber-100'} text-xs hidden sm:inline-flex`}
-                                                    onClick={() => window.location.href = `/dashboard/${wallet}/businessprofile`}
-                                                >
-                                                    Review Details
-                                                </Button>
+                                                {!hasNoDirectors && (
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className={`${hasNoDirectors ? 'h-7 px-2 text-red-700 hover:bg-red-100' : 'h-7 px-2 text-amber-700 hover:bg-amber-100'} text-xs hidden sm:inline-flex`}
+                                                        onClick={() => window.location.href = `/dashboard/${wallet}/businessprofile`}
+                                                    >
+                                                        Review Details
+                                                    </Button>
+                                                )}
                                             </div>
                                         </div>
                                     </div>

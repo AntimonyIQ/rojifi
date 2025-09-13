@@ -296,7 +296,6 @@ export function BusinessDetailsForm() {
                     website: formData.website,
                     legalForm: formData.legalForm,
                     companyActivity: formData.companyActivity,
-                    countriesOfOperation: formData.countriesOfOperation,
                     registrationDate: formData.registrationDate ? format(formData.registrationDate, 'yyyy-MM-dd') : "",
                     onboardingDate: format(new Date(), 'yyyy-MM-dd'), // Set to current date
                     registeredAddress: {
@@ -309,6 +308,7 @@ export function BusinessDetailsForm() {
                         postalCode: formData.postalCode
                     },
                     actualOperationsAndRegisteredAddressesMatch: formData.actualOperationsAndRegisteredAddressesMatch,
+                    countriesOfOperation: formData.countriesOfOperation,
                     actualOperationsAddress: formData.actualOperationsAndRegisteredAddressesMatch ? undefined : {
                         streetAddress: formData.actualOperationsAddress.streetAddress,
                         streetAddress2: formData.actualOperationsAddress.streetAddress2,
@@ -322,7 +322,6 @@ export function BusinessDetailsForm() {
                 tradingName: formData.tradingName
             }
 
-            // API call to save business details
             const res = await fetch(`${Defaults.API_BASE_URL}/auth/business`, {
                 method: 'POST',
                 headers: {
@@ -425,19 +424,14 @@ export function BusinessDetailsForm() {
                     <div className="p-4 max-w-md mx-auto">
                         {/* Header */}
                         <div className="flex items-center justify-between mb-8">
-                            <div className="flex items-center space-x-2">
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => window.history.back()}
-                                    className="text-gray-600"
-                                >
-                                    <ArrowLeft className="h-4 w-4" />
-                                </Button>
-                                <Link href="/" className="flex items-center space-x-2">
-                                    <Logo className="h-8 w-auto" />
-                                </Link>
-                            </div>
+                            <button
+                                type="button"
+                                onClick={() => window.history.back()}
+                                className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 focus:outline-none"
+                            >
+                                <ArrowLeft className="h-4 w-4" />
+                                <Logo className="h-8 w-auto" />
+                            </button>
                         </div>
 
                         {/* Form Content */}

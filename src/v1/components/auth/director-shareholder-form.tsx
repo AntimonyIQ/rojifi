@@ -72,7 +72,7 @@ export function DirectorShareholderForm() {
     const [isLoading, setIsLoading] = useState(true)
     const [isNotApprove, setIsNotApprove] = useState(false)
     const [error, setError] = useState<string | null>(null)
-    const [showSuccessModal, setShowSuccessModal] = useState(true)
+    const [showSuccessModal, setShowSuccessModal] = useState(false)
 
     // Forms array to handle multiple directors/shareholders
     const [forms, setForms] = useState<DirectorShareholderFormData[]>([])
